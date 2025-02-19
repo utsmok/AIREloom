@@ -1,57 +1,21 @@
-def default_validation() -> callable:
-    return lambda x: x if x else ""
 
-class BaseEndpoint:
-    url = "https://api.openaire.eu/graph/"
-    params: dict = {
-        "debugQuery": False,
-        "page": 1,
-        "pageSize": 10,
-        "cursor": '*'
-    }
-    valid_filters:dict[str, callable] = {} # dict with valid filter names and validation functions for this endpoint
-
-
-    # generic functions here!
-
-    def _update_params(self, **kwargs):
-        """
-        Updates self.params with kwargs.
-        Note: validation should happen before using this method
-
-        In case of conflicts, will overwrite existing values
-        """
-        for k, v in kwargs.items():
-            self.params[k] = v
-
-    # filtering
-    # TODO:
-    # include AND OR NOT operators, used by combining param values with e.g. whitespaceANDwhitespace: val1 AND val2
-    # enclose vals in double quotes if they contain whitespace
-    # each implementation class has list of valid params for filter
-
-    def filter(self, **kwargs):
-        self._verify_filters(**kwargs)
-        self.params = kwargs
-
-    def _verify_filters(self, **kwargs):
-        for k, v in kwargs.items():
-            if k not in self.valid_filters:
-                raise ValueError(f"Invalid filter: {k}")
-            if not self.valid_filters[k](v):
-                raise ValueError(f"Invalid filter value: {v}")
-
-    def sort(self, **kwargs):
-        ...
-
-        """
-        sortBy
-        Defines the field and the sort direction.
-        See researchProducts for details
-
-        set final data as param
-        """
-    # paging
+from aireloom.base_classes import BaseEndpoint
+from aireloom.validators import (
+    default_validation,
+    validate_openaire_id,
+    validate_date,
+    validate_country,
+    validate_orcid,
+    validate_int,
+    validate_bool,
+    validate_enum_type,
+    validate_enum_open_access,
+    validate_enum_influence,
+    validate_enum_impulse,
+    validate_enum_popularity,
+    validate_enum_citation_count,
+    validate_enum_instance_type
+)
 
 class researchProducts(BaseEndpoint):
     url = "https://api.openaire.eu/graph/researchProducts/"
@@ -72,19 +36,19 @@ class researchProducts(BaseEndpoint):
         "authorFullName":default_validation,
         "authorOrcid":validate_orcid,
         "publisher":default_validation,
-        "bestOpenAccessRightLabel":validate_enum,
-        "influenceClass":validate_enum,
-        "impulseClass":validate_enum,
-        "popularityClass":validate_enum,
-        "citationCountClass":validate_enum,
-        "instanceType":validate_enum,
+        "bestOpenAccessRightLabel":validate_enum_open_access,
+        "influenceClass":validate_enum_influence,
+        "impulseClass":validate_enum_impulse,
+        "popularityClass":validate_enum_popularity,
+        "citationCountClass":validate_enum_citation_count,
+        "instanceType":validate_enum_instance_type,
         "sdg":validate_int,
         "fos":default_validation,
         "isPeerReviewed":validate_bool,
         "isInDiamondJournal":validate_bool,
         "isPubliclyFunded":validate_bool,
         "isGreen":validate_bool,
-        "openAccessColor":validate_enum,
+        "openAccessColor":validate_enum_open_access,
         "relOrganizationId":validate_openaire_id,
         "relCommunityId":validate_openaire_id,
         "relProjectId":validate_openaire_id,
@@ -96,7 +60,6 @@ class researchProducts(BaseEndpoint):
         "relCollectedFromDatasourceId":validate_openaire_id,
         }
 
-    # specific implementation here!
 
     """
     sortBy
@@ -130,5 +93,3 @@ class projects(BaseEndpoint):
     # sorting
     # see researchProducts. available fields are:
     # [relevance, startDate, endDate]
-
-

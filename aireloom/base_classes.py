@@ -1,6 +1,69 @@
 from collections import UserDict
 from typing import Any
 
+class BaseEndpoint:
+    """
+    Base class for API endpoints. This class and its subclasses are the primary method to interact with the OpenAIRE API.
+    The core functionality is to parse input to parameters that are passed to an httpx client, which retrieves the data from the API,
+    and returns it as an OpenAIRE entity.
+
+    This base class is not meant to be used directly, but rather subclassed by specific endpoints, e.g. researchProducts, organizations, etc.
+    """
+
+    url = "https://api.openaire.eu/graph/"
+    params: dict = {
+        "debugQuery": False,
+        "page": 1,
+        "pageSize": 10,
+        "cursor": '*'
+    }
+    valid_filters:dict[str, callable] = {} # dict with valid filter names and validation functions for this endpoint
+
+
+    def _update_params(self, **kwargs):
+        """
+        Updates self.params with kwargs.
+        Note: validation should happen before using this method
+
+        In case of conflicts, will overwrite existing values
+        """
+        for k, v in kwargs.items():
+            self.params[k] = v
+
+    # filtering
+    # TODO:
+    # include AND OR NOT operators, used by combining param values with e.g. whitespaceANDwhitespace: val1 AND val2
+    # enclose vals in double quotes if they contain whitespace
+    # each implementation class has list of valid params for filter
+
+    def filter(self, **kwargs):
+        self._verify_filters(**kwargs)
+        self.params = kwargs
+
+    def _verify_filters(self, **kwargs):
+        for k, v in kwargs.items():
+            if k not in self.valid_filters:
+                raise ValueError(f"Invalid filter: {k}")
+            if not self.valid_filters[k](v):
+                raise ValueError(f"Invalid filter value: {v}")
+
+    # sorting
+    # TODO: implement sorting
+    def sort(self, **kwargs):
+        ...
+
+        """
+        sortBy
+        Defines the field and the sort direction.
+        See researchProducts for details
+
+        set final data as param
+        """
+
+    # paging
+    # should work 'by default' I think?
+
+
 class SafeDict(UserDict):
     """
     A dictionary-like class that allows configurable default return values
@@ -11,6 +74,8 @@ class SafeDict(UserDict):
     in `_default_values`, the configured default is returned.
     If the key is not found and not in `_default_values`, it returns
     a fallback default (which is an empty list by default, but can be overridden).
+
+    Used as a base class for entities.
     """
 
     fallback_default: Any = list()
@@ -57,3 +122,8 @@ class SafeDict(UserDict):
         else:
             return self.fallback_default
 
+class BaseEntity(SafeDict):
+    """
+    The base class for all OpenAIRE entities, like ResearchProduct, Organization, etc.
+    """
+    ...

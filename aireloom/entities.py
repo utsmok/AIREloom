@@ -1,7 +1,5 @@
-from aireloom.util import SafeDict
+from aireloom.base_classes import BaseEntity
 
-class BaseEntity(SafeDict):
-    ...
 
 class ResearchProduct(BaseEntity):
     ...
@@ -11,8 +9,6 @@ class Organization(BaseEntity):
 
 class Project(BaseEntity):
     ...
-
-
 
 class DataSource(BaseEntity):
     ...

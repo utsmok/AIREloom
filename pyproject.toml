@@ -3,14 +3,11 @@ name = "aireloom"
 version = "0.1.0"
 description = "Python interface for the OpenAIRE Graph API"
 authors = [
-    {
-        name = "Samuel Mok",
-        email = "s.mok@utwente.nl"
-    }
+    {name = "Samuel Mok",email = "s.mok@utwente.nl"}
 
 ]
 readme = "README.md"
-license = {text= "MIT}
+license = {text= "MIT"}
 requires-python = ">=3.12"
 dependencies = [
     "httpx"
