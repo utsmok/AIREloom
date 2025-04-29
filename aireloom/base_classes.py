@@ -1,6 +1,7 @@
 from collections import UserDict
 from typing import Any
 
+
 class BaseEndpoint:
     """
     Base class for API endpoints. This class and its subclasses are the primary method to interact with the OpenAIRE API.
@@ -11,14 +12,10 @@ class BaseEndpoint:
     """
 
     url = "https://api.openaire.eu/graph/"
-    params: dict = {
-        "debugQuery": False,
-        "page": 1,
-        "pageSize": 10,
-        "cursor": '*'
-    }
-    valid_filters:dict[str, callable] = {} # dict with valid filter names and validation functions for this endpoint
-
+    params: dict = {"debugQuery": False, "page": 1, "pageSize": 10, "cursor": "*"}
+    valid_filters: dict[
+        str, callable
+    ] = {}  # dict with valid filter names and validation functions for this endpoint
 
     def _update_params(self, **kwargs):
         """
@@ -50,8 +47,6 @@ class BaseEndpoint:
     # sorting
     # TODO: implement sorting
     def sort(self, **kwargs):
-        ...
-
         """
         sortBy
         Defines the field and the sort direction.
@@ -80,7 +75,12 @@ class SafeDict(UserDict):
 
     fallback_default: Any = list()
 
-    def __init__(self, data: dict = None, default_values: dict = None, fallback_default: Any = list()) -> None:
+    def __init__(
+        self,
+        data: dict = None,
+        default_values: dict = None,
+        fallback_default: Any = None,
+    ) -> None:
         """
         Initialize ConfigurableSafeDict.
 
@@ -93,9 +93,12 @@ class SafeDict(UserDict):
                 Defaults to list().
         """
         super().__init__(data)
-        self._default_values: dict[str, Any] = default_values if default_values is not None else dict()
+        self._default_values: dict[str, Any] = (
+            default_values if default_values is not None else dict()
+        )
+
         if fallback_default is not None:
-            self.fallback_default = fallback_default # Instance level fallback override
+            self.fallback_default = fallback_default  # Instance level fallback override
 
     def __getitem__(self, key) -> Any:
         """
@@ -106,8 +109,7 @@ class SafeDict(UserDict):
         except KeyError:
             if key in self._default_values:
                 return self._default_values[key]  # Return configured default
-            else:
-                return self.fallback_default  # Return fallback default
+            return self.fallback_default  # Return fallback default
 
     def get(self, key, default=None) -> Any:
         """
@@ -115,15 +117,14 @@ class SafeDict(UserDict):
         """
         if key in self:
             return super().get(key)
-        elif key in self._default_values:
+        if key in self._default_values:
             return self._default_values[key]
-        elif default is not None:
+        if default is not None:
             return default
-        else:
-            return self.fallback_default
+        return self.fallback_default
+
 
 class BaseEntity(SafeDict):
     """
     The base class for all OpenAIRE entities, like ResearchProduct, Organization, etc.
     """
-    ...
