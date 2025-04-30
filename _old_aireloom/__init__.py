@@ -1,13 +1,2 @@
-from aireloom.endpoints import (
-    researchProducts,
-    organizations,
-    projects,
-    dataSources
-)
-
-from aireloom.entities import (
-    ResearchProduct,
-    Organization,
-    Project,
-    DataSource
-)
+from aireloom.endpoints import dataSources, organizations, projects, researchProducts
+from aireloom.entities import DataSource, Organization, Project, ResearchProduct

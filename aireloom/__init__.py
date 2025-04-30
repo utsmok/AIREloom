@@ -2,28 +2,48 @@
 
 __version__ = "0.1.0"  # Placeholder
 
+# Import Exceptions
 from .exceptions import (
     AireloomError,
-    ApiError,
+    APIError,
     AuthenticationError,
     RateLimitError,
     ValidationError,
 )
-from .models.data_source import DataSource
-from .models.organization import Organization
-from .models.project import Project
-from .models.research_product import ResearchProduct
+
+# Re-export key models from the models subpackage
+from .models import (
+    ApiResponse,
+    BaseEntity,
+    DataSource,
+    Header,
+    Organization,
+    Project,
+    ResearchProduct,
+    ScholixRelationship,
+)
+
+# Import main session class
 from .session import AireloomSession
 
 __all__ = [
+    # Session
     "AireloomSession",
-    "ResearchProduct",
-    "Organization",
-    "DataSource",
-    "Project",
+    # Exceptions (Sorted)
     "AireloomError",
+    "APIError",
     "AuthenticationError",
-    "ApiError",
     "RateLimitError",
     "ValidationError",
+    # Models (Sorted)
+    "ApiResponse",
+    "BaseEntity",
+    "Community",
+    "DataSource",
+    "Header",
+    "Organization",
+    "Project",
+    "Relationship",
+    "ResearchProduct",
+    "ScholixRelationship",
 ]

@@ -1,81 +1,79 @@
 # https://graph.openaire.eu/docs/apis/scholexplorer/v3/response_schema
 
-from typing import Literal
-from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import Annotated, Literal
 
-RelationshipName = Literal["IsSupplementTo", "IsSupplementedBy", "References", "IsReferencedBy", "IsRelatedTo"]
-EntityType = Literal["publication", "dataset", "software", "other"]
+from pydantic import BaseModel, Field, HttpUrl
 
-class Identifier(BaseModel):
-    ID: str | None = None
-    IDScheme: str | None = None
-    IDURL: str | None = None
+# Type Aliases & Literals
+ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
+ScholixRelationshipNameValue = Literal[
+    "IsSupplementTo",
+    "IsSupplementedBy",
+    "References",
+    "IsReferencedBy",
+    "IsRelatedTo",
+]
 
-    class Config:
-        frozen = True
 
-class LinkProvider(BaseModel):
-    name: str | None = None
-    identifier: list[Identifier] = Field(default_factory=list)
+class ScholixIdentifier(BaseModel):
+    ID: str
+    IDScheme: str
+    IDURL: HttpUrl | None = None
 
-    class Config:
-        frozen = True
 
-class RelationshipType(BaseModel):
-    Name: RelationshipName | None = None
-    SubType: str | None = None
-    SubTypeSchema: str | None = None
+class ScholixCreator(BaseModel):
+    Name: str | None = None  # Sometimes just identifier is present
+    Identifier: list[ScholixIdentifier] | None = None
 
-    class Config:
-        frozen = True
 
-class Creator(BaseModel):
-    Name: str | None = None
-    Identifier: 'Identifier' | None = None
+class ScholixPublisher(BaseModel):
+    Name: str
+    Identifier: list[ScholixIdentifier] | None = None
 
-    class Config:
-        frozen = True
 
-class Publisher(BaseModel):
-    name: str | None = None
-    Identifier: list['Identifier'] = Field(default_factory=list)
-
-    class Config:
-        frozen = True
-
-class Entity(BaseModel):
-    Identifier: list['Identifier'] = Field(default_factory=list)
-    Type: EntityType | None = None
+class ScholixEntity(BaseModel):
+    Identifier: list[ScholixIdentifier]
+    Type: ScholixEntityTypeName
     SubType: str | None = None
     Title: str | None = None
-    Creator: list['Creator'] = Field(default_factory=list)
-    PublicationDate: str | None = None
-    Publisher: list['Publisher'] = Field(default_factory=list)
+    Creator: list[ScholixCreator] | None = None
+    PublicationDate: str | None = None  # Keep as string for flexibility
+    Publisher: list[ScholixPublisher] | None = None
 
-    class Config:
-        frozen = True
+
+class ScholixRelationshipType(BaseModel):
+    Name: ScholixRelationshipNameValue
+    SubType: str | None = None
+    SubTypeSchema: HttpUrl | None = None
+
+
+class ScholixLinkProvider(BaseModel):
+    Name: str
+    Identifier: list[ScholixIdentifier] | None = None
+
 
 class ScholixRelationship(BaseModel):
-    LinkPublicationDate: str | None = None
-    LinkProvider: list['LinkProvider'] = Field(default_factory=list)
-    RelationshipType: 'RelationshipType' | None = None
-    LicenseURL: str | None = None
-    Source: Entity | None = None
-    Target: Entity | None = None
+    LinkProvider: list[ScholixLinkProvider] | None = None
+    RelationshipType: ScholixRelationshipType
+    Source: ScholixEntity
+    Target: ScholixEntity
+    LinkPublicationDate: datetime | None = Field(
+        default=None, description="Date the link was published."
+    )
+    LicenseURL: HttpUrl | None = None
+    # HarvestDate appears in examples but not the schema doc?
+    HarvestDate: Annotated[str | None, Field(alias="HarvestDate")] = None
 
-    class Config:
-        frozen = True
 
-# Response wrapper classes
-class Header(BaseModel):
-    nextCursor: str | None = None
+class ScholixResponse(BaseModel):
+    """Response structure for the Scholexplorer Links endpoint."""
 
-    class Config:
-        frozen = True
-
-class Message(BaseModel):
-    header: Header
-    results: list[ScholixRelationship]
-
-    class Config:
-        frozen = True
+    currentPage: int = Field(..., description="The current page number (0-indexed).")
+    totalLinks: int = Field(
+        ..., description="Total number of links matching the query."
+    )
+    totalPages: int = Field(..., description="Total number of pages available.")
+    result: list[ScholixRelationship] = Field(
+        ..., description="List of Scholix relationship links."
+    )

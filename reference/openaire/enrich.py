@@ -1,16 +1,18 @@
-from collections import defaultdict
-from ..base_classes import BaseEnricher, BaseQuery, BaseQuerySet
-from db.duckdb import DuckDBInstance
 from dataclasses import dataclass, field
-from .queries import OAIREQuery, OAIREQuerySet
+
+from db.duckdb import DuckDBInstance
+
 from .mappings import OAIREEndpoint
-from rich import print
+from .queries import OAIREQuerySet
+
 
 @dataclass
 class OAEnricher:
     # BaseEnricher protocol
     db: DuckDBInstance
-    queryset: dict[OAIREEndpoint, OAIREQuerySet] = field(default_factory=dict, init=False)
+    queryset: dict[OAIREEndpoint, OAIREQuerySet] = field(
+        default_factory=dict, init=False
+    )
 
     def retrieve_related_items(self, table_name: str) -> None:
         """

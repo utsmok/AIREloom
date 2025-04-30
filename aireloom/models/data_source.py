@@ -3,25 +3,30 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from .research_product import Container
+from .base import ApiResponse, BaseEntity
 
 # Type literals for restricted values
 AccessRightType = Literal["open", "restricted", "closed"]
 DatabaseRestrictionType = Literal["feeRequired", "registration", "other"]
 
+
 # Base classes for controlled fields
 class ControlledField(BaseModel):
+    """Represents a controlled vocabulary field with scheme and value."""
+
     scheme: str | None = None
     value: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
+
 
 # Main DataSource model
-class DataSource(BaseModel):
-    id: str | None = None
-    originalIds: list[str] = Field(default_factory=list)
-    pids: list[ControlledField] = Field(default_factory=list)
+class DataSource(BaseEntity):
+    """Model representing an OpenAIRE Data Source entity."""
+
+    originalIds: list[str] | None = Field(default_factory=list)
+    pids: list[ControlledField] | None = Field(default_factory=list)
     type: ControlledField | None = None
     openaireCompatibility: str | None = None
     officialName: str | None = None
@@ -30,38 +35,22 @@ class DataSource(BaseModel):
     logoUrl: str | None = None
     dateOfValidation: str | None = None
     description: str | None = None
-    subjects: list[str] = Field(default_factory=list)
-    languages: list[str] = Field(default_factory=list)
-    contentTypes: list[str] = Field(default_factory=list)
+    subjects: list[str] | None = Field(default_factory=list)
+    languages: list[str] | None = Field(default_factory=list)
+    contentTypes: list[str] | None = Field(default_factory=list)
     releaseStartDate: str | None = None
     releaseEndDate: str | None = None
     accessRights: AccessRightType | None = None
     uploadRights: AccessRightType | None = None
     databaseAccessRestriction: DatabaseRestrictionType | None = None
-    dataUploadRestriction: str | None = None  # Can be space-separated combination
+    dataUploadRestriction: str | None = None
     versioning: bool | None = None
     citationGuidelineUrl: str | None = None
     pidSystems: str | None = None
     certificates: str | None = None
-    policies: list[str] = Field(default_factory=list)
-    journal: Container | None = None  # Reuse Container from research_product.py
+    policies: list[str] | None = Field(default_factory=list)
     missionStatementUrl: str | None = None
 
-    class Config:
-        frozen = True
 
-
-# Response wrapper classes
-class Header(BaseModel):
-    nextCursor: str | None = None
-
-    class Config:
-        frozen = True
-
-
-class Message(BaseModel):
-    header: Header
-    results: list[DataSource]
-
-    class Config:
-        frozen = True
+# Define the specific response type for data sources
+DataSourceResponse = ApiResponse[DataSource]

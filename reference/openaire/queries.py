@@ -5,10 +5,9 @@ from pathlib import Path
 from typing import Self
 
 import httpx
+from db.duckdb import DuckDBInstance
 from pydantic import BaseModel, ValidationError
 from rich import print
-
-from db.duckdb import DuckDBInstance
 
 from .mappings import ENDPOINT_TO_MESSAGECLASS, OAIREEndpoint, OAIREMessage
 

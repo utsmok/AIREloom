@@ -1,9 +1,11 @@
 # https://graph.openaire.eu/docs/data-model/entities/community
 
 from typing import Literal
+
 from pydantic import BaseModel, Field
 
 CommunityType = Literal["Research Community", "Research infrastructure"]
+
 
 class Community(BaseModel):
     id: str | None = None
@@ -17,12 +19,14 @@ class Community(BaseModel):
     class Config:
         frozen = True
 
+
 # Response wrapper classes
 class Header(BaseModel):
     nextCursor: str | None = None
 
     class Config:
         frozen = True
+
 
 class Message(BaseModel):
     header: Header

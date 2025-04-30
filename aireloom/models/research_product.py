@@ -4,6 +4,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
+# Import base classes
+from .base import ApiResponse, BaseEntity
+
 """
 This module contains the Pydantic models for parsing & validation OpenAIRE API responses.
 The models are designed to be used with the OpenAIRE Graph API and are structured to match
@@ -22,7 +25,7 @@ class PidIdentifier(BaseModel):
     value: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class PidProvenance(BaseModel):
@@ -30,7 +33,7 @@ class PidProvenance(BaseModel):
     trust: float | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class Pid(BaseModel):
@@ -50,7 +53,7 @@ class Pid(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class Author(BaseModel):
@@ -70,7 +73,7 @@ class Author(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class BestAccessRight(BaseModel):
@@ -79,7 +82,7 @@ class BestAccessRight(BaseModel):
     scheme: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class ResultCountry(BaseModel):
@@ -97,7 +100,7 @@ class ResultCountry(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 # Updated CitationImpact to match documentation
@@ -112,7 +115,7 @@ class CitationImpact(BaseModel):
     impulseClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class UsageCounts(BaseModel):
@@ -132,7 +135,7 @@ class UsageCounts(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class Indicator(BaseModel):
@@ -152,7 +155,7 @@ class Indicator(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 # Updated AccessRight model to include openAccessRoute
@@ -163,7 +166,7 @@ class AccessRight(BaseModel):
     scheme: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class ArticleProcessingCharge(BaseModel):
@@ -171,7 +174,7 @@ class ArticleProcessingCharge(BaseModel):
     currency: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class ResultPid(BaseModel):
@@ -179,15 +182,32 @@ class ResultPid(BaseModel):
     value: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
-# Updated Instance model to include all fields from docs
+class License(BaseModel):
+    code: str | None = None
+    label: str | None = None
+    provenance: PidProvenance | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def replace_none_with_empty_classes(cls, data) -> dict | Any:
+        if data is None:
+            data = {}
+        if isinstance(data, dict) and not data.get("provenance"):
+            data["provenance"] = PidProvenance()
+        return data
+
+    class Config:
+        extra = "allow"
+
+
 class Instance(BaseModel):
     accessRight: AccessRight | None = None
     alternateIdentifier: list[dict[str, str]] = Field(default_factory=list)
     articleProcessingCharge: ArticleProcessingCharge | None = None
-    license: str | None = None
+    license: License | None = None
     pid: list[ResultPid] = Field(default_factory=list)
     publicationDate: str | None = None
     refereed: RefereedType | None = None
@@ -204,13 +224,15 @@ class Instance(BaseModel):
                 data["accessRight"] = AccessRight()
             if not data.get("articleProcessingCharge"):
                 data["articleProcessingCharge"] = ArticleProcessingCharge()
+            if not data.get("license"):
+                data["license"] = License()
             if not data.get("pid"):
                 data["pid"] = [ResultPid()]
 
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class Language(BaseModel):
@@ -218,7 +240,7 @@ class Language(BaseModel):
     label: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 class Subject(BaseModel):
@@ -238,7 +260,7 @@ class Subject(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 # Container for Publication
@@ -254,7 +276,7 @@ class Container(BaseModel):
     vol: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 # GeoLocation for Data
@@ -264,12 +286,11 @@ class GeoLocation(BaseModel):
     point: str | None = None
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
 # Update main ResearchProduct model
-class ResearchProduct(BaseModel):
-    id: str | None = None
+class ResearchProduct(BaseEntity):
     type: ResearchProductType | None = None
     originalId: list[str] = Field(default_factory=list)
     mainTitle: str | None = None
@@ -327,7 +348,11 @@ class ResearchProduct(BaseModel):
         }
 
         data["publiclyFunded"] = bool(
-            data.get("publicyFunded") == "True" or data.get("publiclyFunded") == True
+            data.get("publicyFunded") == "True"
+            or (
+                isinstance(data.get("publiclyFunded"), bool)
+                and data.get("publiclyFunded")
+            )
         )
 
         for field, classtype in obj_fields.items():
@@ -351,20 +376,8 @@ class ResearchProduct(BaseModel):
         return data
 
     class Config:
-        frozen = True
+        extra = "allow"
 
 
-# Response wrapper classes
-class Header(BaseModel):
-    nextCursor: str | None = None
-
-    class Config:
-        frozen = True
-
-
-class Message(BaseModel):
-    header: Header
-    results: list[ResearchProduct]
-
-    class Config:
-        frozen = True
+# Define the specific response type for ResearchProduct results
+ResearchProductResponse = ApiResponse[ResearchProduct]

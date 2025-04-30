@@ -9,6 +9,7 @@ from .research_product import Container
 AccessRightType = Literal["open", "restricted", "closed"]
 DatabaseRestrictionType = Literal["feeRequired", "registration", "other"]
 
+
 # Base classes for controlled fields
 class ControlledField(BaseModel):
     scheme: str | None = None
@@ -16,6 +17,7 @@ class ControlledField(BaseModel):
 
     class Config:
         frozen = True
+
 
 # Main DataSource model
 class DataSource(BaseModel):

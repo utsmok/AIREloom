@@ -6,10 +6,12 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import os
     import json
+    import os
+
     import httpx
     import polars as pl
+
     return httpx, json, os, pl
 
 
@@ -67,6 +69,7 @@ def _(basic_params, client, pl, projects_url):
             else:
                 projects_params["cursor"] = projects_data["header"]["nextCursor"]
         return pl.DataFrame(ut_projects, infer_schema_length=None)
+
     return (get_projects,)
 
 
@@ -95,7 +98,6 @@ def _(basic_params, client, pl):
             params["cursor"] = research_products_data["header"]["nextCursor"]
             return get_data(given_url, params, existing_data)
 
-        
         all_research_products = []
         total = len(all_project_ids)
         for item_num, id in enumerate(all_project_ids):
@@ -108,9 +110,12 @@ def _(basic_params, client, pl):
                 all_research_products.extend(research_products_data)
             if isinstance(research_products_data, dict):
                 all_research_products.append(research_products_data)
-        
-            print(f'[{item_num}/{total}] {len(all_research_products)} (+{len(all_research_products) - cur_len})')
+
+            print(
+                f"[{item_num}/{total}] {len(all_research_products)} (+{len(all_research_products) - cur_len})"
+            )
         return pl.DataFrame(all_research_products, infer_schema_length=None)
+
     return (get_research_products,)
 
 

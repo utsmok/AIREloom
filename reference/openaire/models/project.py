@@ -2,12 +2,14 @@
 
 from pydantic import BaseModel, Field
 
+
 class FundingStream(BaseModel):
     description: str | None = None
     id: str | None = None
 
     class Config:
         frozen = True
+
 
 class Funding(BaseModel):
     fundingStream: FundingStream | None = None
@@ -18,6 +20,7 @@ class Funding(BaseModel):
     class Config:
         frozen = True
 
+
 class Grant(BaseModel):
     currency: str | None = None
     fundedAmount: float | None = None
@@ -26,12 +29,14 @@ class Grant(BaseModel):
     class Config:
         frozen = True
 
+
 class H2020Programme(BaseModel):
     code: str | None = None
     description: str | None = None
 
     class Config:
         frozen = True
+
 
 class Project(BaseModel):
     id: str | None = None
@@ -54,12 +59,14 @@ class Project(BaseModel):
     class Config:
         frozen = True
 
+
 # Response wrapper classes
 class Header(BaseModel):
     nextCursor: str | None = None
 
     class Config:
         frozen = True
+
 
 class Message(BaseModel):
     header: Header

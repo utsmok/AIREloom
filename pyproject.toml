@@ -13,13 +13,22 @@ dependencies = [
     "polars",
     "loguru",
     "pydantic",
-
+    "pydantic-settings>=2.9.1",
+    "tenacity>=9.1.2",
 ]
 
 [project.optional-dependencies]
 lint = ["ruff"]
 test = ["pytest", "pytest-randomly"]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.1.1", 
+    "pytest-httpx>=0.35.0",
+]
 
+[project.urls]
+"Homepage" = "https://github.com/utsmok/aireloom"
 
 [build-system]
 requires = ["hatchling"]
@@ -28,13 +37,13 @@ build-backend = "hatchling.build"
 [tool.uv.pip]
 generate-hashes = true
 
+[tool.ruff]
+line-length = 88
+
 [tool.ruff.format]
 # formatting of code snippets in docstrings.
 docstring-code-format = true
 docstring-code-line-length = 60
-
-[tool.ruff.lint.isort]
-combine-as-imports = true
 
 [tool.ruff.lint]
 # defaults are `E4`, E7`, `E9`, and `F`
@@ -56,3 +65,17 @@ select = [
     "UP", # check for deprecated ways of coding
     "FURB",
 ]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+# Enable asyncio mode for pytest-asyncio
+# Options: auto, strict, legacy
+asyncio_mode = "auto"
