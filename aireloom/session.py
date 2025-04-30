@@ -273,7 +273,7 @@ class AireloomSession:
                 for result in api_response.results:
                     yield result
 
-                next_cursor = api_response.header.next_cursor
+                next_cursor = api_response.header.nextCursor
                 if not next_cursor:
                     break
 
@@ -319,8 +319,8 @@ class AireloomSession:
         self._validate_filters(RESEARCH_PRODUCTS, filters)
         self._validate_sort(RESEARCH_PRODUCTS, sort_by)
         params = {
-            "page": page, 
-            "pageSize": page_size, 
+            "page": page,
+            "pageSize": page_size,
             "sortBy": sort_by,
             **filters,
         }
@@ -351,8 +351,8 @@ class AireloomSession:
         self._validate_sort(RESEARCH_PRODUCTS, sort_by)
         # Build params *without* page, ensure size is present
         params = {
-            "page": 1, 
-            "pageSize": page_size, 
+            "page": 1,
+            "pageSize": page_size,
             "sortBy": sort_by,
             **filters,
         }
@@ -482,8 +482,8 @@ class AireloomSession:
 
         # Scholexplorer uses 0-based page, size is 'rows'
         params = {
-            "page": page, 
-            "rows": page_size,  
+            "page": page,
+            "rows": page_size,
             **mutable_filters,
         }
         params = {k: v for k, v in params.items() if v is not None}
@@ -528,17 +528,19 @@ class AireloomSession:
         self._validate_filters(SCHOLIX, mutable_filters)
 
         current_page = 0
-        total_pages = 1
+        total_pages = 1 # Assume at least one page initially
 
         while current_page < total_pages:
             logger.debug(
                 f"Iterating Scholix page {current_page + 1}/{total_pages if total_pages > 1 else '?'}"
             )
             try:
+                # Call search_scholix_links, passing page_size explicitly,
+                # and validated filters via **mutable_filters.
                 response_data = await self.search_scholix_links(
                     page=current_page,
-                    rows=page_size,
-                    **mutable_filters,
+                    page_size=page_size, # Pass page_size directly
+                    **mutable_filters, # Pass validated filters
                 )
 
                 if not response_data.result:
@@ -552,6 +554,8 @@ class AireloomSession:
                 if current_page == 0:
                     total_pages = response_data.totalPages
                     logger.debug(f"Total pages reported by Scholix: {total_pages}")
+
+                # Check if we've processed the last page
                 if current_page >= total_pages - 1:
                     logger.debug("Last page processed, stopping iteration.")
                     break

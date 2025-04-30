@@ -13,12 +13,10 @@ DatabaseRestrictionType = Literal["feeRequired", "registration", "other"]
 # Base classes for controlled fields
 class ControlledField(BaseModel):
     """Represents a controlled vocabulary field with scheme and value."""
-
     scheme: str | None = None
     value: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Main DataSource model

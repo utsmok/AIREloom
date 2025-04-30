@@ -11,9 +11,7 @@ class FundingStream(BaseModel):
 
     description: str | None = None
     id: str | None = None
-
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Funding(BaseModel):
@@ -23,9 +21,8 @@ class Funding(BaseModel):
     jurisdiction: str | None = None
     name: str | None = None
     shortName: str | None = None
+    model_config = dict(extra="allow")
 
-    class Config:
-        extra = "allow"
 
 
 class Grant(BaseModel):
@@ -34,9 +31,7 @@ class Grant(BaseModel):
     currency: str | None = None
     fundedAmount: float | None = None
     totalCost: float | None = None
-
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class H2020Programme(BaseModel):
@@ -44,10 +39,7 @@ class H2020Programme(BaseModel):
 
     code: str | None = None
     description: str | None = None
-
-    class Config:
-        extra = "allow"
-
+    model_config = dict(extra="allow")
 
 class Project(BaseEntity):
     """Model representing an OpenAIRE Project entity."""
@@ -68,6 +60,8 @@ class Project(BaseEntity):
     subjects: list[str] | None = Field(default_factory=list)
     summary: str | None = None
     websiteUrl: str | None = None
+
+    model_config = dict(extra="allow")
 
 
 # Define the specific response type for projects

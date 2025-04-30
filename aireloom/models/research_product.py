@@ -24,16 +24,14 @@ class PidIdentifier(BaseModel):
     scheme: str | None = None
     value: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class PidProvenance(BaseModel):
     provenance: str | None = None
     trust: float | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Pid(BaseModel):
@@ -52,8 +50,7 @@ class Pid(BaseModel):
                 data["provenance"] = PidProvenance()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Author(BaseModel):
@@ -72,8 +69,7 @@ class Author(BaseModel):
             data["pid"] = Pid()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class BestAccessRight(BaseModel):
@@ -81,8 +77,7 @@ class BestAccessRight(BaseModel):
     label: str | None = None
     scheme: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class ResultCountry(BaseModel):
@@ -99,8 +94,7 @@ class ResultCountry(BaseModel):
             data["provenance"] = PidProvenance()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Updated CitationImpact to match documentation
@@ -114,8 +108,7 @@ class CitationImpact(BaseModel):
     impulse: float | None = None
     impulseClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class UsageCounts(BaseModel):
@@ -134,8 +127,7 @@ class UsageCounts(BaseModel):
                 data["views"] = "0"
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Indicator(BaseModel):
@@ -154,8 +146,7 @@ class Indicator(BaseModel):
                 data["usageCounts"] = UsageCounts()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Updated AccessRight model to include openAccessRoute
@@ -165,24 +156,21 @@ class AccessRight(BaseModel):
     openAccessRoute: OpenAccessRouteType | None = None
     scheme: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class ArticleProcessingCharge(BaseModel):
     amount: str | None = None
     currency: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class ResultPid(BaseModel):
     scheme: str | None = None
     value: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class License(BaseModel):
@@ -199,8 +187,7 @@ class License(BaseModel):
             data["provenance"] = PidProvenance()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Instance(BaseModel):
@@ -231,16 +218,14 @@ class Instance(BaseModel):
 
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Language(BaseModel):
     code: str | None = None
     label: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Subject(BaseModel):
@@ -259,8 +244,7 @@ class Subject(BaseModel):
                 data["provenance"] = PidProvenance()
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Container for Publication
@@ -275,8 +259,7 @@ class Container(BaseModel):
     ep: str | None = None
     vol: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # GeoLocation for Data
@@ -285,8 +268,7 @@ class GeoLocation(BaseModel):
     place: str | None = None
     point: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Update main ResearchProduct model
@@ -375,8 +357,7 @@ class ResearchProduct(BaseEntity):
                 data[field] = [classtype()]
         return data
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 # Define the specific response type for ResearchProduct results

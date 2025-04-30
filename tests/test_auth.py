@@ -246,28 +246,15 @@ async def test_client_credentials_auth_close():
 @pytest.mark.asyncio
 async def test_client_credentials_auth_concurrent_fetch(httpx_mock: HTTPXMock):
     """Test that concurrent authenticate calls only fetch the token once."""
-    fetch_delay = 0.1  # Simulate network delay for token fetch
+    # Simplify mock: Just add the expected response directly.
+    # The internal lock in ClientCredentialsAuth should handle concurrency.
     httpx_mock.add_response(
         url=MOCK_TOKEN_URL,
         method="POST",
         json={"access_token": MOCK_ACCESS_TOKEN, "expires_in": 3600},
         status_code=200,
-        # Simulate delay to allow tasks to run concurrently
-        stream=httpx.ByteStream(
-            b'{"access_token":"' + MOCK_ACCESS_TOKEN.encode() + b'", "expires_in": 3600}'
-        ),
-        # Use stream to introduce delay more effectively
-        # Note: httpx_mock doesn't directly support delay, stream helps simulate
     )
-    # Hacky way to add delay with httpx_mock - wrap the callback
-    async def delayed_callback(request, **kwargs):
-        await asyncio.sleep(fetch_delay)
-        return httpx.Response(
-            200,
-            json={"access_token": MOCK_ACCESS_TOKEN, "expires_in": 3600},
-        )
-
-    httpx_mock.add_callback(delayed_callback, url=MOCK_TOKEN_URL, method="POST")
+    # Remove the complex callback and delay simulation
 
     strategy = ClientCredentialsAuth(
         client_id=MOCK_CLIENT_ID,

@@ -21,15 +21,21 @@ class ScholixIdentifier(BaseModel):
     IDScheme: str
     IDURL: HttpUrl | None = None
 
+    model_config = dict(extra="allow")
+
 
 class ScholixCreator(BaseModel):
     Name: str | None = None  # Sometimes just identifier is present
     Identifier: list[ScholixIdentifier] | None = None
 
+    model_config = dict(extra="allow")
+
 
 class ScholixPublisher(BaseModel):
     Name: str
     Identifier: list[ScholixIdentifier] | None = None
+
+    model_config = dict(extra="allow")
 
 
 class ScholixEntity(BaseModel):
@@ -41,11 +47,15 @@ class ScholixEntity(BaseModel):
     PublicationDate: str | None = None  # Keep as string for flexibility
     Publisher: list[ScholixPublisher] | None = None
 
+    model_config = dict(extra="allow")
+
 
 class ScholixRelationshipType(BaseModel):
     Name: ScholixRelationshipNameValue
     SubType: str | None = None
     SubTypeSchema: HttpUrl | None = None
+
+    model_config = dict(extra="allow")
 
 
 class ScholixLinkProvider(BaseModel):
@@ -65,6 +75,8 @@ class ScholixRelationship(BaseModel):
     # HarvestDate appears in examples but not the schema doc?
     HarvestDate: Annotated[str | None, Field(alias="HarvestDate")] = None
 
+    model_config = dict(extra="allow")
+
 
 class ScholixResponse(BaseModel):
     """Response structure for the Scholexplorer Links endpoint."""
@@ -77,3 +89,5 @@ class ScholixResponse(BaseModel):
     result: list[ScholixRelationship] = Field(
         ..., description="List of Scholix relationship links."
     )
+
+    model_config = dict(extra="allow")

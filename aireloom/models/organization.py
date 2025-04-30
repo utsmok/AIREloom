@@ -12,8 +12,7 @@ class Country(BaseModel):
     code: str | None = None
     label: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class OrganizationPid(BaseModel):
@@ -22,8 +21,7 @@ class OrganizationPid(BaseModel):
     scheme: str | None = None
     value: str | None = None
 
-    class Config:
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class Organization(BaseEntity):
@@ -36,6 +34,8 @@ class Organization(BaseEntity):
     websiteUrl: str | None = None
     country: Country | None = None
     pids: list[OrganizationPid] | None = Field(default_factory=list)
+
+    model_config = dict(extra="allow")
 
 
 # Define the specific response type for organizations

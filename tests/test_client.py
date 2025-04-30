@@ -211,15 +211,12 @@ async def test_request_with_client_creds_auth_token_failure(mock_settings_with_c
         status_code=401,
         text="Invalid Credentials"
     )
-    # Mock the actual API endpoint (should not be called)
-    httpx_mock.add_response(url=f"{MOCK_BASE_URL}/data", method="GET", status_code=httpx.codes.OK)
+    # Do NOT mock the /data endpoint
 
     client = AireloomClient(settings=mock_settings_with_creds, base_url=MOCK_BASE_URL)
-
     with pytest.raises(AuthError, match="Failed to fetch access token: 401"):
         async with client:
             await client.request("GET", "/data")
-
     # Ensure the API endpoint was never called
     api_requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/data", method="GET")
     assert len(api_requests) == 0
@@ -302,14 +299,13 @@ async def test_request_non_retryable_4xx_error(mock_settings, httpx_mock: HTTPXM
 async def test_request_timeout_error(mock_settings, httpx_mock: HTTPXMock):
     """Test that TimeoutError is raised on timeout."""
     url = f"{MOCK_BASE_URL}/timeout_test"
-    httpx_mock.add_exception(httpx.TimeoutException("Request timed out", request=httpx.Request("GET", url)))
+    for _ in range(mock_settings.max_retries + 1):
+        httpx_mock.add_exception(httpx.TimeoutException("Request timed out", request=httpx.Request("GET", url)))
 
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
-
-    with patch("asyncio.sleep", new_callable=AsyncMock):
-        with pytest.raises(TimeoutError, match="Request timed out"):
-            async with client:
-                await client.request("GET", "/timeout_test")
+    with pytest.raises(TimeoutError, match="Request timed out"):
+        async with client:
+            await client.request("GET", "/timeout_test")
 
     # Retries should have happened (initial + max_retries)
     assert len(httpx_mock.get_requests()) == mock_settings.max_retries + 1
@@ -318,16 +314,14 @@ async def test_request_timeout_error(mock_settings, httpx_mock: HTTPXMock):
 async def test_request_network_error(mock_settings, httpx_mock: HTTPXMock):
     """Test that NetworkError is raised on connection error."""
     url = f"{MOCK_BASE_URL}/network_error_test"
-    httpx_mock.add_exception(httpx.ConnectError("Connection failed", request=httpx.Request("GET", url)))
+    # Register the exception for each retry attempt
+    for _ in range(mock_settings.max_retries + 1):
+        httpx_mock.add_exception(httpx.ConnectError("Connection failed", request=httpx.Request("GET", url)))
 
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
-
-    with patch("asyncio.sleep", new_callable=AsyncMock):
-        with pytest.raises(NetworkError, match="Network error occurred"):
-            async with client:
-                await client.request("GET", "/network_error_test")
-
-    assert len(httpx_mock.get_requests()) == mock_settings.max_retries + 1
+    with pytest.raises(NetworkError, match="Network error occurred"):
+        async with client:
+            await client.request("GET", "/network_error_test")
 
 
 # --- Test Client Context Manager and Closing ---

@@ -13,19 +13,16 @@ class Header(BaseModel):
     """Model for the standard API response header."""
 
     status: str | None = None
-    # Note: "code" seems unused/always null in examples, but kept for potential future use
     code: str | None = None
     message: str | None = None
     # total and count are often strings in the API response, needs validation/coercion
-    total: int | None = None
-    count: int | None = None
+    queryTime: int | None = None
+    numFound: int | None = None
     # next/prev can be full URLs or just the cursor string
-    next: str | HttpUrl | None = None
-    prev: str | HttpUrl | None = None
-    processing_time_millis: int | None = Field(None, alias="processingTimeMillis")
-    timestamp: datetime | None = None
+    nextCursor: str | HttpUrl | None = None
+    pageSize: int | None = None
 
-    @field_validator("total", "count", mode="before")
+    @field_validator("queryTime", "numFound", "pageSize", mode="before")
     @classmethod
     def coerce_str_to_int(cls, v: Any) -> int | None:
         """Coerce string representations of numbers to integers."""
@@ -36,6 +33,8 @@ class Header(BaseModel):
                 return None  # Or raise a validation error if preferred
         return v
 
+    model_config = dict(extra="allow")
+
 
 class BaseEntity(BaseModel):
     """Base model for all OpenAIRE entities (like publication, project, etc.)."""
@@ -43,9 +42,7 @@ class BaseEntity(BaseModel):
     # Common identifier across most entities
     id: str
 
-    class Config:
-        # Allow extra fields, as API responses can vary
-        extra = "allow"
+    model_config = dict(extra="allow")
 
 
 class ApiResponse(BaseModel, Generic[EntityType]):
@@ -73,6 +70,8 @@ class ApiResponse(BaseModel, Generic[EntityType]):
         # If it's neither None, nor the expected dict wrapper, nor a list, handle appropriately
         # Option: Return empty list, None, or raise ValueError depending on strictness desired
         return []  # Default to empty list for unexpected formats
+
+    model_config = dict(extra="allow")
 
 
 # Example of a specific response type (for illustration)

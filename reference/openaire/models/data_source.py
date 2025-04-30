@@ -14,10 +14,7 @@ DatabaseRestrictionType = Literal["feeRequired", "registration", "other"]
 class ControlledField(BaseModel):
     scheme: str | None = None
     value: str | None = None
-
-    class Config:
-        frozen = True
-
+    model_config = dict(extra="allow")
 
 # Main DataSource model
 class DataSource(BaseModel):
@@ -48,22 +45,16 @@ class DataSource(BaseModel):
     policies: list[str] = Field(default_factory=list)
     journal: Container | None = None  # Reuse Container from research_product.py
     missionStatementUrl: str | None = None
-
-    class Config:
-        frozen = True
-
+    model_config = dict(extra="allow")
 
 # Response wrapper classes
 class Header(BaseModel):
     nextCursor: str | None = None
-
-    class Config:
-        frozen = True
+    model_config = dict(extra="allow")
 
 
 class Message(BaseModel):
     header: Header
     results: list[DataSource]
 
-    class Config:
-        frozen = True
+    model_config = dict(extra="allow")
