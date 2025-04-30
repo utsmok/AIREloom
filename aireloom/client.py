@@ -286,6 +286,9 @@ class AireloomClient:
                     request=e.request,
                 ) from e
 
+        except AireloomError as e:
+            raise e # Re-raise without further wrapping
+
         except Exception as e:
             # Catch truly unexpected errors outside the retry/http logic
             logger.exception(f"Unexpected error during request processing: {e}")

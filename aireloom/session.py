@@ -256,8 +256,9 @@ class AireloomSession:
         current_params = params.copy()
         current_params.pop("page", None)
         current_params["cursor"] = "*"
-        if "size" not in current_params:
-            current_params["size"] = DEFAULT_PAGE_SIZE
+        # Check for the correct parameter name 'pageSize'
+        if "pageSize" not in current_params:
+            current_params["pageSize"] = DEFAULT_PAGE_SIZE # Add pageSize if missing
 
         while True:
             try:
@@ -478,7 +479,19 @@ class AireloomSession:
         """
         # Use a mutable copy for validation side-effects
         mutable_filters = filters.copy()
-        self._validate_filters(SCHOLIX, mutable_filters)
+        source_pid = mutable_filters.pop("sourcePid", None)
+        target_pid = mutable_filters.pop("targetPid", None)
+
+        if not source_pid and not target_pid:
+            raise ValueError(
+                "Either sourcePid or targetPid must be provided for Scholix search."
+            )
+
+        # Validate only the actual filter keys, exclude pagination params
+        filters_to_validate = mutable_filters.copy()
+        filters_to_validate.pop("page", None) # Added validation exclusion
+        filters_to_validate.pop("rows", None) # Added validation exclusion
+        self._validate_filters(SCHOLIX, filters_to_validate)
 
         # Scholexplorer uses 0-based page, size is 'rows'
         params = {

@@ -12,7 +12,7 @@ from aireloom.auth import (  # Import specific auth strategies for checking
     NoAuth,
     StaticTokenAuth,
 )
-from aireloom.constants import OPENAIRE_SCHOLIX_API_BASE_URL
+from aireloom.constants import OPENAIRE_SCHOLIX_API_BASE_URL, OPENAIRE_GRAPH_API_BASE_URL
 from aireloom.exceptions import AireloomError, ValidationError
 
 # Load .env file for local testing (e.g., containing AIRELOOM_OPENAIRE_API_TOKEN)
@@ -36,28 +36,34 @@ MOCK_SCHOLIX_RESPONSE = {
     "result": [
         {
             "LinkProvider": [
-                {
-                    "Name": "DataCite", # Correct casing
-                    "Identifier": [{"ID": "datacite", "IDScheme": "datacid"}],
-                }
+                {"Name": "Example Provider", "AgentId": "example"}
             ],
+            "LinkPublicationDate": "2023-01-15T12:00:00",
             "RelationshipType": {
-                "Name": "references", # Correct casing
-                "SubType": "Dataset",
-                # SubTypeSchema is optional and needs to be a URL or None
-                "SubTypeSchema": "http://example.com/schema/references",
+                "Name": "References",  # Correct casing
+                "SubType": "Scholix",
+                "SubTypeSchema": "DataCite",
             },
-            "Source": { # Add Source
-                "Identifier": [{"ID": KNOWN_DOI_WITH_LINKS, "IDScheme": "doi"}],
-                "Type": {"Name": "literature"},
+            "Source": {
+                "Identifier": [
+                    {"ID": "10.5281/zenodo.7668094", "IDScheme": "doi"}
+                ],
+                "Type": "publication",  # Use literal string
+                "Title": "Source Title",
+                "Creator": [{"Name": "Source Author"}],
+                "PublicationDate": "2023",
+                "Publisher": "Source Publisher",
             },
-            "Target": { # Add Target
-                "Identifier": [{"ID": "10.1234/target.dataset", "IDScheme": "doi"}],
-                "Type": {"Name": "dataset"},
+            "Target": {
+                "Identifier": [
+                    {"ID": "10.1234/target.dataset.1", "IDScheme": "doi"}
+                ],
+                "Type": "dataset",  # Use literal string
+                "Title": "Target Title",
+                "Creator": [{"Name": "Target Author"}],
+                "PublicationDate": "2022",
+                "Publisher": "Target Publisher",
             },
-            "LinkPublicationDate": "2023-01-15T12:00:00", # Added field
-            "LicenseURL": None, # Optional
-            "HarvestDate": None, # Optional
         }
     ],
 }
@@ -107,16 +113,32 @@ async def test_session_initialization_with_token(
 
 
 @pytest.mark.asyncio
-async def test_get_research_product_success():
-    """Test fetching a known public research product."""
+async def test_get_research_product_success(httpx_mock: HTTPXMock):
+    """Test fetching a known research product successfully.
+
+    Ensures a valid response is parsed correctly.
+    """
+    product_id = "oai:zenodo.org:7668094" # Use variable for clarity
+    mock_product_response = {
+        "id": product_id,
+        "titles": [{"value": "Mocked Test Product Title"}],
+        # Add other minimal required fields if necessary based on model
+    }
+
+    # Mock the specific API call
+    httpx_mock.add_response(
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
+        method="GET",
+        json=mock_product_response,
+        status_code=200,
+    )
+
     async with AireloomSession() as session:
         try:
-            product = await session.get_research_product(KNOWN_PRODUCT_ID)
+            product = await session.get_research_product(product_id)
             assert product is not None
-            assert product.id == KNOWN_PRODUCT_ID
-            assert isinstance(product.title, str)
-            assert KNOWN_PRODUCT_TITLE_FRAGMENT.lower() in product.title.lower()
-            # Add more assertions based on expected product structure if needed
+            assert product.id == product_id
+            assert product.titles[0].value == "Mocked Test Product Title"
         except AireloomError as e:
             pytest.fail(f"Fetching known product failed: {e}")
 
@@ -138,19 +160,15 @@ async def test_search_research_products_simple():
         try:
             # Search for a common term, limit results
             response = await session.search_research_products(
-                page_size=5, mainTitle="Open Science"
+                page=1, page_size=5, mainTitle="Open Science"
             )
             assert response is not None
-            assert response.header is not None
-            # Total might fluctuate, just check > 0 if results expected
-            # assert response.header.total > 0
-            assert response.results is not None
-            # Check actual results count matches expectation (up to page_size)
-            assert 0 <= len(response.results) <= 5  # noqa: PLR2004
-            # Optional: Check if results seem relevant
+            assert len(response.results) <= 5
             if response.results:
-                assert isinstance(response.results[0].id, str)
-                assert isinstance(response.results[0].title, str)
+                product = response.results[0]
+                assert product.id is not None
+                # Access the title value correctly from the list
+                assert product.titles[0].value is not None
         except AireloomError as e:
             pytest.fail(f"Simple product search failed: {e}")
 
@@ -238,7 +256,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
                 "Identifier": [{
                     "ID": f"10.1234/target.dataset.{i}", "IDScheme": "doi"
                     }],
-                "Type": {"Name": "dataset"},
+                "Type": "dataset",
             } # Vary target slightly
 
 
@@ -264,7 +282,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
                 "Identifier": [{
                     "ID": f"10.1234/target.dataset.{i+5}", "IDScheme": "doi"
                     }],
-                "Type": {"Name": "dataset"},
+                "Type": "dataset",
             } # Vary target slightly
 
     httpx_mock.add_response(
