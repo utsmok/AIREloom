@@ -1,8 +1,9 @@
 # https://graph.openaire.eu/docs/data-model/entities/research-product
 
-from typing import Any, Literal
+import logging
+from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .base import ApiResponse, BaseEntity
 
@@ -16,342 +17,230 @@ OpenAccessRouteType = Literal["gold", "green", "hybrid", "bronze"]
 RefereedType = Literal["peerReviewed", "nonPeerReviewed", "UNKNOWN"]
 ResearchProductType = Literal["publication", "dataset", "software", "other"]
 
+logger = logging.getLogger(__name__)
 
 # Sub-models for nested structures
 class PidIdentifier(BaseModel):
-    scheme: str | None = None
-    value: str | None = None
+    scheme: Optional[str] = None
+    value: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class PidProvenance(BaseModel):
-    provenance: str | None = None
-    trust: float | None = None
+    provenance: Optional[str] = None
+    trust: Optional[float] = None
 
     model_config = dict(extra="allow")
 
 
 class Pid(BaseModel):
-    id: PidIdentifier | None = None
-    provenance: PidProvenance | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict):
-            if not data.get("id"):
-                data["id"] = PidIdentifier()
-            if not data.get("provenance"):
-                data["provenance"] = PidProvenance()
-        return data
+    id: Optional[PidIdentifier] = None
+    provenance: Optional[PidProvenance] = None
 
     model_config = dict(extra="allow")
 
 
 class Author(BaseModel):
-    fullName: str | None = None
-    rank: int | None = None
-    name: str | None = None
-    surname: str | None = None
-    pid: Pid | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict) and not data.get("pid"):
-            data["pid"] = Pid()
-        return data
+    fullName: Optional[str] = None
+    rank: Optional[int] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    pid: Optional[Pid] = None
 
     model_config = dict(extra="allow")
 
 
 class BestAccessRight(BaseModel):
-    code: str | None = None
-    label: str | None = None
-    scheme: str | None = None
+    code: Optional[str] = None
+    label: Optional[str] = None
+    scheme: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class ResultCountry(BaseModel):
-    code: str | None = None
-    label: str | None = None
-    provenance: PidProvenance | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict) and not data.get("provenance"):
-            data["provenance"] = PidProvenance()
-        return data
+    code: Optional[str] = None
+    label: Optional[str] = None
+    provenance: Optional[PidProvenance] = None
 
     model_config = dict(extra="allow")
 
 
 class CitationImpact(BaseModel):
-    influence: float | None = None
-    influenceClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
-    citationCount: int | None = None
-    citationClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
-    popularity: float | None = None
-    popularityClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
-    impulse: float | None = None
-    impulseClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
+    influence: Optional[float] = None
+    influenceClass: Optional[Literal["C1", "C2", "C3", "C4", "C5"]] = None
+    citationCount: Optional[int] = None
+    citationClass: Optional[Literal["C1", "C2", "C3", "C4", "C5"]] = None
+    popularity: Optional[float] = None
+    popularityClass: Optional[Literal["C1", "C2", "C3", "C4", "C5"]] = None
+    impulse: Optional[float] = None
+    impulseClass: Optional[Literal["C1", "C2", "C3", "C4", "C5"]] = None
 
     model_config = dict(extra="allow")
 
 
 class UsageCounts(BaseModel):
-    downloads: str | None = None
-    views: str | None = None
+    downloads: Optional[int] = None
+    views: Optional[int] = None
 
-    @model_validator(mode="before")
+    @field_validator('downloads', 'views', mode='before')
     @classmethod
-    def text_fix(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict):
-            if not data.get("downloads") or not isinstance(data["downloads"], str):
-                data["downloads"] = "0"
-            if not data.get("views") or not isinstance(data["views"], str):
-                data["views"] = "0"
-        return data
+    def coerce_str_to_int(cls, v: Any) -> Optional[int]:
+        """Coerce string count values to integers, handling None and errors."""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                return int(v)
+            except (ValueError, TypeError):
+                logger.warning(f"Could not coerce UsageCounts value '{v}' to int.")
+                return None
+        if isinstance(v, int):
+            return v
+        logger.warning(f"Unexpected type {type(v)} for UsageCounts value '{v}'.")
+        return None
 
     model_config = dict(extra="allow")
 
 
 class Indicator(BaseModel):
-    citationImpact: CitationImpact | None = None
-    usageCounts: UsageCounts | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict):
-            if not data.get("citationImpact"):
-                data["citationImpact"] = CitationImpact()
-            if not data.get("usageCounts"):
-                data["usageCounts"] = UsageCounts()
-        return data
+    citationImpact: Optional[CitationImpact] = None
+    usageCounts: Optional[UsageCounts] = None
 
     model_config = dict(extra="allow")
 
 
 class AccessRight(BaseModel):
-    code: str | None = None
-    label: str | None = None
-    openAccessRoute: OpenAccessRouteType | None = None
-    scheme: str | None = None
+    code: Optional[str] = None
+    label: Optional[str] = None
+    openAccessRoute: Optional[OpenAccessRouteType] = None
+    scheme: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class ArticleProcessingCharge(BaseModel):
-    amount: str | None = None
-    currency: str | None = None
+    amount: Optional[str] = None
+    currency: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class ResultPid(BaseModel):
-    scheme: str | None = None
-    value: str | None = None
+    scheme: Optional[str] = None
+    value: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class License(BaseModel):
-    code: str | None = None
-    label: str | None = None
-    provenance: PidProvenance | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict) and not data.get("provenance"):
-            data["provenance"] = PidProvenance()
-        return data
+    code: Optional[str] = None
+    label: Optional[str] = None
+    provenance: Optional[PidProvenance] = None
 
     model_config = dict(extra="allow")
 
 
 class Instance(BaseModel):
-    accessRight: AccessRight | None = None
+    accessRight: Optional[AccessRight] = None
     alternateIdentifier: list[dict[str, str]] = Field(default_factory=list)
-    articleProcessingCharge: ArticleProcessingCharge | None = None
-    license: License | None = None
-    pid: list[ResultPid] = Field(default_factory=list)
-    publicationDate: str | None = None
-    refereed: RefereedType | None = None
-    type: str | None = None
+    articleProcessingCharge: Optional[ArticleProcessingCharge] = None
+    license: Optional[License] = None
+    collectedFrom: Optional[dict[str, str]] = None
+    hostedBy: Optional[dict[str, str]] = None
+    distributionLocation: Optional[str] = None
+    embargoEndDate: Optional[str] = None
+    instanceId: Optional[str] = None
+    publicationDate: Optional[str] = None
+    refereed: Optional[RefereedType] = None
+    type: Optional[str] = None
     urls: list[str] = Field(default_factory=list)
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict):
-            if not data.get("accessRight"):
-                data["accessRight"] = AccessRight()
-            if not data.get("articleProcessingCharge"):
-                data["articleProcessingCharge"] = ArticleProcessingCharge()
-            if not data.get("license"):
-                data["license"] = License()
-            if not data.get("pid"):
-                data["pid"] = [ResultPid()]
-
-        return data
 
     model_config = dict(extra="allow")
 
 
 class Language(BaseModel):
-    code: str | None = None
-    label: str | None = None
+    code: Optional[str] = None
+    label: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 class Subject(BaseModel):
-    subject: dict[str, str] | None = None
-    provenance: PidProvenance | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if data is None:
-            data = {}
-        if isinstance(data, dict):
-            if not data.get("subject"):
-                data["subject"] = {}
-            if not data.get("provenance"):
-                data["provenance"] = PidProvenance()
-        return data
+    subject: Optional[dict[str, str]] = None
+    provenance: Optional[PidProvenance] = None
 
     model_config = dict(extra="allow")
 
 
 # Container for Publication
 class Container(BaseModel):
-    edition: str | None = None
-    iss: str | None = None
-    issnLinking: str | None = None
-    issnOnline: str | None = None
-    issnPrinted: str | None = None
-    name: str | None = None
-    sp: str | None = None
-    ep: str | None = None
-    vol: str | None = None
+    edition: Optional[str] = None
+    iss: Optional[str] = None
+    issnLinking: Optional[str] = None
+    issnOnline: Optional[str] = None
+    issnPrinted: Optional[str] = None
+    name: Optional[str] = None
+    sp: Optional[str] = None
+    ep: Optional[str] = None
+    vol: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 # GeoLocation for Data
 class GeoLocation(BaseModel):
-    box: str | None = None
-    place: str | None = None
-    point: str | None = None
+    box: Optional[str] = None
+    place: Optional[str] = None
+    point: Optional[str] = None
 
     model_config = dict(extra="allow")
 
 
 # Update main ResearchProduct model
 class ResearchProduct(BaseEntity):
-    type: ResearchProductType | None = None
+    type: Optional[ResearchProductType] = None
     originalId: list[str] = Field(default_factory=list)
-    mainTitle: str | None = None
-    subTitle: str | None = None
+    mainTitle: Optional[str] = None
+    subTitle: Optional[str] = None
     author: list[Author] = Field(default_factory=list)
-    bestAccessRight: BestAccessRight | None = None
+    bestAccessRight: Optional[BestAccessRight] = None
     contributors: list[str] = Field(default_factory=list)
     country: list[ResultCountry] = Field(default_factory=list)
     coverages: list[str] = Field(default_factory=list)
-    dateOfCollection: str | None = None
+    dateOfCollection: Optional[str] = None
     descriptions: list[str] = Field(default_factory=list)
-    embargoEndDate: str | None = None
-    indicators: Indicator | None = None
+    embargoEndDate: Optional[str] = None
+    indicators: Optional[Indicator] = None
     instance: list[Instance] = Field(default_factory=list)
-    language: Language | None = None
-    lastUpdateTimeStamp: int | None = None
+    language: Optional[Language] = None
+    lastUpdateTimeStamp: Optional[int] = None
     pid: list[ResultPid] = Field(default_factory=list)
-    publicationDate: str | None = None
-    publisher: str | None = None
+    publicationDate: Optional[str] = None
+    publisher: Optional[str] = None
     source: list[str] = Field(default_factory=list)
     formats: list[str] = Field(default_factory=list)
     subjects: list[Subject] = Field(default_factory=list)
-    isGreen: bool | None = None
-    openAccessColor: str | None = None
-    isInDiamondJournal: bool | None = None
-    publiclyFunded: bool | None = None
+    isGreen: Optional[bool] = None
+    openAccessColor: Optional[str] = None
+    isInDiamondJournal: Optional[bool] = None
+    publiclyFunded: Optional[bool] = None
 
-    # for publications
-    container: Container | None = None
+    # Optional nested objects for specific types
+    container: Optional[Container] = None
     # for datasets
-    size: str | None = None
-    version: str | None = None
+    size: Optional[str] = None
+    version: Optional[str] = None
     geolocations: list[GeoLocation] = Field(default_factory=list)
     # for software
     documentationUrls: list[str] = Field(default_factory=list)
-    codeRepositoryUrl: str | None = None
-    programmingLanguage: str | None = None
+    codeRepositoryUrl: Optional[str] = None
+    programmingLanguage: Optional[str] = None
     # for other research products
     contactPeople: list[str] = Field(default_factory=list)
     contactGroups: list[str] = Field(default_factory=list)
     tools: list[str] = Field(default_factory=list)
-
-    @model_validator(mode="before")
-    @classmethod
-    def replace_none_with_empty_classes(cls, data) -> dict | Any:
-        if not isinstance(data, dict):
-            return data
-
-        # Handle optional object fields
-        obj_fields = {
-            "bestAccessRight": BestAccessRight,
-            "indicators": Indicator,
-            "language": Language,
-            "container": Container,
-        }
-
-        data["publiclyFunded"] = bool(
-            data.get("publicyFunded") == "True"
-            or (
-                isinstance(data.get("publiclyFunded"), bool)
-                and data.get("publiclyFunded")
-            )
-        )
-
-        for field, classtype in obj_fields.items():
-            if data.get(field) is None:
-                data[field] = classtype()
-
-        obj_list_fields = {
-            "bestAccessRight": BestAccessRight,
-            "indicators": Indicator,
-            "language": Language,
-            "author": Author,
-            "country": ResultCountry,
-            "instance": Instance,
-            "pid": ResultPid,
-            "subjects": Subject,
-            "geolocation": GeoLocation,
-        }
-        for field, classtype in obj_list_fields.items():
-            if not data.get(field) or data.get(field) is None or data.get(field) == []:
-                data[field] = [classtype()]
-        return data
 
     model_config = dict(extra="allow")
 

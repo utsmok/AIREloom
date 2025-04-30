@@ -1,16 +1,19 @@
 """Base Pydantic models for API entities and responses."""
 
 from typing import Any, Generic, TypeVar
+import logging
 
 from pydantic import BaseModel,  HttpUrl, field_validator
 
 # Generic type for the entity contained within the response results
 EntityType = TypeVar("EntityType", bound="BaseEntity")
+logger = logging.getLogger(__name__)
 
 
 class Header(BaseModel):
     """Model for the standard API response header."""
 
+    # Note: status, code, message are typically expected, but optional for robustness.
     status: str | None = None
     code: str | None = None
     message: str | None = None
@@ -24,13 +27,19 @@ class Header(BaseModel):
     @field_validator("queryTime", "numFound", "pageSize", mode="before")
     @classmethod
     def coerce_str_to_int(cls, v: Any) -> int | None:
-        """Coerce string representations of numbers to integers."""
+        """Coerce string representations of numbers to integers, logging on failure."""
         if isinstance(v, str):
             try:
                 return int(v)
             except (ValueError, TypeError):
-                return None  # Or raise a validation error if preferred
-        return v
+                logger.warning(f"Could not coerce header value '{v}' to int.")
+                return None
+        # Allow integers through if they somehow bypass 'before' validation or API changes
+        if isinstance(v, int):
+             return v
+        # Handle other unexpected types if necessary
+        logger.warning(f"Unexpected type {type(v)} for header numeric value '{v}'.")
+        return None
 
     model_config = dict(extra="allow")
 
@@ -54,21 +63,23 @@ class ApiResponse(BaseModel, Generic[EntityType]):
     @field_validator("results", mode="before")
     @classmethod
     def handle_null_results(cls, v: Any) -> list[EntityType] | None:
-        """Ensure 'results' is a list or None, handling potential null values from API."""
+        """Ensure 'results' is a list or None.
+
+        Handles potential None or unexpected formats from the API.
+        Logs a warning and returns an empty list for unexpected types.
+        """
         if v is None:
             return None  # Explicitly return None if API sends null
-        if isinstance(v, dict) and "result" in v:
-            # API often wraps single result in {"result": {...}} or {"result": [{...}]}
-            single_result = v["result"]
-            if isinstance(single_result, list):
-                return single_result
-            if isinstance(single_result, dict):
-                return [single_result]  # Wrap single dict in a list
         if isinstance(v, list):
             return v  # Already a list
-        # If it's neither None, nor the expected dict wrapper, nor a list, handle appropriately
-        # Option: Return empty list, None, or raise ValueError depending on strictness desired
-        return []  # Default to empty list for unexpected formats
+
+        # Handle unexpected formats (e.g., dict wrappers like {'result': [...]})
+        # or other non-list types by logging and returning an empty list.
+        logger.warning(
+            f"Unexpected format for 'results' field: {type(v)}. "
+            f"Expected list or None, got {v!r}. Returning empty list."
+        )
+        return []
 
     model_config = dict(extra="allow")
 

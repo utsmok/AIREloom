@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from .base import ApiResponse, BaseEntity
+from .research_product import Container
 
 # Type literals for restricted values
 AccessRightType = Literal["open", "restricted", "closed"]
@@ -48,6 +49,8 @@ class DataSource(BaseEntity):
     certificates: str | None = None
     policies: list[str] | None = Field(default_factory=list)
     missionStatementUrl: str | None = None
+    # Added based on documentation/analysis
+    journal: Container | None = None
 
 
 # Define the specific response type for data sources

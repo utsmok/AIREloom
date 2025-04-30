@@ -490,7 +490,7 @@ class AireloomSession:
     ) -> AsyncIterator[ScholixRelationship]:
         """Iterates through all Scholexplorer relationship links matching the filters.
 
-        Handles pagination automatically based on 'totalPages'.
+        Handles pagination automatically based on 'total_pages'.
 
         Args:
             page_size: The number of results per page during iteration.
@@ -532,11 +532,11 @@ class AireloomSession:
 
                 # Update total_pages from the first response, then check if done
                 if current_page == 0:
-                    total_pages = response_data.totalPages
+                    total_pages = response_data.total_pages
                     logger.debug(f"Total pages reported by Scholix: {total_pages}")
 
                 # Check if we've processed the last page
-                if current_page >= total_pages - 1:
+                if current_page >= response_data.total_pages - 1:
                     logger.debug("Last page processed, stopping iteration.")
                     break
 

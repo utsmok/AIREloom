@@ -43,12 +43,6 @@ class APIError(AireloomError):
     # No additional methods needed currently
 
 
-class AuthenticationError(APIError):
-    """Represents an authentication error (401 Unauthorized or 403 Forbidden)."""
-
-    # No additional methods needed currently
-
-
 class NotFoundError(APIError):
     """Represents a resource not found error (404 Not Found)."""
 

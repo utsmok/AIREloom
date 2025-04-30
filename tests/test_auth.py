@@ -94,7 +94,7 @@ async def test_client_credentials_auth_init_missing_config():
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_fetch_token_success(httpx_mock: HTTPXMock):
-    """Test successful token fetching."""
+    """Test successful token fetching and authentication header addition."""
     httpx_mock.add_response(
         url=MOCK_TOKEN_URL,
         method="POST",
@@ -119,7 +119,7 @@ async def test_client_credentials_auth_fetch_token_success(httpx_mock: HTTPXMock
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_fetch_token_cached(httpx_mock: HTTPXMock):
-    """Test that token is fetched only once and cached."""
+    """Test that token is fetched only once and cached for subsequent calls."""
     httpx_mock.add_response(
         url=MOCK_TOKEN_URL,
         method="POST",
@@ -153,7 +153,7 @@ async def test_client_credentials_auth_fetch_token_cached(httpx_mock: HTTPXMock)
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_fetch_token_http_error(httpx_mock: HTTPXMock):
-    """Test token fetching failure due to HTTP error (e.g., 401 Unauthorized)."""
+    """Test AuthError is raised on HTTP error during token fetch."""
     httpx_mock.add_response(
         url=MOCK_TOKEN_URL,
         method="POST",
@@ -177,7 +177,7 @@ async def test_client_credentials_auth_fetch_token_http_error(httpx_mock: HTTPXM
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_fetch_token_network_error(httpx_mock: HTTPXMock):
-    """Test token fetching failure due to network error."""
+    """Test AuthError is raised on network error during token fetch."""
     httpx_mock.add_exception(httpx.ConnectError("Connection failed"))
 
     strategy = ClientCredentialsAuth(
@@ -200,7 +200,7 @@ async def test_client_credentials_auth_fetch_token_network_error(httpx_mock: HTT
 async def test_client_credentials_auth_fetch_token_missing_in_response(
     httpx_mock: HTTPXMock,
 ):
-    """Test token fetching failure when 'access_token' is missing in the response."""
+    """Test AuthError is raised when access_token is missing in token response."""
     httpx_mock.add_response(
         url=MOCK_TOKEN_URL,
         method="POST",
@@ -224,7 +224,7 @@ async def test_client_credentials_auth_fetch_token_missing_in_response(
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_close():
-    """Test that the close method closes the internal client."""
+    """Test that the close method closes the internal httpx client."""
     strategy = ClientCredentialsAuth(
         client_id=MOCK_CLIENT_ID,
         client_secret=MOCK_CLIENT_SECRET,
@@ -245,7 +245,7 @@ async def test_client_credentials_auth_close():
 
 @pytest.mark.asyncio
 async def test_client_credentials_auth_concurrent_fetch(httpx_mock: HTTPXMock):
-    """Test that concurrent authenticate calls only fetch the token once."""
+    """Test that concurrent authenticate calls only trigger one token fetch."""
     # Simplify mock: Just add the expected response directly.
     # The internal lock in ClientCredentialsAuth should handle concurrency.
     httpx_mock.add_response(
