@@ -7,15 +7,7 @@ This map contains some reference material: earlier/different implementations, do
     /entities
       *.md --> one file with details for each entity
     relationships.md --> info on relationships
-/openaire
-  .py files with an implementation of a python app to pull data from the OpenAIRE api.
-  Not completely implemented, and is built on top of generic code of a different project -- these files are not included here.
-  These imports cover almost all omitted code:
-    -DuckDBInstance for storing/retrieving data using duckdb (or sqlite)
-    - from ..base_classes import BaseEnricher, BaseQuery, BaseQuerySet: interfaces for enricher, query, and queryset (pure abstract classes, no code)
 
- 
-  folder /models has a python file for each entity type defining pydantic classes to parse/validate/serialize api results.
-  mappings.py contains constants, enums, and mappings to use for this api.
-  queries.py contains classes for queries to the api. This is the main controlling code.
-  enrich.py contains classes for enriching data using this api -- currently not implemented at all except placeholder.
+openaire_endpoints.md --> overview of available openaire endpoints
+openaire_entities.md --> all entity information in a single .md file
+pyalex_reference.md --> the readme for the pyalex package, which can be used to interact with the openalex api. It's a pretty decent package, so could possible serve as an an example for user experience

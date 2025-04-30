@@ -1,9 +1,8 @@
 """Base Pydantic models for API entities and responses."""
 
-from datetime import datetime
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel,  HttpUrl, field_validator
 
 # Generic type for the entity contained within the response results
 EntityType = TypeVar("EntityType", bound="BaseEntity")

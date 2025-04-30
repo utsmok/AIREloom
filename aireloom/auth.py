@@ -1,4 +1,3 @@
-# aireloom/auth.py
 import asyncio
 from typing import Protocol
 

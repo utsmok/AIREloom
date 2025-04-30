@@ -4,7 +4,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-# Import base classes
 from .base import ApiResponse, BaseEntity
 
 """
@@ -13,7 +12,6 @@ The models are designed to be used with the OpenAIRE Graph API and are structure
 the expected JSON response format for Research Products.
 """
 
-# Add type literals for restricted values
 OpenAccessRouteType = Literal["gold", "green", "hybrid", "bronze"]
 RefereedType = Literal["peerReviewed", "nonPeerReviewed", "UNKNOWN"]
 ResearchProductType = Literal["publication", "dataset", "software", "other"]
@@ -97,7 +95,6 @@ class ResultCountry(BaseModel):
     model_config = dict(extra="allow")
 
 
-# Updated CitationImpact to match documentation
 class CitationImpact(BaseModel):
     influence: float | None = None
     influenceClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
@@ -149,7 +146,6 @@ class Indicator(BaseModel):
     model_config = dict(extra="allow")
 
 
-# Updated AccessRight model to include openAccessRoute
 class AccessRight(BaseModel):
     code: str | None = None
     label: str | None = None
