@@ -6,8 +6,12 @@ __version__ = "0.1.0"  # Placeholder
 from .exceptions import (
     AireloomError,
     APIError,
-    AuthenticationError,
+    AuthError,
+    ConfigurationError,
+    NetworkError,
+    NotFoundError,
     RateLimitError,
+    TimeoutError,
     ValidationError,
 )
 
@@ -25,25 +29,30 @@ from .models import (
 
 # Import main session class
 from .session import AireloomSession
+# Import main client class
+from .client import AireloomClient
 
 __all__ = [
-    # Session
+    # Core Client/Session
+    "AireloomClient",
     "AireloomSession",
-    # Exceptions (Sorted)
+    # Core Exceptions
     "AireloomError",
     "APIError",
-    "AuthenticationError",
+    "AuthError",
+    "ConfigurationError",
+    "NetworkError",
+    "NotFoundError",
     "RateLimitError",
+    "TimeoutError",
     "ValidationError",
-    # Models (Sorted)
+    # Key Models (consider reducing if needed)
     "ApiResponse",
     "BaseEntity",
-    "Community",
     "DataSource",
     "Header",
     "Organization",
     "Project",
-    "Relationship",
     "ResearchProduct",
     "ScholixRelationship",
 ]

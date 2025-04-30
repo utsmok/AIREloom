@@ -1,4 +1,3 @@
-# aireloom/client.py
 import ssl
 from collections.abc import Mapping
 from typing import Any, Self
@@ -8,7 +7,6 @@ import httpx
 import tenacity
 from tenacity import (
     AsyncRetrying,
-    RetryCallState,
     RetryError,
     stop_after_attempt,
     wait_exponential,
@@ -31,6 +29,7 @@ from .exceptions import (
     NetworkError,
     RateLimitError,
     TimeoutError,
+    # Add ConfigurationError if needed, though not directly used here
 )
 from .log_config import logger
 from .types import RequestData
@@ -79,7 +78,6 @@ class AireloomClient:
         self._base_url = base_url.rstrip("/")
         self._retryable_status_codes = retryable_status_codes
 
-        # Determine Authentication Strategy
         self._auth_strategy: AuthStrategy
         if auth_strategy:
             logger.info("Using explicitly provided authentication strategy.")
@@ -105,7 +103,6 @@ class AireloomClient:
                 logger.info("No authentication credentials found, using NoAuth.")
                 self._auth_strategy = NoAuth()
 
-        # Initialize HTTP Client
         self._should_close_client = http_client is None  # Close only if we created it
         self._http_client = http_client or self._create_default_http_client()
 
@@ -114,12 +111,10 @@ class AireloomClient:
     def _create_default_http_client(self) -> httpx.AsyncClient:
         """Creates a default httpx.AsyncClient with configured settings."""
         try:
-            # Use certifi for SSL certificates if available
             ssl_context = ssl.create_default_context(cafile=certifi.where())
             verify_ssl = ssl_context
             logger.debug("Using certifi SSL context.")
         except Exception:
-            # Fallback to default httpx verification
             verify_ssl = True
             logger.warning(
                 "certifi not found or failed to load. Using default SSL verification."
@@ -157,7 +152,6 @@ class AireloomClient:
 
             # Raise APIError for non-success status codes *after* logging
             if response.status_code >= 400:
-                # Raise specific error for rate limit
                 if response.status_code == 429:
                     raise RateLimitError("API rate limit exceeded.", response=response)
                 raise APIError(
@@ -167,44 +161,61 @@ class AireloomClient:
             return response
 
         except httpx.HTTPStatusError as e:
-            # Handle 4xx/5xx errors after successful connection
             logger.error(
                 f"Request failed with status {e.response.status_code}: {e.request.url}"
             )
-            # Raise specific error for rate limiting
             if e.response.status_code == 429:
                 raise RateLimitError("API rate limit exceeded.", response=e.response, request=e.request) from e
-            # General API error for others
             raise APIError(
                 f"API request failed with status {e.response.status_code}",
                 response=e.response,
                 request=e.request,
             ) from e
-        except Exception as e:  # Catch unexpected errors
-            logger.exception(f"Unexpected error during request to {request.url}: {e}")
-            raise AireloomError(f"An unexpected error occurred: {e}") from e
+        except httpx.TimeoutException as e:
+            logger.error(f"Request timed out: {request.url}")
+            raise TimeoutError("Request timed out", request=request) from e
+        except httpx.NetworkError as e:
+            logger.error(f"Network error occurred: {request.url}")
+            raise NetworkError("Network error occurred", request=request) from e
+        except Exception as e:
+            logger.exception(f"Unexpected error during single request execution to {request.url}: {e}")
+            if isinstance(e, AireloomError):
+                raise e
+            raise AireloomError(f"An unexpected error occurred during request execution: {e}", request=request) from e
 
     def _should_retry_request(self, retry_state: tenacity.RetryCallState) -> bool:
         """Predicate for tenacity: should we retry this request?"""
         outcome = retry_state.outcome
         if not outcome: # Should not happen with reraise=True, but defensive check
-             return False
+            return False
 
         if outcome.failed:
             exc = outcome.exception()
-            if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError)):
-                url = getattr(getattr(exc, 'request', None), 'url', 'N/A')
+            url = "N/A"
+            request = getattr(exc, 'request', None)
+            if request:
+                url = getattr(request, 'url', 'N/A')
+
+            if isinstance(exc, (TimeoutError, NetworkError, RateLimitError)):
                 logger.warning(f"Retrying due to {type(exc).__name__} for {url}")
-                return True  # Retry on timeout or network errors
-            if isinstance(exc, httpx.HTTPStatusError):
+                return True
+            if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError)):
+                logger.warning(f"Retrying due to {type(exc).__name__} (httpx) for {url}")
+                return True
+
+            status_code: int | None = None
+            if isinstance(exc, APIError):
+                if exc.response is not None:
+                    status_code = exc.response.status_code
+            elif isinstance(exc, httpx.HTTPStatusError):
                 status_code = exc.response.status_code
-                # Retry on 5xx server errors or 429 Rate Limit
-                if status_code >= 500 or status_code == 429:
-                    logger.warning(
-                        f"Retrying due to status code {status_code} for {exc.request.url}"
-                    )
-                    return True
-        # Do not retry otherwise (successful response or non-retryable error like 404)
+
+            if status_code is not None and status_code in self._retryable_status_codes:
+                logger.warning(
+                    f"Retrying due to status code {status_code} for {url}"
+                )
+                return True
+
         return False
 
     async def _request_with_retry(
@@ -226,23 +237,21 @@ class AireloomClient:
             params=params,
             json_data=json_data,
             data=data,
-            # Headers are added during _execute_single_request after auth
         )
 
-        auth_header: dict[str, str] | None = None
-        if self._auth_strategy:
-            try:
-                auth_header = await self._auth_strategy.async_authenticate(request_data)
-            except AuthError as e:
-                logger.error(f"Authentication failed: {e}")
-                # Wrap AuthError for consistent API
-                raise AireloomError(f"Authentication failed: {e}") from e
-
-        headers = {"User-Agent": self._settings.user_agent}
-        if auth_header:
-            headers.update(auth_header)
-
-        request_data.headers = headers
+        # Apply authentication *before* retry loop setup, fail fast on auth issues
+        try:
+            # Build a temporary request just for authentication purposes
+            temp_request = request_data.build_request()
+            await self._auth_strategy.async_authenticate(temp_request)
+            # Update request_data headers if auth added/modified them
+            request_data.headers = temp_request.headers
+        except AuthError as e:
+            logger.error(f"Authentication failed before request: {e}")
+            raise e
+        except Exception as e:
+            logger.exception(f"Unexpected error during pre-request authentication: {e}")
+            raise AireloomError(f"Unexpected authentication error: {e}") from e
 
         # Prepare retry strategy
         retry_strategy = AsyncRetrying(
@@ -251,52 +260,65 @@ class AireloomClient:
                 multiplier=self._settings.backoff_factor, min=0.1, max=10
             ),
             retry=self._should_retry_request,
-            reraise=True,
+            reraise=True, # Reraise the last exception if all retries fail
         )
 
         try:
-            # Call the function with retry logic
             response = await retry_strategy(self._execute_single_request, request_data)
             return response
 
-        # Handle exceptions *after* retries are exhausted or if a non-retryable error occurs
+        except AuthError as e:
+            logger.error(f"Authentication error during request execution: {e}")
+            raise e
+        except TimeoutError as e:
+            logger.warning(f"Request timed out after retries: {e.request.url if e.request else 'N/A'}")
+            raise e
+        except NetworkError as e:
+            logger.warning(f"Network error after retries: {e.request.url if e.request else 'N/A'}")
+            raise e
+
+        except RateLimitError as e:
+            logger.warning(f"Rate limit error after retries: {e.request.url if e.request else 'N/A'}")
+            raise e
+
+        except APIError as e:
+            logger.warning(
+                f"API error {e.response.status_code if e.response else 'N/A'} after retries: {e.request.url if e.request else 'N/A'}"
+            )
+            raise e
+
         except httpx.TimeoutException as e:
-            logger.warning(f"Request timed out after retries: {e}")
-            raise TimeoutError("Request timed out", request=getattr(e, "request", None)) from e
+            logger.warning(f"Request timed out after retries (httpx): {getattr(e.request, 'url', 'N/A')}")
+            raise TimeoutError("Request timed out", request=e.request) from e
 
         except httpx.NetworkError as e:
-            logger.warning(f"Network error after retries: {e}")
-            raise NetworkError("Connection failed", request=getattr(e, "request", None)) from e
+            logger.warning(f"Network error after retries (httpx): {getattr(e.request, 'url', 'N/A')}")
+            raise NetworkError("Connection failed", request=e.request) from e
 
         except httpx.HTTPStatusError as e:
             logger.warning(
-                f"HTTP error after retries: Status {e.response.status_code}, Response: {e.response.text[:100]}"
+                f"HTTP error after retries (httpx): Status {e.response.status_code}, URL: {e.request.url}"
             )
+            #
             if e.response.status_code == 429:
-                raise RateLimitError(
-                    "API rate limit exceeded.",
-                    response=e.response,
-                    request=e.request,
-                ) from e
+                raise RateLimitError("API rate limit exceeded.", response=e.response, request=e.request) from e
             else:
-                # General API error for other HTTP issues
-                raise APIError(
-                    f"API request failed with status {e.response.status_code}",
-                    response=e.response,
-                    request=e.request,
-                ) from e
+                raise APIError(f"API request failed with status {e.response.status_code}", response=e.response, request=e.request) from e
+
+        except RetryError as e:
+            logger.error(f"Request failed after multiple retries: {e}")
+            raise AireloomError("Request failed after multiple retries") from e
 
         except AireloomError as e:
             raise e # Re-raise without further wrapping
 
         except Exception as e:
-            # Catch truly unexpected errors outside the retry/http logic
             logger.exception(f"Unexpected error during request processing: {e}")
-            # Attempt to get request info if available, otherwise None
             request_info = getattr(e, "request", None)
-            # Ensure it's actually an httpx.Request or None
             if not isinstance(request_info, (httpx.Request, type(None))):
-                request_info = None # Default to None if it's something else unexpected
+                request_info = None
+            if isinstance(e, AireloomError):
+                raise e
             raise AireloomError(f"An unexpected error occurred: {e}", request=request_info) from e
 
     async def request(
@@ -327,10 +349,11 @@ class AireloomClient:
 
         Raises:
             APIError: If the API returns an error status code (4xx, 5xx) after retries.
+            RateLimitError: If the API returns a 429 status code after retries.
             TimeoutError: If the request times out after retries.
             NetworkError: If a network-level error occurs.
-            AireloomError: For other unexpected client-side errors.
             AuthError: If authentication fails.
+            AireloomError: For other unexpected client-side errors.
             ValidationError: If response parsing/validation fails (when using expected_model).
         """
         response = await self._request_with_retry(

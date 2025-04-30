@@ -44,7 +44,7 @@ __all__ = [
     "ResearchProductResponse",
     "ScholixCreator",
     "ScholixEntity",
-    "ScholixEntityType",
+    # "ScholixEntityType", # Removed as per user request
     "ScholixIdentifier",
     "ScholixLinkProvider",
     "ScholixPublisher",

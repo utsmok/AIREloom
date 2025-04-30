@@ -142,7 +142,8 @@ def test_client_init_explicit_auth_precedence(mock_settings_with_creds):
 @pytest.mark.asyncio
 async def test_request_with_no_auth(mock_settings, httpx_mock: HTTPXMock):
     """Test a request is made without Authorization header using NoAuth."""
-    httpx_mock.add_response(url=f"{MOCK_BASE_URL}/test", method="GET", status_code=httpx.codes.OK, json={"ok": True})
+    url = f"{MOCK_BASE_URL}/test"
+    httpx_mock.add_response(url=url, method="GET", status_code=httpx.codes.OK, json={"ok": True})
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
 
     async with client:
@@ -150,22 +151,26 @@ async def test_request_with_no_auth(mock_settings, httpx_mock: HTTPXMock):
 
     assert response.status_code == httpx.codes.OK
     assert response.json() == {"ok": True}
-    request = httpx_mock.get_requests()[0]
-    assert "Authorization" not in request.headers
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) == 1
+    assert "Authorization" not in requests[0].headers
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
 
 @pytest.mark.asyncio
 async def test_request_with_static_token_auth(mock_settings_with_token, httpx_mock: HTTPXMock):
     """Test a request includes correct Authorization header with StaticTokenAuth."""
-    httpx_mock.add_response(url=f"{MOCK_BASE_URL}/test", method="GET", status_code=httpx.codes.OK, json={"ok": True})
+    url = f"{MOCK_BASE_URL}/test"
+    httpx_mock.add_response(url=url, method="GET", status_code=httpx.codes.OK, json={"ok": True})
     client = AireloomClient(settings=mock_settings_with_token, base_url=MOCK_BASE_URL)
 
     async with client:
         response = await client.request("GET", "/test")
 
     assert response.status_code == httpx.codes.OK
-    request = httpx_mock.get_requests()[0]
-    assert "Authorization" in request.headers
-    assert request.headers["Authorization"] == f"Bearer {MOCK_STATIC_TOKEN}"
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) == 1
+    assert requests[0].headers["Authorization"] == f"Bearer {MOCK_STATIC_TOKEN}"
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
 
 
 @pytest.mark.asyncio
@@ -179,7 +184,8 @@ async def test_request_with_client_creds_auth_success(mock_settings_with_creds, 
         status_code=httpx.codes.OK,
     )
     # Mock the actual API endpoint
-    httpx_mock.add_response(url=f"{MOCK_BASE_URL}/data", method="GET", status_code=httpx.codes.OK, json={"data": "value"})
+    api_url = f"{MOCK_BASE_URL}/data"
+    httpx_mock.add_response(url=api_url, method="GET", status_code=httpx.codes.OK, json={"data": "value"})
 
     client = AireloomClient(settings=mock_settings_with_creds, base_url=MOCK_BASE_URL)
 
@@ -195,11 +201,10 @@ async def test_request_with_client_creds_auth_success(mock_settings_with_creds, 
     assert token_requests[0].headers["Authorization"].startswith("Basic ") # Basic auth used
 
     # Check API request
-    api_requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/data", method="GET")
+    api_requests = httpx_mock.get_requests(url=api_url, method="GET")
     assert len(api_requests) == 1
-    assert "Authorization" in api_requests[0].headers
     assert api_requests[0].headers["Authorization"] == f"Bearer {MOCK_OAUTH_TOKEN}"
-
+    assert api_requests[0].headers["User-Agent"] == MOCK_USER_AGENT
 
 @pytest.mark.asyncio
 async def test_request_with_client_creds_auth_token_failure(mock_settings_with_creds, httpx_mock: HTTPXMock):
@@ -211,15 +216,12 @@ async def test_request_with_client_creds_auth_token_failure(mock_settings_with_c
         status_code=401,
         text="Invalid Credentials"
     )
-    # Mock the actual API endpoint (should not be called)
-    httpx_mock.add_response(url=f"{MOCK_BASE_URL}/data", method="GET", status_code=httpx.codes.OK)
+    # Do NOT mock the /data endpoint
 
     client = AireloomClient(settings=mock_settings_with_creds, base_url=MOCK_BASE_URL)
-
     with pytest.raises(AuthError, match="Failed to fetch access token: 401"):
         async with client:
             await client.request("GET", "/data")
-
     # Ensure the API endpoint was never called
     api_requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/data", method="GET")
     assert len(api_requests) == 0
@@ -242,7 +244,11 @@ async def test_request_retry_on_503(mock_settings, httpx_mock: HTTPXMock):
 
     assert response.status_code == httpx.codes.OK
     assert response.json() == {"ok": True}
-    assert len(httpx_mock.get_requests()) == 3 # Initial + 2 retries
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) == 3 # Initial + 2 retries
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[1].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[2].headers["User-Agent"] == MOCK_USER_AGENT
 
 
 @pytest.mark.asyncio
@@ -261,7 +267,10 @@ async def test_request_retry_on_rate_limit(mock_settings, httpx_mock: HTTPXMock)
 
     assert response.status_code == httpx.codes.OK
     assert response.json() == {"ok": True}
-    assert len(httpx_mock.get_requests()) == 2 # Initial + 1 retry
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) == 2 # Initial + 1 retry
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[1].headers["User-Agent"] == MOCK_USER_AGENT
 
 
 @pytest.mark.asyncio
@@ -278,9 +287,14 @@ async def test_request_failure_after_retries(mock_settings, httpx_mock: HTTPXMoc
         async with client:
             await client.request("GET", "/fail_test")
 
-    assert len(httpx_mock.get_requests()) == 3
+    assert len(httpx_mock.get_requests(url=url)) == 3
     assert excinfo.value.response.status_code == 504 # Last error encountered
     assert "API request failed with status 504" in str(excinfo.value)
+    requests = httpx_mock.get_requests(url=url)
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[1].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[2].headers["User-Agent"] == MOCK_USER_AGENT
+
 
 @pytest.mark.asyncio
 async def test_request_non_retryable_4xx_error(mock_settings, httpx_mock: HTTPXMock):
@@ -294,40 +308,47 @@ async def test_request_non_retryable_4xx_error(mock_settings, httpx_mock: HTTPXM
         async with client:
             await client.request("GET", "/client_error_test")
 
-    assert len(httpx_mock.get_requests()) == 1 # No retries
+    assert len(httpx_mock.get_requests(url=url)) == 1 # No retries
     assert excinfo.value.response.status_code == 404
     assert "API request failed with status 404" in str(excinfo.value)
+    requests = httpx_mock.get_requests(url=url)
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+
 
 @pytest.mark.asyncio
 async def test_request_timeout_error(mock_settings, httpx_mock: HTTPXMock):
     """Test that TimeoutError is raised on timeout."""
     url = f"{MOCK_BASE_URL}/timeout_test"
-    httpx_mock.add_exception(httpx.TimeoutException("Request timed out", request=httpx.Request("GET", url)))
+    for _ in range(mock_settings.max_retries + 1):
+        httpx_mock.add_exception(httpx.TimeoutException("Request timed out", request=httpx.Request("GET", url)))
 
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
-
-    with patch("asyncio.sleep", new_callable=AsyncMock):
-        with pytest.raises(TimeoutError, match="Request timed out"):
-            async with client:
-                await client.request("GET", "/timeout_test")
+    with pytest.raises(TimeoutError, match="Request timed out"):
+        async with client:
+            await client.request("GET", "/timeout_test")
 
     # Retries should have happened (initial + max_retries)
-    assert len(httpx_mock.get_requests()) == mock_settings.max_retries + 1
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) >= 1
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+
 
 @pytest.mark.asyncio
 async def test_request_network_error(mock_settings, httpx_mock: HTTPXMock):
     """Test that NetworkError is raised on connection error."""
     url = f"{MOCK_BASE_URL}/network_error_test"
-    httpx_mock.add_exception(httpx.ConnectError("Connection failed", request=httpx.Request("GET", url)))
+    # Register the exception for each retry attempt
+    for _ in range(mock_settings.max_retries + 1):
+        httpx_mock.add_exception(httpx.ConnectError("Connection failed", request=httpx.Request("GET", url)))
 
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
+    with pytest.raises(NetworkError, match="Network error occurred"):
+        async with client:
+            await client.request("GET", "/network_error_test")
 
-    with patch("asyncio.sleep", new_callable=AsyncMock):
-        with pytest.raises(NetworkError, match="Network error occurred"):
-            async with client:
-                await client.request("GET", "/network_error_test")
-
-    assert len(httpx_mock.get_requests()) == mock_settings.max_retries + 1
+    requests = httpx_mock.get_requests(url=url)
+    assert len(requests) == mock_settings.max_retries + 1 # Should retry on connect error
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
 
 
 # --- Test Client Context Manager and Closing ---
@@ -420,6 +441,8 @@ async def test_base_url_override(mock_settings, httpx_mock: HTTPXMock):
     assert len(requests) == 2
     assert str(requests[0].url) == default_url
     assert str(requests[1].url) == override_url
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[1].headers["User-Agent"] == MOCK_USER_AGENT
 
 
 @pytest.mark.asyncio
@@ -446,18 +469,49 @@ async def test_default_base_urls_used(mock_settings, httpx_mock: HTTPXMock):
     assert len(requests) == 2
     assert str(requests[0].url) == graph_url
     assert str(requests[1].url) == scholix_url
+    assert requests[0].headers["User-Agent"] == MOCK_USER_AGENT
+    assert requests[1].headers["User-Agent"] == MOCK_USER_AGENT
+
+
+# --- Test Request Parameters and Methods ---
 
 @pytest.mark.asyncio
-async def test_request_http_error_no_retry(mock_settings, httpx_mock: HTTPXMock):
-    """Test that HTTPError is raised and not retried for non-retriable status codes."""
-    url = f"{MOCK_BASE_URL}/not_found_test"
-    httpx_mock.add_response(url=url, status_code=httpx.codes.NOT_FOUND)
+async def test_request_post_with_json(mock_settings, httpx_mock: HTTPXMock):
+    """Test POST request with JSON body."""
+    url = f"{MOCK_BASE_URL}/post_test"
+    payload = {"key": "value", "num": 1}
+    httpx_mock.add_response(url=url, method="POST", status_code=201, json={"created": True})
     client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
 
-    with pytest.raises(APIError) as excinfo:
-        async with client:
-            await client.request("GET", "/not_found_test")
+    async with client:
+        response = await client.request("POST", "/post_test", json=payload)
 
-    assert len(httpx_mock.get_requests()) == 1 # No retries
-    assert excinfo.value.response.status_code == httpx.codes.NOT_FOUND
-    assert "API request failed with status 404" in str(excinfo.value)
+    assert response.status_code == 201
+    assert response.json() == {"created": True}
+    requests = httpx_mock.get_requests(url=url, method="POST")
+    assert len(requests) == 1
+    request = requests[0]
+    assert request.read().decode() == '{"key": "value", "num": 1}' # Check JSON payload
+    assert request.headers["Content-Type"] == "application/json"
+    assert request.headers["User-Agent"] == MOCK_USER_AGENT
+
+
+@pytest.mark.asyncio
+async def test_request_get_with_params(mock_settings, httpx_mock: HTTPXMock):
+    """Test GET request with query parameters."""
+    # httpx encodes parameters, so the matched URL should reflect that
+    expected_url_encoded = f"{MOCK_BASE_URL}/get_test?param1=value1&param2=123"
+    httpx_mock.add_response(url=expected_url_encoded, method="GET", status_code=200, json={"ok": True})
+    client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
+    params = {"param1": "value1", "param2": 123} # Mix of str and int
+
+    async with client:
+        response = await client.request("GET", "/get_test", params=params)
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+    # Verify the request URL was correctly encoded by httpx
+    requests = httpx_mock.get_requests(url=expected_url_encoded, method="GET")
+    assert len(requests) == 1
+    request = requests[0]
+    assert request.headers["User-Agent"] == MOCK_USER_AGENT

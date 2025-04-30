@@ -15,10 +15,7 @@ class RequestData(BaseModel):
     json_data: Any | None = None
     data: Mapping[str, Any] | None = None
     headers: dict[str, str] = Field(default_factory=dict)
-
-    class Config:
-        # Allow arbitrary types like Mapping which Pydantic might not handle by default
-        arbitrary_types_allowed = True
+    model_config = dict(extra="allow")
 
     def build_request(self) -> httpx.Request:
         """Builds an httpx.Request object from the stored data."""

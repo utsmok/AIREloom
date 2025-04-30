@@ -1,15 +1,12 @@
 """Main user-facing session class for interacting with the OpenAIRE Graph API and Scholexplorer."""
 
-# Standard Library
 import http
 from collections.abc import AsyncIterator
 from typing import Any, TypeVar
 
-# Third Party
 import httpx
 from loguru import logger
 
-# Local
 from .auth import AuthStrategy, NoAuth
 from .client import AireloomClient
 from .constants import (
@@ -42,14 +39,11 @@ from .models import (
     ScholixResponse,
 )
 
-# Configure logging
 configure_logging()
 
-# Type variable for standard Graph API entity models
 GraphApiEntityType = TypeVar(
     "GraphApiEntityType", ResearchProduct, Organization, DataSource, Project
 )
-# Type variable for standard Graph API response models
 GraphApiResponseType = TypeVar("GraphApiResponseType", bound=ApiResponse)
 
 
@@ -66,33 +60,23 @@ class AireloomSession:
         """Initializes the Aireloom session.
 
         Args:
-            auth_strategy: Authentication strategy (e.g., NoAuth(), TokenAuth(...)).
-                           Defaults to NoAuth.
+            auth_strategy:  Authentication strategy (e.g., NoAuth(), TokenAuth(...)).
+                            Defaults to NoAuth.
             timeout: Default request timeout in seconds.
             api_base_url: Base URL for the OpenAIRE Graph API.
             scholix_base_url: Base URL for the Scholexplorer API.
         """
         self._auth_strategy = auth_strategy or NoAuth()
-        # Note: Session-level overrides are less common now, client uses settings directly
-        # self._timeout = timeout if timeout is not None else settings.request_timeout
-        # self._retries = retries if retries is not None else settings.max_retries
-        # Base URLs default to constants, can be overridden by user args
         self._api_base_url = api_base_url or OPENAIRE_GRAPH_API_BASE_URL
         self._scholix_base_url = scholix_base_url or OPENAIRE_SCHOLIX_API_BASE_URL
 
-        # Initialize API Client
-        # Note: Client requires authenticator, but AuthStrategy has the auth logic now.
-        # We'll pass the strategy, and the client will use its .authenticate method.
         self._api_client = AireloomClient(
             auth_strategy=self._auth_strategy,
             base_url=self._api_base_url,
-            # Timeout & Retries are now primarily handled by the client using its settings
         )
         logger.info(f"AireloomSession initialized for API: {self._api_base_url}")
         logger.info(f"Scholexplorer configured for: {self._scholix_base_url}")
 
-        # Mapping from entity path to Pydantic models (for Graph API and validation)
-        # Type hint updated for clarity
         self._model_map: dict[
             str, dict[str, type[BaseEntity | ApiResponse | ScholixResponse]]
         ] = {
@@ -112,7 +96,6 @@ class AireloomSession:
     def _validate_filters(self, entity_path: str, filters: dict[str, Any]) -> None:
         """Validates filter keys and attempts type conversion based on endpoint definitions."""
         if entity_path not in ENDPOINT_DEFINITIONS:
-            # This check might be redundant if called only from methods for known paths
             raise ValueError(f"Unknown entity path definition: {entity_path}")
 
         valid_filters = ENDPOINT_DEFINITIONS[entity_path].get("filters", {})
@@ -122,7 +105,7 @@ class AireloomSession:
             )
             return
         if not valid_filters:
-            return  # No filters defined, nothing to validate
+            return
 
         for key, value in filters.items():
             if key not in valid_filters:
@@ -130,7 +113,6 @@ class AireloomSession:
                     f"Invalid filter key for {entity_path}: '{key}'. Valid keys: {list(valid_filters)}"
                 )
 
-            # Attempt type validation and conversion
             try:
                 filters[key] = self._validate_and_convert_filter_value(
                     key, value, valid_filters[key].get("type", "any")
@@ -154,12 +136,12 @@ class AireloomSession:
         }
 
         if expected_type_str == "any" or expected_type_str not in type_map:
-            return value  # No validation/conversion needed or type not recognized
+            return value
 
         target_type = type_map[expected_type_str]
 
         if isinstance(value, target_type):
-            return value  # Type is already correct
+            return value
 
         logger.warning(
             f"Filter '{key}' expects {expected_type_str}, got {current_type.__name__}. Attempting conversion."
@@ -240,7 +222,6 @@ class AireloomSession:
             response = await self._api_client.request("GET", entity_path, params=params)
             return response_model.model_validate(response.json())
         except Exception as e:
-            # Use | for isinstance check
             if isinstance(e, AireloomError | ValidationError):
                 raise e
             raise AireloomError(f"Failed to search {entity_path}: {e}") from e
@@ -274,19 +255,18 @@ class AireloomSession:
                 for result in api_response.results:
                     yield result
 
-                next_cursor = api_response.header.next_cursor
+                next_cursor = api_response.header.nextCursor
                 if not next_cursor:
                     break
 
                 current_params["cursor"] = next_cursor
 
             except Exception as e:
-                # Use | for isinstance check
                 if isinstance(e, AireloomError | ValidationError):
                     raise e
                 logger.exception(
                     f"Failed during iteration of {entity_path}"
-                )  # Log exception details
+                )
                 raise AireloomError(
                     f"Failed during iteration of {entity_path}: {e}"
                 ) from e
@@ -320,8 +300,8 @@ class AireloomSession:
         self._validate_filters(RESEARCH_PRODUCTS, filters)
         self._validate_sort(RESEARCH_PRODUCTS, sort_by)
         params = {
-            "page": page, 
-            "pageSize": page_size, 
+            "page": page,
+            "pageSize": page_size,
             "sortBy": sort_by,
             **filters,
         }
@@ -352,8 +332,8 @@ class AireloomSession:
         self._validate_sort(RESEARCH_PRODUCTS, sort_by)
         # Build params *without* page, ensure size is present
         params = {
-            "page": 1, 
-            "pageSize": page_size, 
+            "page": 1,
+            "pageSize": page_size,
             "sortBy": sort_by,
             **filters,
         }
@@ -495,8 +475,8 @@ class AireloomSession:
 
         # Scholexplorer uses 0-based page, size is 'rows'
         params = {
-            "page": page, 
-            "rows": page_size,  
+            "page": page,
+            "rows": page_size,
             **mutable_filters,
         }
         params = {k: v for k, v in params.items() if v is not None}
@@ -523,7 +503,7 @@ class AireloomSession:
     ) -> AsyncIterator[ScholixRelationship]:
         """Iterates through all Scholexplorer relationship links matching the filters.
 
-        Handles pagination automatically based on 'totalPages'.
+        Handles pagination automatically based on 'total_pages'.
 
         Args:
             page_size: The number of results per page during iteration.
@@ -541,17 +521,19 @@ class AireloomSession:
         self._validate_filters(SCHOLIX, mutable_filters)
 
         current_page = 0
-        total_pages = 1
+        total_pages = 1 # Assume at least one page initially
 
         while current_page < total_pages:
             logger.debug(
                 f"Iterating Scholix page {current_page + 1}/{total_pages if total_pages > 1 else '?'}"
             )
             try:
+                # Call search_scholix_links, passing page_size explicitly,
+                # and validated filters via **mutable_filters.
                 response_data = await self.search_scholix_links(
                     page=current_page,
-                    rows=page_size,
-                    **mutable_filters,
+                    page_size=page_size, # Pass page_size directly
+                    **mutable_filters, # Pass validated filters
                 )
 
                 if not response_data.result:
@@ -563,9 +545,11 @@ class AireloomSession:
 
                 # Update total_pages from the first response, then check if done
                 if current_page == 0:
-                    total_pages = response_data.totalPages
+                    total_pages = response_data.total_pages
                     logger.debug(f"Total pages reported by Scholix: {total_pages}")
-                if current_page >= total_pages - 1:
+
+                # Check if we've processed the last page
+                if current_page >= response_data.total_pages - 1:
                     logger.debug("Last page processed, stopping iteration.")
                     break
 

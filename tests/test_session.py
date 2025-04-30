@@ -12,7 +12,10 @@ from aireloom.auth import (  # Import specific auth strategies for checking
     NoAuth,
     StaticTokenAuth,
 )
-from aireloom.constants import OPENAIRE_SCHOLIX_API_BASE_URL, OPENAIRE_GRAPH_API_BASE_URL
+from aireloom.constants import (
+    OPENAIRE_GRAPH_API_BASE_URL,
+    OPENAIRE_SCHOLIX_API_BASE_URL,
+)
 from aireloom.exceptions import AireloomError, ValidationError
 
 # Load .env file for local testing (e.g., containing AIRELOOM_OPENAIRE_API_TOKEN)
@@ -20,7 +23,7 @@ load_dotenv()
 
 # --- Constants ---
 # Keep existing constants
-KNOWN_PRODUCT_ID = "oai:zenodo.org:7668094"
+KNOWN_PRODUCT_ID = "doi_dedup___::2b3cb7130c506d1c3a05e9160b2c4108"
 KNOWN_PRODUCT_TITLE_FRAGMENT = (
     "OpenAIRE Graph"  # A fragment likely present in the title
 )
@@ -35,9 +38,7 @@ MOCK_SCHOLIX_RESPONSE = {
     "totalPages": 1,
     "result": [
         {
-            "LinkProvider": [
-                {"Name": "Example Provider", "AgentId": "example"}
-            ],
+            "LinkProvider": [{"Name": "Example Provider", "AgentId": "example"}],
             "LinkPublicationDate": "2023-01-15T12:00:00",
             "RelationshipType": {
                 "Name": "References",  # Correct casing
@@ -45,25 +46,28 @@ MOCK_SCHOLIX_RESPONSE = {
                 "SubTypeSchema": "DataCite",
             },
             "Source": {
-                "Identifier": [
-                    {"ID": "10.5281/zenodo.7668094", "IDScheme": "doi"}
-                ],
+                "Identifier": [{"ID": "10.5281/zenodo.7668094", "IDScheme": "doi"}],
                 "Type": "publication",  # Use literal string
                 "Title": "Source Title",
                 "Creator": [{"Name": "Source Author"}],
                 "PublicationDate": "2023",
                 "Publisher": "Source Publisher",
+                "Name": "References",  # Use valid literal from ScholixRelationshipNameValue
+                "SubType": "Dataset",
+                # SubTypeSchema is optional and needs to be a URL or None
+                "SubTypeSchema": "http://example.com/schema/references",
             },
-            "Target": {
-                "Identifier": [
-                    {"ID": "10.1234/target.dataset.1", "IDScheme": "doi"}
-                ],
-                "Type": "dataset",  # Use literal string
-                "Title": "Target Title",
-                "Creator": [{"Name": "Target Author"}],
-                "PublicationDate": "2022",
-                "Publisher": "Target Publisher",
+            "Source": {  # Add Source (Required)
+                "Identifier": [{"ID": KNOWN_DOI_WITH_LINKS, "IDScheme": "doi"}],
+                "Type": "publication",  # Use valid literal from ScholixEntityTypeName
             },
+            "Target": {  # Add Target (Required)
+                "Identifier": [{"ID": "10.1234/target.dataset", "IDScheme": "doi"}],
+                "Type": "dataset",  # Use valid literal from ScholixEntityTypeName
+            },
+            "LinkPublicationDate": "2023-01-15T12:00:00Z",  # Added field, use ISO format with Z
+            "LicenseURL": None,  # Optional
+            "HarvestDate": None,  # Optional
         }
     ],
 }
@@ -118,7 +122,7 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
 
     Ensures a valid response is parsed correctly.
     """
-    product_id = "oai:zenodo.org:7668094" # Use variable for clarity
+    product_id = "oai:zenodo.org:7668094"  # Use variable for clarity
     mock_product_response = {
         "id": product_id,
         "titles": [{"value": "Mocked Test Product Title"}],
@@ -137,8 +141,8 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
         try:
             product = await session.get_research_product(product_id)
             assert product is not None
-            assert product.id == product_id
-            assert product.titles[0].value == "Mocked Test Product Title"
+            assert product.id == KNOWN_PRODUCT_ID
+            assert isinstance(product.mainTitle, str)  # Fix: use mainTitle
         except AireloomError as e:
             pytest.fail(f"Fetching known product failed: {e}")
 
@@ -147,9 +151,7 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
 async def test_get_research_product_not_found():
     """Test fetching a non-existent research product."""
     async with AireloomSession() as session:
-        with pytest.raises(
-            AireloomError, match="API request failed with status 404"
-        ):  
+        with pytest.raises(AireloomError, match="API request failed with status 404"):
             await session.get_research_product("nonexistent:id_123456789_invalid")
 
 
@@ -160,37 +162,49 @@ async def test_search_research_products_simple():
         try:
             # Search for a common term, limit results
             response = await session.search_research_products(
-                page=1, page_size=5, mainTitle="Open Science"
+                page_size=5,
+                mainTitle="Open Science",  # Use mainTitle filter
             )
             assert response is not None
             assert len(response.results) <= 5
             if response.results:
-                product = response.results[0]
-                assert product.id is not None
-                # Access the title value correctly from the list
-                assert product.titles[0].value is not None
+                assert isinstance(response.results[0].id, str)
+                # Use mainTitle attribute for assertion
+                assert isinstance(response.results[0].mainTitle, str)
         except AireloomError as e:
             pytest.fail(f"Simple product search failed: {e}")
 
 
 @pytest.mark.asyncio
-async def test_iterate_research_products():
+async def test_iterate_research_products(httpx_mock: HTTPXMock):
     """Test iterating through research products."""
+    # Mock the API response for the iteration
+    mock_response = {
+        "header": {"total": 2},
+        "results": [
+            {"id": "id1", "mainTitle": "Title 1"},
+            {"id": "id2", "mainTitle": "Title 2"},
+        ],
+    }
+    httpx_mock.add_response(
+        url="https://api.openaire.eu/graph/v1/researchProducts?pageSize=5&sortBy=&mainTitle=FAIR+data&cursor=%2A&size=20",
+        method="GET",
+        json=mock_response,
+        status_code=200,
+    )
     async with AireloomSession() as session:
         count = 0
-        max_items_to_iterate = 15  # Limit iteration for testing speed and API usage
+        max_items_to_iterate = 15
         try:
-            # Iterate using a common term
             async for product in session.iterate_research_products(
                 page_size=5, mainTitle="FAIR data"
             ):
                 assert product is not None
-                assert isinstance(product.id, str)  # Basic check on iterated item
+                assert isinstance(product.id, str)
                 count += 1
                 if count >= max_items_to_iterate:
                     break
-            assert count >= 0  # Ensure we can iterate even if 0 results found
-            # We can't guarantee > 0 results for a general term, so check <= max
+            assert count >= 0
             assert count <= max_items_to_iterate
         except AireloomError as e:
             pytest.fail(f"Product iteration failed: {e}")
@@ -219,7 +233,7 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
             )
             assert response is not None
             assert response.currentPage == 0  # API is 0-indexed
-            assert response.totalLinks >= 0 # Check for non-negative
+            assert response.totalLinks >= 0  # Check for non-negative
             assert response.result is not None
             assert 0 <= len(response.result) <= 10  # noqa: PLR2004
             # If results exist, check basic structure
@@ -231,7 +245,7 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
                 assert link.Target is not None
                 assert isinstance(link.Source.Identifier, list)
                 assert isinstance(link.Target.Identifier, list)
-                assert link.RelationshipType is not None # Check added field
+                assert link.RelationshipType is not None  # Check added field
         except AireloomError as e:
             pytest.fail(f"Scholix link search failed: {e}")
 
@@ -243,22 +257,25 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
     # Use a response with enough links for the test iteration count.
     mock_response_page1 = MOCK_SCHOLIX_RESPONSE.copy()
     mock_response_page1["currentPage"] = 0
-    mock_response_page1["totalLinks"] = 7 # Example: 7 links total across 2 pages
-    mock_response_page1["totalPages"] = 2 # Example: 2 pages total
+    mock_response_page1["totalLinks"] = 7  # Example: 7 links total across 2 pages
+    mock_response_page1["totalPages"] = 2  # Example: 2 pages total
     # Create 5 links for page 1 (size=5)
-    mock_response_page1["result"] = [
-        dict(link) for link in MOCK_SCHOLIX_RESPONSE["result"] * 5
-    ]
-    # Ensure LinkPublicationDate is valid in copies
-    for i, link in enumerate(mock_response_page1["result"]):
-        link["LinkPublicationDate"] = f"2023-01-15T12:00:0{i}" # Vary slightly
-        link["Target"] = {
-                "Identifier": [{
-                    "ID": f"10.1234/target.dataset.{i}", "IDScheme": "doi"
-                    }],
-                "Type": "dataset",
-            } # Vary target slightly
-
+    # Ensure the base link structure is valid
+    base_link = MOCK_SCHOLIX_RESPONSE["result"][0]
+    mock_response_page1["result"] = []
+    for i in range(5):
+        link = base_link.copy()
+        link["LinkPublicationDate"] = f"2023-01-15T12:00:0{i}Z"  # Vary slightly, use Z
+        # Ensure Source and Target are valid ScholixEntity structures
+        link["Source"] = {  # Add Source (Required)
+            "Identifier": [{"ID": f"{KNOWN_DOI_WITH_LINKS}/{i}", "IDScheme": "doi"}],
+            "Type": "publication",
+        }
+        link["Target"] = {  # Add Target (Required)
+            "Identifier": [{"ID": f"10.1234/target.dataset.{i}", "IDScheme": "doi"}],
+            "Type": "dataset",  # Ensure valid type
+        }
+        mock_response_page1["result"].append(link)
 
     httpx_mock.add_response(
         url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&rows=5",
@@ -273,17 +290,24 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
     mock_response_page2["totalLinks"] = 7
     mock_response_page2["totalPages"] = 2
     # Create 2 remaining links for page 2
-    mock_response_page2["result"] = [
-        dict(link) for link in MOCK_SCHOLIX_RESPONSE["result"] * 2
-    ]
-    for i, link in enumerate(mock_response_page2["result"]):
-        link["LinkPublicationDate"] = f"2023-01-16T13:00:0{i}" # Vary slightly
-        link["Target"] = {
-                "Identifier": [{
-                    "ID": f"10.1234/target.dataset.{i+5}", "IDScheme": "doi"
-                    }],
-                "Type": "dataset",
-            } # Vary target slightly
+    mock_response_page2["result"] = []
+    for i in range(2):
+        link = base_link.copy()
+        link["LinkPublicationDate"] = f"2023-01-16T13:00:0{i}Z"  # Vary slightly, use Z
+        # Ensure Source and Target are valid ScholixEntity structures
+        link["Source"] = {  # Add Source (Required)
+            "Identifier": [
+                {"ID": f"{KNOWN_DOI_WITH_LINKS}/{i + 5}", "IDScheme": "doi"}
+            ],
+            "Type": "publication",
+        }
+        link["Target"] = {  # Add Target (Required)
+            "Identifier": [
+                {"ID": f"10.1234/target.dataset.{i + 5}", "IDScheme": "doi"}
+            ],
+            "Type": "dataset",  # Ensure valid type
+        }
+        mock_response_page2["result"].append(link)
 
     httpx_mock.add_response(
         url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=1&rows=5",
@@ -294,7 +318,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
 
     async with AireloomSession() as session:
         count = 0
-        max_items_to_iterate = 7 # Iterate through all mocked items
+        max_items_to_iterate = 7  # Iterate through all mocked items
         try:
             async for link in session.iterate_scholix_links(
                 page_size=5, sourcePid=KNOWN_DOI_WITH_LINKS
@@ -303,7 +327,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
                 assert link.RelationshipType is not None  # Core field
                 assert link.Source is not None
                 assert link.Target is not None
-                assert link.LinkPublicationDate is not None # Check date exists
+                assert link.LinkPublicationDate is not None  # Check date exists
                 count += 1
                 if count >= max_items_to_iterate:
                     break
