@@ -239,7 +239,7 @@ class AireloomSession:
         current_params["cursor"] = "*"
         # Check for the correct parameter name 'pageSize'
         if "pageSize" not in current_params:
-            current_params["pageSize"] = DEFAULT_PAGE_SIZE # Add pageSize if missing
+            current_params["pageSize"] = DEFAULT_PAGE_SIZE  # Add pageSize if missing
 
         while True:
             try:
@@ -264,9 +264,7 @@ class AireloomSession:
             except Exception as e:
                 if isinstance(e, AireloomError | ValidationError):
                     raise e
-                logger.exception(
-                    f"Failed during iteration of {entity_path}"
-                )
+                logger.exception(f"Failed during iteration of {entity_path}")
                 raise AireloomError(
                     f"Failed during iteration of {entity_path}: {e}"
                 ) from e
@@ -469,16 +467,22 @@ class AireloomSession:
 
         # Validate only the actual filter keys, exclude pagination params
         filters_to_validate = mutable_filters.copy()
-        filters_to_validate.pop("page", None) # Added validation exclusion
-        filters_to_validate.pop("rows", None) # Added validation exclusion
+        filters_to_validate.pop("page", None)  # Added validation exclusion
+        filters_to_validate.pop("rows", None)  # Added validation exclusion
         self._validate_filters(SCHOLIX, filters_to_validate)
 
         # Scholexplorer uses 0-based page, size is 'rows'
         params = {
             "page": page,
             "rows": page_size,
-            **mutable_filters,
+            **mutable_filters,  # Add validated filters first
         }
+        # Add source/target PID if they were provided
+        if source_pid:
+            params["sourcePid"] = source_pid
+        if target_pid:
+            params["targetPid"] = target_pid
+
         params = {k: v for k, v in params.items() if v is not None}
 
         try:
@@ -521,7 +525,7 @@ class AireloomSession:
         self._validate_filters(SCHOLIX, mutable_filters)
 
         current_page = 0
-        total_pages = 1 # Assume at least one page initially
+        total_pages = 1  # Assume at least one page initially
 
         while current_page < total_pages:
             logger.debug(
@@ -532,8 +536,8 @@ class AireloomSession:
                 # and validated filters via **mutable_filters.
                 response_data = await self.search_scholix_links(
                     page=current_page,
-                    page_size=page_size, # Pass page_size directly
-                    **mutable_filters, # Pass validated filters
+                    page_size=page_size,  # Pass page_size directly
+                    **mutable_filters,  # Pass validated filters
                 )
 
                 if not response_data.result:

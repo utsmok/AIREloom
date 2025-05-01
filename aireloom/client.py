@@ -34,6 +34,10 @@ from .exceptions import (
 from .log_config import logger
 from .types import RequestData
 
+# Define constants for HTTP status codes
+HTTP_BAD_REQUEST = 400
+HTTP_TOO_MANY_REQUESTS = 429
+
 
 class AireloomClient:
     """Asynchronous HTTP client for interacting with OpenAIRE APIs."""
@@ -137,6 +141,10 @@ class AireloomClient:
             # Apply authentication just before sending
             await self._auth_strategy.async_authenticate(request)
 
+            # Ensure User-Agent is set
+            if "User-Agent" not in request.headers or not request.headers["User-Agent"]:
+                request.headers["User-Agent"] = self._settings.user_agent
+
             logger.debug(f"Sending request: {request.method} {request.url}")
             logger.trace(f"Request Headers: {request.headers}")
             if request.content:
@@ -151,8 +159,8 @@ class AireloomClient:
             # logger.trace(f"Response Body Excerpt: {response.text[:200]}")
 
             # Raise APIError for non-success status codes *after* logging
-            if response.status_code >= 400:
-                if response.status_code == 429:
+            if response.status_code >= HTTP_BAD_REQUEST:
+                if response.status_code == HTTP_TOO_MANY_REQUESTS:
                     raise RateLimitError("API rate limit exceeded.", response=response)
                 raise APIError(
                     f"API request failed with status {response.status_code}",
@@ -164,8 +172,11 @@ class AireloomClient:
             logger.error(
                 f"Request failed with status {e.response.status_code}: {e.request.url}"
             )
-            if e.response.status_code == 429:
-                raise RateLimitError("API rate limit exceeded.", response=e.response, request=e.request) from e
+            if e.response.status_code == HTTP_TOO_MANY_REQUESTS:
+                raise RateLimitError(
+                    "API rate limit exceeded.", response=e.response, request=e.request
+                ) from e
+            # No else needed after raise
             raise APIError(
                 f"API request failed with status {e.response.status_code}",
                 response=e.response,
@@ -178,29 +189,38 @@ class AireloomClient:
             logger.error(f"Network error occurred: {request.url}")
             raise NetworkError("Network error occurred", request=request) from e
         except Exception as e:
-            logger.exception(f"Unexpected error during single request execution to {request.url}: {e}")
+            logger.exception(
+                f"Unexpected error during single request execution to {request.url}: {e}"
+            )
             if isinstance(e, AireloomError):
                 raise e
-            raise AireloomError(f"An unexpected error occurred during request execution: {e}", request=request) from e
+            raise AireloomError(
+                f"An unexpected error occurred during request execution: {e}",
+                request=request,
+            ) from e
 
     def _should_retry_request(self, retry_state: tenacity.RetryCallState) -> bool:
         """Predicate for tenacity: should we retry this request?"""
         outcome = retry_state.outcome
-        if not outcome: # Should not happen with reraise=True, but defensive check
+        if not outcome:  # Should not happen with reraise=True, but defensive check
             return False
 
         if outcome.failed:
             exc = outcome.exception()
             url = "N/A"
-            request = getattr(exc, 'request', None)
+            request = getattr(exc, "request", None)  # Use double quotes
             if request:
-                url = getattr(request, 'url', 'N/A')
+                url = getattr(request, "url", "N/A")  # Use double quotes
 
-            if isinstance(exc, (TimeoutError, NetworkError, RateLimitError)):
+            # Use | for isinstance check
+            if isinstance(exc, TimeoutError | NetworkError | RateLimitError):
                 logger.warning(f"Retrying due to {type(exc).__name__} for {url}")
                 return True
-            if isinstance(exc, (httpx.TimeoutException, httpx.NetworkError)):
-                logger.warning(f"Retrying due to {type(exc).__name__} (httpx) for {url}")
+            # Use | for isinstance check
+            if isinstance(exc, httpx.TimeoutException | httpx.NetworkError):
+                logger.warning(
+                    f"Retrying due to {type(exc).__name__} (httpx) for {url}"
+                )
                 return True
 
             status_code: int | None = None
@@ -211,9 +231,7 @@ class AireloomClient:
                 status_code = exc.response.status_code
 
             if status_code is not None and status_code in self._retryable_status_codes:
-                logger.warning(
-                    f"Retrying due to status code {status_code} for {url}"
-                )
+                logger.warning(f"Retrying due to status code {status_code} for {url}")
                 return True
 
         return False
@@ -260,7 +278,7 @@ class AireloomClient:
                 multiplier=self._settings.backoff_factor, min=0.1, max=10
             ),
             retry=self._should_retry_request,
-            reraise=True, # Reraise the last exception if all retries fail
+            reraise=True,  # Reraise the last exception if all retries fail
         )
 
         try:
@@ -271,14 +289,20 @@ class AireloomClient:
             logger.error(f"Authentication error during request execution: {e}")
             raise e
         except TimeoutError as e:
-            logger.warning(f"Request timed out after retries: {e.request.url if e.request else 'N/A'}")
+            logger.warning(
+                f"Request timed out after retries: {e.request.url if e.request else 'N/A'}"
+            )
             raise e
         except NetworkError as e:
-            logger.warning(f"Network error after retries: {e.request.url if e.request else 'N/A'}")
+            logger.warning(
+                f"Network error after retries: {e.request.url if e.request else 'N/A'}"
+            )
             raise e
 
         except RateLimitError as e:
-            logger.warning(f"Rate limit error after retries: {e.request.url if e.request else 'N/A'}")
+            logger.warning(
+                f"Rate limit error after retries: {e.request.url if e.request else 'N/A'}"
+            )
             raise e
 
         except APIError as e:
@@ -288,38 +312,50 @@ class AireloomClient:
             raise e
 
         except httpx.TimeoutException as e:
-            logger.warning(f"Request timed out after retries (httpx): {getattr(e.request, 'url', 'N/A')}")
+            logger.warning(
+                f"Request timed out after retries (httpx): {getattr(e.request, 'url', 'N/A')}"
+            )
             raise TimeoutError("Request timed out", request=e.request) from e
 
         except httpx.NetworkError as e:
-            logger.warning(f"Network error after retries (httpx): {getattr(e.request, 'url', 'N/A')}")
+            logger.warning(
+                f"Network error after retries (httpx): {getattr(e.request, 'url', 'N/A')}"
+            )
             raise NetworkError("Connection failed", request=e.request) from e
 
         except httpx.HTTPStatusError as e:
             logger.warning(
                 f"HTTP error after retries (httpx): Status {e.response.status_code}, URL: {e.request.url}"
             )
-            #
-            if e.response.status_code == 429:
-                raise RateLimitError("API rate limit exceeded.", response=e.response, request=e.request) from e
-            else:
-                raise APIError(f"API request failed with status {e.response.status_code}", response=e.response, request=e.request) from e
+            if e.response.status_code == HTTP_TOO_MANY_REQUESTS:
+                raise RateLimitError(
+                    "API rate limit exceeded.", response=e.response, request=e.request
+                ) from e
+            # No else needed after raise
+            raise APIError(
+                f"API request failed with status {e.response.status_code}",
+                response=e.response,
+                request=e.request,
+            ) from e
 
         except RetryError as e:
             logger.error(f"Request failed after multiple retries: {e}")
             raise AireloomError("Request failed after multiple retries") from e
 
         except AireloomError as e:
-            raise e # Re-raise without further wrapping
+            raise e  # Re-raise without further wrapping
 
         except Exception as e:
             logger.exception(f"Unexpected error during request processing: {e}")
             request_info = getattr(e, "request", None)
-            if not isinstance(request_info, (httpx.Request, type(None))):
+            # Use | for isinstance check
+            if not isinstance(request_info, httpx.Request | type(None)):
                 request_info = None
             if isinstance(e, AireloomError):
                 raise e
-            raise AireloomError(f"An unexpected error occurred: {e}", request=request_info) from e
+            raise AireloomError(
+                f"An unexpected error occurred: {e}", request=request_info
+            ) from e
 
     async def request(
         self,
@@ -327,6 +363,7 @@ class AireloomClient:
         path: str,
         *,
         params: Mapping[str, Any] | None = None,
+        json: Any | None = None,  # Added alias for json_data
         json_data: Any | None = None,
         data: Mapping[str, Any] | None = None,
         expected_model: type[Any] | None = None,  # For potential future validation
@@ -339,6 +376,7 @@ class AireloomClient:
             method: HTTP method (e.g., "GET", "POST").
             path: API endpoint path (relative to base_url).
             params: URL query parameters.
+            json: Data to send as JSON in the request body (alias for json_data).
             json_data: Data to send as JSON in the request body.
             data: Data to send form-encoded in the request body.
             expected_model: Pydantic model to validate the response against (optional).
@@ -356,11 +394,18 @@ class AireloomClient:
             AireloomError: For other unexpected client-side errors.
             ValidationError: If response parsing/validation fails (when using expected_model).
         """
+        # Allow using 'json' as an alias for 'json_data'
+        actual_json_data = json_data if json_data is not None else json
+        if json is not None and json_data is not None:
+            logger.warning(
+                "Both 'json' and 'json_data' provided to request; using 'json_data'."
+            )
+
         response = await self._request_with_retry(
             method=method,
             path=path,
             params=params,
-            json_data=json_data,
+            json_data=actual_json_data,  # Use the determined json data
             data=data,
             base_url_override=base_url_override,
         )

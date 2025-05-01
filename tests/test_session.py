@@ -39,33 +39,26 @@ MOCK_SCHOLIX_RESPONSE = {
     "result": [
         {
             "LinkProvider": [{"Name": "Example Provider", "AgentId": "example"}],
-            "LinkPublicationDate": "2023-01-15T12:00:00",
+            "LinkPublicationDate": "2023-01-15T12:00:00Z",  # Use ISO format with Z
             "RelationshipType": {
                 "Name": "References",  # Correct casing
                 "SubType": "Scholix",
-                "SubTypeSchema": "DataCite",
+                "SubTypeSchema": "http://example.com/datacite",  # Fix: Use valid URL
             },
-            "Source": {
-                "Identifier": [{"ID": "10.5281/zenodo.7668094", "IDScheme": "doi"}],
-                "Type": "publication",  # Use literal string
+            "Source": {  # Source (Required)
+                "Identifier": [{"ID": KNOWN_DOI_WITH_LINKS, "IDScheme": "doi"}],
+                "Type": "publication",  # Use valid literal from ScholixEntityTypeName
                 "Title": "Source Title",
                 "Creator": [{"Name": "Source Author"}],
                 "PublicationDate": "2023",
-                "Publisher": "Source Publisher",
-                "Name": "References",  # Use valid literal from ScholixRelationshipNameValue
-                "SubType": "Dataset",
-                # SubTypeSchema is optional and needs to be a URL or None
-                "SubTypeSchema": "http://example.com/schema/references",
-            },
-            "Source": {  # Add Source (Required)
-                "Identifier": [{"ID": KNOWN_DOI_WITH_LINKS, "IDScheme": "doi"}],
-                "Type": "publication",  # Use valid literal from ScholixEntityTypeName
+                "Publisher": [
+                    {"Name": "Source Publisher"}
+                ],  # Fix: Make Publisher a list of objects
             },
             "Target": {  # Add Target (Required)
                 "Identifier": [{"ID": "10.1234/target.dataset", "IDScheme": "doi"}],
                 "Type": "dataset",  # Use valid literal from ScholixEntityTypeName
             },
-            "LinkPublicationDate": "2023-01-15T12:00:00Z",  # Added field, use ISO format with Z
             "LicenseURL": None,  # Optional
             "HarvestDate": None,  # Optional
         }
@@ -126,6 +119,8 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
     mock_product_response = {
         "id": product_id,
         "titles": [{"value": "Mocked Test Product Title"}],
+        # Add mainTitle field to prevent None value
+        "mainTitle": "Mocked Test Product Title",
         # Add other minimal required fields if necessary based on model
     }
 
@@ -141,7 +136,7 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
         try:
             product = await session.get_research_product(product_id)
             assert product is not None
-            assert product.id == KNOWN_PRODUCT_ID
+            assert product.id == product_id
             assert isinstance(product.mainTitle, str)  # Fix: use mainTitle
         except AireloomError as e:
             pytest.fail(f"Fetching known product failed: {e}")
@@ -187,7 +182,7 @@ async def test_iterate_research_products(httpx_mock: HTTPXMock):
         ],
     }
     httpx_mock.add_response(
-        url="https://api.openaire.eu/graph/v1/researchProducts?pageSize=5&sortBy=&mainTitle=FAIR+data&cursor=%2A&size=20",
+        url="https://api.openaire.eu/graph/v1/researchProducts?pageSize=5&sortBy=&mainTitle=FAIR+data&cursor=%2A",
         method="GET",
         json=mock_response,
         status_code=200,
@@ -241,11 +236,11 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
                 link = response.result[0]
                 # Assuming LinkPublicationDate might be None in real data or mock
                 # assert link.LinkPublicationDate is not None
-                assert link.Source is not None
-                assert link.Target is not None
-                assert isinstance(link.Source.Identifier, list)
-                assert isinstance(link.Target.Identifier, list)
-                assert link.RelationshipType is not None  # Check added field
+                assert link.source is not None
+                assert link.target is not None
+                assert isinstance(link.source.identifier, list)
+                assert isinstance(link.target.identifier, list)
+                assert link.relationship_type is not None  # Check added field
         except AireloomError as e:
             pytest.fail(f"Scholix link search failed: {e}")
 
@@ -275,6 +270,9 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
             "Identifier": [{"ID": f"10.1234/target.dataset.{i}", "IDScheme": "doi"}],
             "Type": "dataset",  # Ensure valid type
         }
+        link["RelationshipType"]["SubTypeSchema"] = (
+            "http://example.com/datacite"  # Fix SubTypeSchema
+        )
         mock_response_page1["result"].append(link)
 
     httpx_mock.add_response(
@@ -315,7 +313,6 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         json=mock_response_page2,
         status_code=200,
     )
-
     async with AireloomSession() as session:
         count = 0
         max_items_to_iterate = 7  # Iterate through all mocked items
@@ -324,10 +321,10 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
                 page_size=5, sourcePid=KNOWN_DOI_WITH_LINKS
             ):
                 assert link is not None
-                assert link.RelationshipType is not None  # Core field
-                assert link.Source is not None
-                assert link.Target is not None
-                assert link.LinkPublicationDate is not None  # Check date exists
+                assert link.relationship_type is not None  # Use snake_case field name
+                assert link.source is not None
+                assert link.target is not None
+                assert link.link_publication_date is not None  # Check date exists
                 count += 1
                 if count >= max_items_to_iterate:
                     break
@@ -344,6 +341,9 @@ async def test_search_scholix_invalid_filter():
             ValidationError, match="Invalid filter key"
         ):  # Check error message content
             # Pass a deliberately invalid filter key
+            # Also pass a valid sourcePid to get past the initial check
             await session.search_scholix_links(
-                page_size=10, someMadeUpFilterKey="someValue"
+                page_size=10,
+                sourcePid=KNOWN_DOI_WITH_LINKS,
+                someMadeUpFilterKey="someValue",
             )

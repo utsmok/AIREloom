@@ -1,7 +1,8 @@
 # https://graph.openaire.eu/docs/data-model/entities/project
 
+from typing import Any
+
 from pydantic import BaseModel, Field, field_validator
-from typing import Any, list
 
 # Import base classes
 from .base import ApiResponse, BaseEntity
@@ -67,13 +68,13 @@ class Project(BaseEntity):
 
     model_config = dict(extra="allow")
 
-    @field_validator('keywords', mode='before')
+    @field_validator("keywords", mode="before")
     @classmethod
     def parse_keywords_string(cls, v: Any) -> list[str] | str | None:
         """Attempt to parse a keyword string into a list using common delimiters."""
         if isinstance(v, str):
             # Prioritize comma, then semicolon
-            delimiters = [',', ';']
+            delimiters = [",", ";"]
             for delimiter in delimiters:
                 parts = [part.strip() for part in v.split(delimiter) if part.strip()]
                 if len(parts) > 1:
