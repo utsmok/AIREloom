@@ -3,30 +3,47 @@ import pytest
 from dotenv import load_dotenv
 from pytest_httpx import HTTPXMock
 
-# Make sure aireloom can be imported from the src directory
-# This might require specific pytest configuration or PYTHONPATH adjustments
-# depending on project structure and how tests are run.
-# Assuming standard src layout is handled by pytest/uv.
 from aireloom import AireloomSession
-from aireloom.auth import (  # Import specific auth strategies for checking
+from aireloom.auth import (
     NoAuth,
     StaticTokenAuth,
 )
 from aireloom.constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
+    EndpointName,
 )
-from aireloom.exceptions import AireloomError, ValidationError
+from aireloom.endpoints import (
+    DataSourcesFilters,
+    OrganizationsFilters,
+    ProjectsFilters,
+    ResearchProductsFilters,
+    ScholixFilters,
+)
+from aireloom.exceptions import AireloomError
+from aireloom.models import (
+    DataSource,
+    Organization,
+    Project,
+    ResearchProduct,
+    ScholixRelationship as ScholixLink,  # Alias for test consistency
+)
+from aireloom.models.base import ApiResponse
+from aireloom.models.scholix import ScholixResponse  # Import for Scholix tests
+from aireloom.resources import (
+    DataSourcesClient,
+    OrganizationsClient,
+    ProjectsClient,
+    ResearchProductsClient,
+    ScholixClient,
+)
 
 # Load .env file for local testing (e.g., containing AIRELOOM_OPENAIRE_API_TOKEN)
 load_dotenv()
 
 # --- Constants ---
-# Keep existing constants
 KNOWN_PRODUCT_ID = "doi_dedup___::2b3cb7130c506d1c3a05e9160b2c4108"
-KNOWN_PRODUCT_TITLE_FRAGMENT = (
-    "OpenAIRE Graph"  # A fragment likely present in the title
-)
+KNOWN_PRODUCT_TITLE_FRAGMENT = "OpenAIRE Graph"
 KNOWN_DOI_WITH_LINKS = "10.5281/zenodo.7668094"
 UNKNOWN_PRODUCT_ID = "oai:example.org:nonexistent123"
 INVALID_PRODUCT_ID_FORMAT = "not-a-valid-id-format"
@@ -39,28 +56,26 @@ MOCK_SCHOLIX_RESPONSE = {
     "result": [
         {
             "LinkProvider": [{"Name": "Example Provider", "AgentId": "example"}],
-            "LinkPublicationDate": "2023-01-15T12:00:00Z",  # Use ISO format with Z
+            "LinkPublicationDate": "2023-01-15T12:00:00Z",
             "RelationshipType": {
-                "Name": "References",  # Correct casing
+                "Name": "References",
                 "SubType": "Scholix",
-                "SubTypeSchema": "http://example.com/datacite",  # Fix: Use valid URL
+                "SubTypeSchema": "http://example.com/datacite",
             },
-            "Source": {  # Source (Required)
+            "Source": {
                 "Identifier": [{"ID": KNOWN_DOI_WITH_LINKS, "IDScheme": "doi"}],
-                "Type": "publication",  # Use valid literal from ScholixEntityTypeName
+                "Type": "publication",
                 "Title": "Source Title",
                 "Creator": [{"Name": "Source Author"}],
                 "PublicationDate": "2023",
-                "Publisher": [
-                    {"Name": "Source Publisher"}
-                ],  # Fix: Make Publisher a list of objects
+                "Publisher": [{"Name": "Source Publisher"}],
             },
-            "Target": {  # Add Target (Required)
+            "Target": {
                 "Identifier": [{"ID": "10.1234/target.dataset", "IDScheme": "doi"}],
-                "Type": "dataset",  # Use valid literal from ScholixEntityTypeName
+                "Type": "dataset",
             },
-            "LicenseURL": None,  # Optional
-            "HarvestDate": None,  # Optional
+            "LicenseURL": None,
+            "HarvestDate": None,
         }
     ],
 }
@@ -73,148 +88,838 @@ async def test_session_initialization_no_token():
     """Test initializing AireloomSession without providing a token."""
     async with AireloomSession() as session:
         assert session is not None
-        # Check if NoAuth strategy is implicitly used
         assert isinstance(session._api_client._auth_strategy, NoAuth)
+        assert isinstance(session.research_products, ResearchProductsClient)
+        assert isinstance(session.organizations, OrganizationsClient)
+        assert isinstance(session.projects, ProjectsClient)
+        assert isinstance(session.data_sources, DataSourcesClient)
+        assert isinstance(session.scholix, ScholixClient)
 
 
 @pytest.mark.asyncio
-async def test_session_initialization_with_token(
-    api_token,
-):  # Uses fixture from conftest.py
+async def test_session_initialization_with_token(api_token):
     """Test initializing AireloomSession with a token (from fixture)."""
     if not api_token:
-        pytest.skip(
-            "Skipping token test: AIRELOOM_OPENAIRE_API_TOKEN not set in environment."
-        )
+        pytest.skip("Skipping token test: AIRELOOM_OPENAIRE_API_TOKEN not set.")
 
-    # Test explicit token argument
-    async with AireloomSession(api_token=api_token) as session:
+    auth_strat = StaticTokenAuth(token=api_token)
+    async with AireloomSession(auth_strategy=auth_strat) as session:
         assert session is not None
-        # Check if TokenAuth strategy is used
         assert isinstance(session._api_client._auth_strategy, StaticTokenAuth)
         assert session._api_client._auth_strategy._token == api_token
 
-    # Test token via settings (implicitly via environment variable AIRELOOM_OPENAIRE_API_TOKEN)
-    # This assumes the ApiClient correctly reads from settings when no strategy/token is passed
+    # Test token via settings (implicitly via environment variable)
+    # AireloomClient inside AireloomSession should pick this up
     async with AireloomSession() as session_env:
         assert session_env is not None
         assert isinstance(session_env._api_client._auth_strategy, StaticTokenAuth)
         assert session_env._api_client._auth_strategy._token == api_token
 
 
-# --- Graph API Tests ---
+@pytest.mark.asyncio
+async def test_session_initialization_with_custom_timeout():
+    """Test initializing AireloomSession with custom timeout."""
+    custom_timeout_float = 45.0
+    custom_timeout_int = int(custom_timeout_float)  # AireloomSession expects int | None
 
-
-# Use a known, stable, public research product ID for testing
-# Example: OpenAIRE-Nexus project publication
+    async with AireloomSession(timeout=custom_timeout_int) as session:
+        assert session is not None
+        assert isinstance(session._api_client._auth_strategy, NoAuth)
+        # AireloomClient's _settings will have the updated timeout
+        assert session._api_client._settings.request_timeout == custom_timeout_float
+        # The internal httpx.AsyncClient will be configured with this timeout
+        assert session._api_client._http_client.timeout.read == custom_timeout_float
+        assert session._api_client._http_client.timeout.connect == custom_timeout_float
 
 
 @pytest.mark.asyncio
-async def test_get_research_product_success(httpx_mock: HTTPXMock):
-    """Test fetching a known research product successfully.
+async def test_session_context_manager_aclose():
+    """Test that the async context manager calls aclose on the client."""
+    session = AireloomSession()
+    initial_client = session._api_client
+    assert (
+        initial_client._http_client is not None
+        and not initial_client._http_client.is_closed
+    )
 
-    Ensures a valid response is parsed correctly.
-    """
-    product_id = "oai:zenodo.org:7668094"  # Use variable for clarity
+    async with session:
+        assert session._api_client is not None
+        assert not session._api_client._http_client.is_closed
+    assert session._api_client._http_client.is_closed
+
+
+# --- Integration Tests for Resource Clients via Session ---
+
+
+# --- ResearchProducts ---
+@pytest.mark.asyncio
+async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
+    product_id = "rp123"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}/{product_id}"
+    mock_api_response_json = {
+        "id": product_id,
+        "titles": [{"value": "Mocked Research Product Title"}],
+        "mainTitle": "Mocked Research Product Title",
+        "type": {"name": "publication", "type": "article"},
+        "publicationDate": "2023-01-01",
+    }
+    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    async with AireloomSession() as session:
+        product = await session.research_products.get(product_id)
+    assert isinstance(product, ResearchProduct)
+    assert product.id == product_id
+    assert product.mainTitle == "Mocked Research Product Title"
+
+
+@pytest.mark.asyncio
+async def test_session_search_research_products_integration(httpx_mock: HTTPXMock):
+    expected_url = (
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+    )
+    mock_api_response_json = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 1,
+            "totalPages": 1,
+            "maxPage": 1000,
+        },
+        "results": [
+            {
+                "id": "rp456",
+                "titles": [{"value": "Searched Research Product"}],
+                "mainTitle": "Searched Research Product",
+                "type": {"name": "publication", "type": "article"},
+                "publicationDate": "2023-02-01",
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"mainTitle": "Test Search", "page": "1", "size": "1"},
+    )
+    async with AireloomSession() as session:
+        filters = ResearchProductsFilters(mainTitle="Test Search")
+        response = await session.research_products.search(
+            filters=filters, page=1, page_size=1
+        )
+    assert isinstance(response, ApiResponse)
+    assert response.results is not None and len(response.results) > 0
+    assert isinstance(response.results[0], ResearchProduct)
+    assert response.results[0].id == "rp456"
+    assert response.header.numFound == 1
+
+
+@pytest.mark.asyncio
+async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMock):
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+    mock_response_page1 = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": "cursor1",
+        },
+        "results": [
+            {
+                "id": "rp_iter1",
+                "titles": [{"value": "Iter Product 1"}],
+                "mainTitle": "Iter Product 1",
+                "type": {"name": "publication", "type": "article"},
+                "publicationDate": "2023-03-01",
+            }
+        ],
+    }
+    mock_response_page2 = {
+        "header": {
+            "page": 2,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": None,
+        },
+        "results": [
+            {
+                "id": "rp_iter2",
+                "titles": [{"value": "Iter Product 2"}],
+                "mainTitle": "Iter Product 2",
+                "type": {"name": "publication", "type": "article"},
+                "publicationDate": "2023-03-02",
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page1,
+        match_params={"mainTitle": "Iterate Me", "size": "1", "cursor": "*"},
+    )
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page2,
+        match_params={"mainTitle": "Iterate Me", "size": "1", "cursor": "cursor1"},
+    )
+    products_iterated = []
+    async with AireloomSession() as session:
+        filters = ResearchProductsFilters(mainTitle="Iterate Me")
+        async for product in session.research_products.iterate(
+            filters=filters, page_size=1
+        ):
+            products_iterated.append(product)
+    assert len(products_iterated) == 2
+    if len(products_iterated) == 2:
+        assert isinstance(products_iterated[0], ResearchProduct)
+        assert products_iterated[0].id == "rp_iter1"
+        assert isinstance(products_iterated[1], ResearchProduct)
+        assert products_iterated[1].id == "rp_iter2"
+
+
+# --- Organizations ---
+@pytest.mark.asyncio
+async def test_session_get_organization_integration(httpx_mock: HTTPXMock):
+    org_id = "org123"
+    expected_url = (
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}/{org_id}"
+    )
+    mock_api_response_json = {
+        "id": org_id,
+        "legalName": "Mocked Org Name",
+        "country": {"code": "GR", "name": "Greece"},
+    }
+    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    async with AireloomSession() as session:
+        organization = await session.organizations.get(org_id)
+    assert isinstance(organization, Organization)
+    assert organization.id == org_id
+    assert organization.legalName == "Mocked Org Name"
+
+
+@pytest.mark.asyncio
+async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+    mock_api_response_json = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 1,
+            "totalPages": 1,
+            "maxPage": 1000,
+        },
+        "results": [
+            {
+                "id": "org456",
+                "legalName": "Searched Org Name",
+                "country": {"code": "GR", "name": "Greece"},
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"countryCode": "GR", "page": "1", "size": "1"},
+    )  # API uses countryCode
+    async with AireloomSession() as session:
+        filters = OrganizationsFilters(
+            countryCode="GR"
+        )  # Using countryCode directly for instantiation
+        response = await session.organizations.search(
+            filters=filters, page=1, page_size=1
+        )
+    assert isinstance(response, ApiResponse)
+    assert response.results is not None and len(response.results) > 0
+    assert isinstance(response.results[0], Organization)
+    assert response.results[0].id == "org456"
+    assert response.header.numFound == 1
+
+
+@pytest.mark.asyncio
+async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+    mock_response_page1 = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": "cursor_org1",
+        },
+        "results": [
+            {
+                "id": "org_iter1",
+                "legalName": "Iter Org 1",
+                "country": {"code": "FR", "name": "France"},
+            }
+        ],
+    }
+    mock_response_page2 = {
+        "header": {
+            "page": 2,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": None,
+        },
+        "results": [
+            {
+                "id": "org_iter2",
+                "legalName": "Iter Org 2",
+                "country": {"code": "DE", "name": "Germany"},
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page1,
+        match_params={"countryCode": "EU", "size": "1", "cursor": "*"},
+    )
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page2,
+        match_params={"countryCode": "EU", "size": "1", "cursor": "cursor_org1"},
+    )
+    orgs_iterated = []
+    async with AireloomSession() as session:
+        filters = OrganizationsFilters(
+            countryCode="EU"
+        )  # Using countryCode directly for instantiation
+        async for org in session.organizations.iterate(filters=filters, page_size=1):
+            orgs_iterated.append(org)
+    assert len(orgs_iterated) == 2
+    if len(orgs_iterated) == 2:
+        assert isinstance(orgs_iterated[0], Organization)
+        assert orgs_iterated[0].id == "org_iter1"
+        assert isinstance(orgs_iterated[1], Organization)
+        assert orgs_iterated[1].id == "org_iter2"
+
+
+# --- Projects ---
+@pytest.mark.asyncio
+async def test_session_get_project_integration(httpx_mock: HTTPXMock):
+    project_id = "proj123"
+    expected_url = (
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}/{project_id}"
+    )
+    mock_api_response_json = {
+        "id": project_id,
+        "acronym": "MOCKPROJ",
+        "code": "FP7-123",
+        "title": "Mocked Project Title",
+        "fundingTree": [{"id": "fund1", "name": "EC"}],
+        "startDate": "2022-01-01",
+        "endDate": "2023-01-01",
+    }
+    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    async with AireloomSession() as session:
+        project = await session.projects.get(project_id)
+    assert isinstance(project, Project)
+    assert project.id == project_id
+    assert project.title == "Mocked Project Title"
+
+
+@pytest.mark.asyncio
+async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+    mock_api_response_json = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 1,
+            "totalPages": 1,
+            "maxPage": 1000,
+        },
+        "results": [
+            {
+                "id": "proj456",
+                "acronym": "SEARCHPROJ",
+                "code": "H2020-456",
+                "title": "Searched Project",
+                "fundingTree": [{"id": "fund2", "name": "National Funder"}],
+                "startDate": "2021-01-01",
+                "endDate": "2022-01-01",
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"grantID": "H2020", "page": "1", "size": "1"},
+    )
+    async with AireloomSession() as session:
+        filters = ProjectsFilters(grantID="H2020")
+        response = await session.projects.search(filters=filters, page=1, page_size=1)
+    assert isinstance(response, ApiResponse)
+    assert response.results is not None and len(response.results) > 0
+    assert isinstance(response.results[0], Project)
+    assert response.results[0].id == "proj456"
+    assert response.header.numFound == 1
+
+
+@pytest.mark.asyncio
+async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+    mock_response_page1 = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": "cursor_proj1",
+        },
+        "results": [
+            {
+                "id": "proj_iter1",
+                "acronym": "ITERPROJ1",
+                "code": "FP7-iter1",
+                "title": "Iter Project 1",
+                "fundingTree": [{"id": "fund_iter1", "name": "EC"}],
+                "startDate": "2020-01-01",
+                "endDate": "2021-01-01",
+            }
+        ],
+    }
+    mock_response_page2 = {
+        "header": {
+            "page": 2,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": None,
+        },
+        "results": [
+            {
+                "id": "proj_iter2",
+                "acronym": "ITERPROJ2",
+                "code": "H2020-iter2",
+                "title": "Iter Project 2",
+                "fundingTree": [{"id": "fund_iter2", "name": "ERC"}],
+                "startDate": "2019-01-01",
+                "endDate": "2020-01-01",
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page1,
+        match_params={"fundingShortName": "EC", "size": "1", "cursor": "*"},
+    )  # API uses fundingShortName
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page2,
+        match_params={"fundingShortName": "EC", "size": "1", "cursor": "cursor_proj1"},
+    )
+    projects_iterated = []
+    async with AireloomSession() as session:
+        filters = ProjectsFilters(fundingShortName="EC")
+        async for project in session.projects.iterate(filters=filters, page_size=1):
+            projects_iterated.append(project)
+    assert len(projects_iterated) == 2
+    if len(projects_iterated) == 2:
+        assert isinstance(projects_iterated[0], Project)
+        assert projects_iterated[0].id == "proj_iter1"
+        assert isinstance(projects_iterated[1], Project)
+        assert projects_iterated[1].id == "proj_iter2"
+
+
+# --- DataSources ---
+@pytest.mark.asyncio
+async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
+    ds_id = "ds123"
+    expected_url = (
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}/{ds_id}"
+    )
+    mock_api_response_json = {
+        "id": ds_id,
+        "officialName": "Mocked Data Source",
+        "englishName": "Mocked Data Source EN",
+        "websiteUrl": "http://example.com/ds",
+        "type": {"name": "repository"},
+    }
+    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    async with AireloomSession() as session:
+        data_source = await session.data_sources.get(ds_id)
+    assert isinstance(data_source, DataSource)
+    assert data_source.id == ds_id
+    assert data_source.officialName == "Mocked Data Source"
+
+
+@pytest.mark.asyncio
+async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+    mock_api_response_json = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 1,
+            "totalPages": 1,
+            "maxPage": 1000,
+        },
+        "results": [
+            {
+                "id": "ds456",
+                "officialName": "Searched Data Source",
+                "englishName": "Searched Data Source EN",
+                "websiteUrl": "http://example.com/ds_search",
+                "type": {"name": "journal"},
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"openaireCompatibility": "UNKNOWN", "page": "1", "size": "1"},
+    )
+    async with AireloomSession() as session:
+        filters = DataSourcesFilters(openaireCompatibility="UNKNOWN")
+        response = await session.data_sources.search(
+            filters=filters, page=1, page_size=1
+        )
+    assert isinstance(response, ApiResponse)
+    assert response.results is not None and len(response.results) > 0
+    assert isinstance(response.results[0], DataSource)
+    assert response.results[0].id == "ds456"
+    assert response.header.numFound == 1
+
+
+@pytest.mark.asyncio
+async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+    mock_response_page1 = {
+        "header": {
+            "page": 1,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": "cursor_ds1",
+        },
+        "results": [
+            {
+                "id": "ds_iter1",
+                "officialName": "Iter DS 1",
+                "englishName": "Iter DS 1 EN",
+                "websiteUrl": "http://example.com/ds_iter1",
+                "type": {"name": "aggregator"},
+            }
+        ],
+    }
+    mock_response_page2 = {
+        "header": {
+            "page": 2,
+            "size": 1,
+            "numFound": 2,
+            "totalPages": 2,
+            "cursor": None,
+        },
+        "results": [
+            {
+                "id": "ds_iter2",
+                "officialName": "Iter DS 2",
+                "englishName": "Iter DS 2 EN",
+                "websiteUrl": "http://example.com/ds_iter2",
+                "type": {"name": "repository"},
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page1,
+        # DataSourcesFilters does not have countryCode, so remove from match_params
+        # Assuming the iteration is based on some other filter or no filter for this mock
+        match_params={"size": "1", "cursor": "*"},  # Example: Removed countryCode
+    )
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page2,
+        # DataSourcesFilters does not have countryCode, so remove from match_params
+        match_params={
+            "size": "1",
+            "cursor": "cursor_ds1",
+        },  # Example: Removed countryCode
+    )
+    ds_iterated = []
+    async with AireloomSession() as session:
+        # DataSourcesFilters does not have countryCode.
+        # If a filter is needed for the mock to work, use an existing one or add one to the model.
+        # For now, assuming no specific filter or an implicit one the mock expects.
+        filters = DataSourcesFilters()  # No countryCode
+        async for ds in session.data_sources.iterate(filters=filters, page_size=1):
+            ds_iterated.append(ds)
+    assert len(ds_iterated) == 2
+    if len(ds_iterated) == 2:
+        assert isinstance(ds_iterated[0], DataSource)
+        assert ds_iterated[0].id == "ds_iter1"
+        assert isinstance(ds_iterated[1], DataSource)
+        assert ds_iterated[1].id == "ds_iter2"
+
+
+# --- Scholix ---
+@pytest.mark.asyncio
+async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
+    source_pid = "10.1234/source"
+    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+    mock_api_response_json = {
+        "currentPage": 0,
+        "totalLinks": 1,
+        "totalPages": 1,
+        "result": [
+            {
+                "LinkProvider": [{"Name": "Mock Provider"}],
+                "LinkPublicationDate": "2023-01-01T00:00:00Z",
+                "RelationshipType": {"Name": "Cites"},
+                "Source": {
+                    "Identifier": [{"ID": source_pid, "IDScheme": "doi"}],
+                    "Type": "literature",
+                },
+                "Target": {
+                    "Identifier": [{"ID": "10.5678/target", "IDScheme": "doi"}],
+                    "Type": "dataset",
+                },
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"sourcePid": source_pid, "page": "0", "rows": "1"},
+    )
+    async with AireloomSession() as session:
+        filters = ScholixFilters(sourcePid=source_pid)
+        response: ScholixResponse = await session.scholix.search_links(
+            filters=filters, page=0, page_size=1
+        )
+    assert isinstance(response, ScholixResponse)
+    assert response.result is not None and len(response.result) > 0
+    assert isinstance(response.result[0], ScholixLink)
+    assert response.result[0].source.identifier[0].id_val == source_pid
+    assert response.total_links == 1
+
+
+@pytest.mark.asyncio
+async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
+    source_pid = "10.9876/iter_source"
+    base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+    mock_response_page0 = {
+        "currentPage": 0,
+        "totalLinks": 2,
+        "totalPages": 2,
+        "result": [
+            {
+                "LinkProvider": [{"Name": "Iter Provider 1"}],
+                "LinkPublicationDate": "2023-02-01T00:00:00Z",
+                "RelationshipType": {"Name": "IsReferencedBy"},
+                "Source": {
+                    "Identifier": [{"ID": source_pid, "IDScheme": "doi"}],
+                    "Type": "software",
+                },
+                "Target": {
+                    "Identifier": [{"ID": "target1", "IDScheme": "other"}],
+                    "Type": "other",
+                },
+            }
+        ],
+    }
+    mock_response_page1 = {
+        "currentPage": 1,
+        "totalLinks": 2,
+        "totalPages": 2,
+        "result": [
+            {
+                "LinkProvider": [{"Name": "Iter Provider 2"}],
+                "LinkPublicationDate": "2023-02-02T00:00:00Z",
+                "RelationshipType": {"Name": "IsSupplementTo"},
+                "Source": {
+                    "Identifier": [{"ID": source_pid, "IDScheme": "doi"}],
+                    "Type": "software",
+                },
+                "Target": {
+                    "Identifier": [{"ID": "target2", "IDScheme": "other"}],
+                    "Type": "other",
+                },
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page0,
+        match_params={"sourcePid": source_pid, "rows": "1", "page": "0"},
+    )
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page1,
+        match_params={"sourcePid": source_pid, "rows": "1", "page": "1"},
+    )
+    links_iterated = []
+    async with AireloomSession() as session:
+        filters = ScholixFilters(sourcePid=source_pid)
+        async for link in session.scholix.iterate_links(filters=filters, page_size=1):
+            links_iterated.append(link)
+    assert len(links_iterated) == 2
+    if len(links_iterated) == 2:
+        assert isinstance(links_iterated[0], ScholixLink)
+        assert (
+            links_iterated[0].link_provider is not None
+            and links_iterated[0].link_provider[0].name == "Iter Provider 1"
+        )
+        assert isinstance(links_iterated[1], ScholixLink)
+        assert (
+            links_iterated[1].link_provider is not None
+            and links_iterated[1].link_provider[0].name == "Iter Provider 2"
+        )
+
+
+# --- Legacy Test Stubs (to be removed or integrated if still relevant) ---
+@pytest.mark.asyncio
+async def test_get_research_product_success(httpx_mock: HTTPXMock):
+    product_id = "oai:zenodo.org:7668094"
     mock_product_response = {
         "id": product_id,
         "titles": [{"value": "Mocked Test Product Title"}],
-        # Add mainTitle field to prevent None value
         "mainTitle": "Mocked Test Product Title",
-        # Add other minimal required fields if necessary based on model
+        "type": {"name": "publication", "type": "article"},
+        "publicationDate": "2023-01-01",
     }
-
-    # Mock the specific API call
     httpx_mock.add_response(
         url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
         method="GET",
         json=mock_product_response,
         status_code=200,
     )
-
     async with AireloomSession() as session:
-        try:
-            product = await session.get_research_product(product_id)
-            assert product is not None
-            assert product.id == product_id
-            assert isinstance(product.mainTitle, str)  # Fix: use mainTitle
-        except AireloomError as e:
-            pytest.fail(f"Fetching known product failed: {e}")
+        product = await session.research_products.get(product_id)
+        assert product is not None
+        assert product.id == product_id
+        assert isinstance(product.mainTitle, str)
 
 
 @pytest.mark.asyncio
-async def test_get_research_product_not_found():
-    """Test fetching a non-existent research product."""
+async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
+    product_id = "nonexistent:id_123456789_invalid"
+    httpx_mock.add_response(
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
+        method="GET",
+        status_code=404,
+        json={"message": "Not Found"},
+    )
     async with AireloomSession() as session:
         with pytest.raises(AireloomError, match="API request failed with status 404"):
-            await session.get_research_product("nonexistent:id_123456789_invalid")
+            await session.research_products.get(product_id)
 
 
 @pytest.mark.asyncio
-async def test_search_research_products_simple():
-    """Test a simple search for research products."""
+async def test_search_research_products_simple(httpx_mock: HTTPXMock):
+    mock_api_response_json = {
+        "header": {
+            "page": 1,
+            "size": 5,
+            "numFound": 1,
+            "totalPages": 1,
+        },  # Use numFound
+        "results": [
+            {
+                "id": "rp_search_legacy",
+                "titles": [{"value": "Legacy Search Product"}],
+                "mainTitle": "Legacy Search Product",
+                "type": {"name": "publication", "type": "article"},
+                "publicationDate": "2023-04-01",
+            }
+        ],
+    }
+    httpx_mock.add_response(
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts",
+        method="GET",
+        json=mock_api_response_json,
+        match_params={"mainTitle": "Open Science", "size": "5", "page": "1"},
+    )
     async with AireloomSession() as session:
-        try:
-            # Search for a common term, limit results
-            response = await session.search_research_products(
-                page_size=5,
-                mainTitle="Open Science",  # Use mainTitle filter
-            )
-            assert response is not None
-            assert len(response.results) <= 5
-            if response.results:
-                assert isinstance(response.results[0].id, str)
-                # Use mainTitle attribute for assertion
-                assert isinstance(response.results[0].mainTitle, str)
-        except AireloomError as e:
-            pytest.fail(f"Simple product search failed: {e}")
+        filters = ResearchProductsFilters(mainTitle="Open Science")
+        response = await session.research_products.search(
+            filters=filters, page_size=5, page=1
+        )
+        assert response is not None
+        assert response.results is not None and len(response.results) <= 5
+        if response.results:
+            assert isinstance(response.results[0].id, str)
+            assert isinstance(response.results[0].mainTitle, str)
 
 
 @pytest.mark.asyncio
 async def test_iterate_research_products(httpx_mock: HTTPXMock):
-    """Test iterating through research products."""
-    # Mock the API response for the iteration
-    mock_response = {
-        "header": {"total": 2},
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts"
+    mock_response_page1 = {
+        "header": {
+            "numFound": 2,
+            "cursor": "cursor_legacy1",
+            "size": 1,
+            "page": 1,
+        },  # Use numFound
         "results": [
-            {"id": "id1", "mainTitle": "Title 1"},
-            {"id": "id2", "mainTitle": "Title 2"},
+            {
+                "id": "id_legacy1",
+                "mainTitle": "Title Legacy 1",
+                "type": {"name": "dataset"},
+                "publicationDate": "2023-01-01",
+            }
+        ],
+    }
+    mock_response_page2 = {
+        "header": {"numFound": 2, "cursor": None, "size": 1, "page": 2},  # Use numFound
+        "results": [
+            {
+                "id": "id_legacy2",
+                "mainTitle": "Title Legacy 2",
+                "type": {"name": "software"},
+                "publicationDate": "2023-01-02",
+            }
         ],
     }
     httpx_mock.add_response(
-        url="https://api.openaire.eu/graph/v1/researchProducts?pageSize=5&sortBy=&mainTitle=FAIR+data&cursor=%2A",
+        url=base_url,
         method="GET",
-        json=mock_response,
-        status_code=200,
+        json=mock_response_page1,
+        match_params={"mainTitle": "FAIR data", "size": "1", "cursor": "*"},
+    )
+    httpx_mock.add_response(
+        url=base_url,
+        method="GET",
+        json=mock_response_page2,
+        match_params={
+            "mainTitle": "FAIR data",
+            "size": "1",
+            "cursor": "cursor_legacy1",
+        },
     )
     async with AireloomSession() as session:
         count = 0
-        max_items_to_iterate = 15
-        try:
-            async for product in session.iterate_research_products(
-                page_size=5, mainTitle="FAIR data"
-            ):
-                assert product is not None
-                assert isinstance(product.id, str)
-                count += 1
-                if count >= max_items_to_iterate:
-                    break
-            assert count >= 0
-            assert count <= max_items_to_iterate
-        except AireloomError as e:
-            pytest.fail(f"Product iteration failed: {e}")
-
-
-# --- Scholix API Tests ---
-
-
-# Use a known DOI with known relationships if possible, otherwise use a general one
+        max_items_to_iterate = 2
+        filters = ResearchProductsFilters(mainTitle="FAIR data")
+        async for product in session.research_products.iterate(
+            filters=filters, page_size=1
+        ):
+            assert product is not None
+            assert isinstance(product.id, str)
+            count += 1
+            if count >= max_items_to_iterate:
+                break
+        assert count == max_items_to_iterate
 
 
 @pytest.mark.asyncio
 async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
-    """Test searching for Scholix links for a known DOI."""
-    # Mock the API call
     httpx_mock.add_response(
         url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&rows=10",
         method="GET",
@@ -222,56 +927,45 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
         status_code=200,
     )
     async with AireloomSession() as session:
-        try:
-            response = await session.search_scholix_links(
-                page_size=10, sourcePid=KNOWN_DOI_WITH_LINKS
-            )
-            assert response is not None
-            assert response.currentPage == 0  # API is 0-indexed
-            assert response.totalLinks >= 0  # Check for non-negative
-            assert response.result is not None
-            assert 0 <= len(response.result) <= 10  # noqa: PLR2004
-            # If results exist, check basic structure
-            if response.result:
-                link = response.result[0]
-                # Assuming LinkPublicationDate might be None in real data or mock
-                # assert link.LinkPublicationDate is not None
-                assert link.source is not None
-                assert link.target is not None
-                assert isinstance(link.source.identifier, list)
-                assert isinstance(link.target.identifier, list)
-                assert link.relationship_type is not None  # Check added field
-        except AireloomError as e:
-            pytest.fail(f"Scholix link search failed: {e}")
+        filters = ScholixFilters(sourcePid=KNOWN_DOI_WITH_LINKS)
+        response: ScholixResponse = await session.scholix.search_links(
+            filters=filters, page_size=10, page=0
+        )
+        assert response is not None
+        assert response.current_page == 0
+        assert response.total_links >= 0
+        assert response.result is not None
+        assert 0 <= len(response.result) <= 10
+        if response.result:
+            link = response.result[0]
+            assert link.source is not None
+            assert link.target is not None
+            assert isinstance(link.source.identifier, list)
+            assert isinstance(link.target.identifier, list)
+            assert link.relationship_type is not None
 
 
 @pytest.mark.asyncio
 async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
-    """Test iterating through Scholix links."""
-    # Mock the first page API call
-    # Use a response with enough links for the test iteration count.
     mock_response_page1 = MOCK_SCHOLIX_RESPONSE.copy()
     mock_response_page1["currentPage"] = 0
-    mock_response_page1["totalLinks"] = 7  # Example: 7 links total across 2 pages
-    mock_response_page1["totalPages"] = 2  # Example: 2 pages total
-    # Create 5 links for page 1 (size=5)
-    # Ensure the base link structure is valid
+    mock_response_page1["totalLinks"] = 7
+    mock_response_page1["totalPages"] = 2
     base_link = MOCK_SCHOLIX_RESPONSE["result"][0]
     mock_response_page1["result"] = []
     for i in range(5):
         link = base_link.copy()
-        link["LinkPublicationDate"] = f"2023-01-15T12:00:0{i}Z"  # Vary slightly, use Z
-        # Ensure Source and Target are valid ScholixEntity structures
-        link["Source"] = {  # Add Source (Required)
+        link["LinkPublicationDate"] = f"2023-01-15T12:00:0{i}Z"
+        link["Source"] = {
             "Identifier": [{"ID": f"{KNOWN_DOI_WITH_LINKS}/{i}", "IDScheme": "doi"}],
             "Type": "publication",
         }
-        link["Target"] = {  # Add Target (Required)
+        link["Target"] = {
             "Identifier": [{"ID": f"10.1234/target.dataset.{i}", "IDScheme": "doi"}],
-            "Type": "dataset",  # Ensure valid type
+            "Type": "dataset",
         }
         link["RelationshipType"]["SubTypeSchema"] = (
-            "http://example.com/datacite"  # Fix SubTypeSchema
+            "http://example.com/datacite"  # Ensure valid URL
         )
         mock_response_page1["result"].append(link)
 
@@ -282,29 +976,29 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         status_code=200,
     )
 
-    # Mock the second page
     mock_response_page2 = MOCK_SCHOLIX_RESPONSE.copy()
     mock_response_page2["currentPage"] = 1
     mock_response_page2["totalLinks"] = 7
     mock_response_page2["totalPages"] = 2
-    # Create 2 remaining links for page 2
     mock_response_page2["result"] = []
     for i in range(2):
         link = base_link.copy()
-        link["LinkPublicationDate"] = f"2023-01-16T13:00:0{i}Z"  # Vary slightly, use Z
-        # Ensure Source and Target are valid ScholixEntity structures
-        link["Source"] = {  # Add Source (Required)
+        link["LinkPublicationDate"] = f"2023-01-16T13:00:0{i}Z"
+        link["Source"] = {
             "Identifier": [
                 {"ID": f"{KNOWN_DOI_WITH_LINKS}/{i + 5}", "IDScheme": "doi"}
             ],
             "Type": "publication",
         }
-        link["Target"] = {  # Add Target (Required)
+        link["Target"] = {
             "Identifier": [
                 {"ID": f"10.1234/target.dataset.{i + 5}", "IDScheme": "doi"}
             ],
-            "Type": "dataset",  # Ensure valid type
+            "Type": "dataset",
         }
+        link["RelationshipType"]["SubTypeSchema"] = (
+            "http://example.com/datacite"  # Ensure valid URL
+        )
         mock_response_page2["result"].append(link)
 
     httpx_mock.add_response(
@@ -315,35 +1009,47 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
     )
     async with AireloomSession() as session:
         count = 0
-        max_items_to_iterate = 7  # Iterate through all mocked items
-        try:
-            async for link in session.iterate_scholix_links(
-                page_size=5, sourcePid=KNOWN_DOI_WITH_LINKS
-            ):
-                assert link is not None
-                assert link.relationship_type is not None  # Use snake_case field name
-                assert link.source is not None
-                assert link.target is not None
-                assert link.link_publication_date is not None  # Check date exists
-                count += 1
-                if count >= max_items_to_iterate:
-                    break
-            assert count == max_items_to_iterate
-        except AireloomError as e:
-            pytest.fail(f"Scholix iteration failed: {e}")
+        max_items_to_iterate = 7
+        filters = ScholixFilters(sourcePid=KNOWN_DOI_WITH_LINKS)
+        async for link_item in session.scholix.iterate_links(
+            filters=filters, page_size=5
+        ):
+            assert link_item is not None
+            assert link_item.relationship_type is not None
+            assert link_item.source is not None
+            assert link_item.target is not None
+            assert link_item.link_publication_date is not None
+            count += 1
+            if count >= max_items_to_iterate:
+                break
+        assert count == max_items_to_iterate
 
 
 @pytest.mark.asyncio
-async def test_search_scholix_invalid_filter():
-    """Test searching Scholix links with an invalid filter key."""
+async def test_search_scholix_ignored_invalid_filter_key(httpx_mock: HTTPXMock):
+    """Test that an invalid filter key in ScholixFilters is ignored."""
+    source_pid = KNOWN_DOI_WITH_LINKS
+    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+
+    mocked_api_response_for_test = MOCK_SCHOLIX_RESPONSE.copy()
+
+    httpx_mock.add_response(
+        url=expected_url,
+        method="GET",
+        json=mocked_api_response_for_test,
+        match_params={"sourcePid": source_pid, "page": "0", "rows": "10"},
+    )
+
     async with AireloomSession() as session:
-        with pytest.raises(
-            ValidationError, match="Invalid filter key"
-        ):  # Check error message content
-            # Pass a deliberately invalid filter key
-            # Also pass a valid sourcePid to get past the initial check
-            await session.search_scholix_links(
-                page_size=10,
-                sourcePid=KNOWN_DOI_WITH_LINKS,
-                someMadeUpFilterKey="someValue",
-            )
+        filters_with_extra = ScholixFilters(
+            sourcePid=source_pid, someMadeUpFilterKey="someValue"
+        )
+
+        response: ScholixResponse = await session.scholix.search_links(
+            filters=filters_with_extra, page_size=10, page=0
+        )
+
+        assert response is not None
+        assert response.total_links == mocked_api_response_for_test["totalLinks"]
+        if response.result:
+            assert len(response.result) == len(mocked_api_response_for_test["result"])

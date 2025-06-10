@@ -22,6 +22,14 @@ ITERATE_PAGE_SIZE: int = (
 # --- API Parameter Enums/Literals --- #
 
 
+class EndpointName(Enum):  # Added
+    RESEARCH_PRODUCTS = "researchProducts"
+    ORGANIZATIONS = "organizations"
+    DATA_SOURCES = "dataSources"
+    PROJECTS = "projects"
+    SCHOLIX = "Links"  # For Scholexplorer API
+
+
 class SortOrder(Enum):
     ASC = "asc"
     DESC = "desc"
@@ -29,12 +37,12 @@ class SortOrder(Enum):
 
 EntityType = Literal[
     "publication",
-    "dataset", # Added dataset based on typical OpenAIRE entities
-    "software", # Added software
+    "dataset",  # Added dataset based on typical OpenAIRE entities
+    "software",  # Added software
     "project",
     "organization",
     "datasource",
-    "other",     # For 'other research products'
+    "other",  # For 'other research products'
 ]
 
 

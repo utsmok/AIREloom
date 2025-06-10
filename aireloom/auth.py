@@ -1,10 +1,17 @@
 import asyncio
+from enum import Enum  # Added
 from typing import Protocol
 
 import httpx
 
 from .exceptions import AuthError, ConfigurationError
 from .log_config import logger
+
+
+class AuthStrategyType(Enum):  # Added
+    NONE = "none"
+    STATIC_TOKEN = "static_token"
+    CLIENT_CREDENTIALS = "client_credentials"
 
 
 class AuthStrategy(Protocol):
@@ -23,6 +30,14 @@ class AuthStrategy(Protocol):
         """
         ...
 
+    async def async_close(self) -> None:
+        """
+        Asynchronously closes any underlying resources used by the auth strategy,
+        if applicable (e.g., an HTTP client for token fetching).
+        This method should be idempotent.
+        """
+        ...
+
 
 class NoAuth:
     """Implements the AuthStrategy protocol for requests requiring no authentication."""
@@ -30,6 +45,9 @@ class NoAuth:
     async def async_authenticate(self, request: httpx.Request) -> None:
         """Does nothing as no authentication is needed."""
         logger.trace("Using NoAuth strategy.")
+
+    async def async_close(self) -> None:
+        """No resources to close for NoAuth."""
 
 
 class StaticTokenAuth:
@@ -49,6 +67,9 @@ class StaticTokenAuth:
         logger.trace("Authenticating request using StaticTokenAuth.")
         request.headers["Authorization"] = f"Bearer {self._token}"
 
+    async def async_close(self) -> None:
+        """No resources to close for StaticTokenAuth."""
+
 
 class ClientCredentialsAuth:
     """
@@ -64,9 +85,12 @@ class ClientCredentialsAuth:
             raise ConfigurationError(
                 "ClientCredentialsAuth requires 'client_id', 'client_secret', and 'token_url'."
             )
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self._token_url = token_url
+        assert client_id is not None, "client_id cannot be None here"
+        assert client_secret is not None, "client_secret cannot be None here"
+        assert token_url is not None, "token_url cannot be None here"
+        self._client_id: str = client_id
+        self._client_secret: str = client_secret
+        self._token_url: str = token_url
         self._access_token: str | None = None
         self._token_client: httpx.AsyncClient | None = None
         self._fetch_lock = asyncio.Lock()  # Prevent concurrent token fetches
@@ -107,6 +131,7 @@ class ClientCredentialsAuth:
                 # expires_in = token_data.get("expires_in")
                 logger.info("Successfully fetched new access token.")
                 self._access_token = access_token
+                assert self._access_token is not None, "Access token should be set here"
                 return self._access_token
             except httpx.HTTPStatusError as e:
                 logger.error(
@@ -132,7 +157,7 @@ class ClientCredentialsAuth:
 
         request.headers["Authorization"] = f"Bearer {self._access_token}"
 
-    async def close(self) -> None:
+    async def async_close(self) -> None:
         """Closes the internal HTTP client used for token fetching."""
         if self._token_client:
             await self._token_client.aclose()

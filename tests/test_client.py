@@ -1,8 +1,11 @@
 import json
+import time  # Added for mocking time in cache tests
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
+from pydantic import BaseModel  # Added for test model
 from pytest_httpx import HTTPXMock
 
 from aireloom.auth import ClientCredentialsAuth, NoAuth, StaticTokenAuth
@@ -16,6 +19,7 @@ from aireloom.exceptions import (
     APIError,
     AuthError,
     NetworkError,
+    RateLimitError,
     TimeoutError,
 )
 
@@ -27,6 +31,13 @@ MOCK_CLIENT_SECRET = "client_test_secret"
 MOCK_OAUTH_TOKEN = "oauth_test_token"
 MOCK_TOKEN_URL = "https://token.test.com/token"
 MOCK_USER_AGENT = "Test User Agent"
+
+
+# --- Test Pydantic Model ---
+class MockResource(BaseModel):
+    id: int
+    name: str
+    value: float | None = None
 
 
 # --- Fixtures ---
@@ -72,6 +83,42 @@ def mock_settings_with_creds() -> ApiSettings:
         max_retries=2,
         backoff_factor=0.5,
         user_agent=MOCK_USER_AGENT,
+    )
+
+
+@pytest.fixture
+def mock_settings_caching_enabled() -> ApiSettings:
+    """Fixture for mock API settings with caching enabled."""
+    return ApiSettings(
+        openaire_api_token=None,
+        openaire_client_id=None,
+        openaire_client_secret=None,
+        openaire_token_url=MOCK_TOKEN_URL,
+        request_timeout=10,
+        max_retries=2,
+        backoff_factor=0.5,
+        user_agent=MOCK_USER_AGENT,
+        enable_caching=True,
+        cache_ttl_seconds=300,
+        cache_max_size=128,
+    )
+
+
+@pytest.fixture
+def mock_settings_caching_disabled() -> ApiSettings:
+    """Fixture for mock API settings with caching explicitly disabled."""
+    return ApiSettings(
+        openaire_api_token=None,
+        openaire_client_id=None,
+        openaire_client_secret=None,
+        openaire_token_url=MOCK_TOKEN_URL,
+        request_timeout=10,
+        max_retries=2,
+        backoff_factor=0.5,
+        user_agent=MOCK_USER_AGENT,
+        enable_caching=False,  # Explicitly false
+        cache_ttl_seconds=300,
+        cache_max_size=128,
     )
 
 
@@ -591,3 +638,815 @@ async def test_request_get_with_params(mock_settings, httpx_mock: HTTPXMock):
     assert len(requests) == 1
     request = requests[0]
     assert request.headers["User-Agent"] == MOCK_USER_AGENT
+
+
+# --- Test Rate Limiting ---
+
+
+@pytest.mark.asyncio
+@patch("asyncio.sleep", new_callable=AsyncMock)
+async def test_client_preemptive_delay_low_remaining(
+    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test client waits before request if X-RateLimit-Remaining is low."""
+    settings = mock_settings
+    settings.enable_rate_limiting = True
+    settings.rate_limit_buffer_percentage = 0.1  # Buffer is 10%
+    # Disable tenacity retries to isolate rate limit sleep
+    settings.max_retries = 0
+
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    reset_time_dt = datetime.now(UTC) + timedelta(seconds=10)
+    reset_timestamp_str = str(int(reset_time_dt.timestamp()))
+
+    # First response: low remaining requests, reset time in future
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/test1",
+        method="GET",
+        headers={
+            "X-RateLimit-Limit": "100",
+            "X-RateLimit-Remaining": "5",  # 5% remaining, buffer is 10%, so wait
+            "X-RateLimit-Reset": reset_timestamp_str,
+        },
+        json={"id": "1", "title": "Test 1"},
+    )
+    # Second response: for the request that should trigger the wait
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/test2",
+        method="GET",
+        json={"id": "2", "title": "Test 2"},
+    )
+
+    async with client:
+        # First request populates rate limit headers
+        await client.request("GET", "/test1")
+        mock_sleep.assert_not_called()  # No sleep before or during the first request
+
+        # Second request should trigger pre-emptive sleep
+        await client.request("GET", "/test2")
+
+    # Assert sleep was called once
+    mock_sleep.assert_called_once()
+    args, _ = mock_sleep.call_args
+    # Check sleep duration is close to the reset time (allowing for small processing delays)
+    # The client calculates delay as: reset_timestamp - time.time()
+    # We expect it to be around 10 seconds.
+    assert 8 < args[0] <= 10.5  # Allow a bit of leeway
+
+
+@pytest.mark.asyncio
+@patch("asyncio.sleep", new_callable=AsyncMock)
+async def test_client_429_with_retry_after_seconds(
+    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test client waits according to Retry-After header (seconds) on 429."""
+    settings = mock_settings
+    settings.enable_rate_limiting = True
+    settings.max_retries = 0  # Disable tenacity retries to isolate rate limit sleep
+
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited",
+        method="GET",
+        status_code=429,
+        headers={"Retry-After": "15"},
+    )
+    # Add a successful response for after the retry, though with max_retries=0 it won't be hit
+    # by tenacity, but the client's internal rate limit handling might attempt one more time
+    # after sleeping. The test expects RateLimitError.
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
+
+    async with client:
+        with pytest.raises(RateLimitError) as excinfo:
+            await client.request("GET", "/limited")
+
+    assert excinfo.value.response is not None
+    assert excinfo.value.response.status_code == 429
+    mock_sleep.assert_called_once()
+    args, _ = mock_sleep.call_args
+    assert args[0] == 15
+
+
+@pytest.mark.asyncio
+@patch("asyncio.sleep", new_callable=AsyncMock)
+async def test_client_429_with_retry_after_http_date(
+    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test client waits according to Retry-After header (HTTP-date) on 429."""
+    settings = mock_settings
+    settings.enable_rate_limiting = True
+    settings.max_retries = 0  # Disable tenacity retries
+
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    retry_after_dt = datetime.now(UTC) + timedelta(seconds=20)
+    # Format as RFC 1123 (HTTP-date)
+    retry_after_http_date = retry_after_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited_date",
+        method="GET",
+        status_code=429,
+        headers={"Retry-After": retry_after_http_date},
+    )
+    httpx_mock.add_response(  # Fallback if retry happens
+        url=f"{MOCK_BASE_URL}/limited_date",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
+
+    async with client:
+        with pytest.raises(RateLimitError) as excinfo:
+            await client.request("GET", "/limited_date")
+
+    assert excinfo.value.response is not None
+    assert excinfo.value.response.status_code == 429
+    mock_sleep.assert_called_once()
+    args, _ = mock_sleep.call_args
+    # Check sleep duration is close to 20 seconds
+    assert 19 < args[0] <= 20.5
+
+
+@pytest.mark.asyncio
+@patch("asyncio.sleep", new_callable=AsyncMock)
+async def test_client_429_with_no_retry_after(
+    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test client uses default retry after on 429 if Retry-After is missing."""
+    settings = mock_settings
+    settings.enable_rate_limiting = True
+    settings.max_retries = 0  # Disable tenacity retries
+    default_retry_sec = settings.rate_limit_retry_after_default
+
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited_no_header",
+        method="GET",
+        status_code=429,
+        # No Retry-After header
+    )
+    httpx_mock.add_response(  # Fallback if retry happens
+        url=f"{MOCK_BASE_URL}/limited_no_header",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
+
+    async with client:
+        with pytest.raises(RateLimitError) as excinfo:
+            await client.request("GET", "/limited_no_header")
+
+    assert excinfo.value.response is not None
+    assert excinfo.value.response.status_code == 429
+    mock_sleep.assert_called_once()
+    args, _ = mock_sleep.call_args
+    assert args[0] == default_retry_sec
+
+
+@pytest.mark.asyncio
+@patch("asyncio.sleep", new_callable=AsyncMock)
+async def test_client_rate_limiting_disabled(
+    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test asyncio.sleep is not called for rate limiting if disabled."""
+    settings = mock_settings
+    settings.enable_rate_limiting = False
+    settings.max_retries = 0  # Disable tenacity retries to avoid its sleep
+
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    # Scenario 1: Low remaining (should be ignored)
+    reset_time_dt = datetime.now(UTC) + timedelta(seconds=10)
+    reset_timestamp_str = str(int(reset_time_dt.timestamp()))
+
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/test_disabled_low_remaining",
+        method="GET",
+        headers={
+            "X-RateLimit-Limit": "100",
+            "X-RateLimit-Remaining": "1",  # Very low
+            "X-RateLimit-Reset": reset_timestamp_str,
+        },
+        json={"id": "1"},
+    )
+    # Second request to check if sleep was called pre-emptively
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/test_disabled_after_low",
+        method="GET",
+        json={"id": "2"},
+    )
+
+    # Scenario 2: 429 response (should be ignored by rate limiter, will raise APIError)
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/test_disabled_429",
+        method="GET",
+        status_code=429,
+        headers={"Retry-After": "5"},  # This header should be ignored
+    )
+
+    async with client:
+        # Test low remaining scenario
+        await client.request("GET", "/test_disabled_low_remaining")
+        mock_sleep.assert_not_called()  # No pre-emptive sleep
+        await client.request("GET", "/test_disabled_after_low")
+        mock_sleep.assert_not_called()  # Still no pre-emptive sleep
+
+        # Test 429 scenario
+        with pytest.raises(APIError) as excinfo:  # Expect APIError as tenacity is off
+            await client.request("GET", "/test_disabled_429")
+
+        assert excinfo.value.response is not None
+        assert excinfo.value.response.status_code == 429
+
+    # Assert sleep was never called by rate limiting logic
+    mock_sleep.assert_not_called()
+
+
+# --- Test Caching Logic ---
+
+
+@pytest.mark.asyncio
+async def test_cache_hit(
+    mock_settings_caching_enabled: ApiSettings, httpx_mock: HTTPXMock
+):
+    """Test that a second identical GET request hits the cache."""
+    client = AireloomClient(
+        settings=mock_settings_caching_enabled, base_url=MOCK_BASE_URL
+    )
+    url_path = "/cached_resource"
+    full_url = f"{MOCK_BASE_URL}{url_path}"
+    mock_response_data = {"id": 1, "name": "Test Resource", "value": 1.23}
+    expected_model = MockResource(**mock_response_data)
+
+    # Mock only one HTTP response, the second call should be cached
+    httpx_mock.add_response(
+        url=full_url, method="GET", status_code=200, json=mock_response_data
+    )
+
+    async with client:
+        # First call - should make HTTP request and cache
+        response1 = await client.request("GET", url_path, expected_model=MockResource)
+        # Second call - should hit cache
+        response2 = await client.request("GET", url_path, expected_model=MockResource)
+
+    assert response1 == expected_model
+    assert response2 == expected_model
+    assert response1 is response2  # Should be the same object from cache
+
+    # Verify only one HTTP request was made
+    requests = httpx_mock.get_requests(url=full_url, method="GET")
+    assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_cache_miss_different_url(
+    mock_settings_caching_enabled: ApiSettings, httpx_mock: HTTPXMock
+):
+    """Test that different URLs result in cache misses and new HTTP calls."""
+    client = AireloomClient(
+        settings=mock_settings_caching_enabled, base_url=MOCK_BASE_URL
+    )
+    url_path1 = "/resourceA"
+    url_path2 = "/resourceB"
+    full_url1 = f"{MOCK_BASE_URL}{url_path1}"
+    full_url2 = f"{MOCK_BASE_URL}{url_path2}"
+    mock_data1 = {"id": 1, "name": "Resource A"}
+    mock_data2 = {"id": 2, "name": "Resource B"}
+
+    httpx_mock.add_response(
+        url=full_url1, method="GET", status_code=200, json=mock_data1
+    )
+    httpx_mock.add_response(
+        url=full_url2, method="GET", status_code=200, json=mock_data2
+    )
+
+    async with client:
+        resp1 = await client.request("GET", url_path1, expected_model=MockResource)
+        resp2 = await client.request("GET", url_path2, expected_model=MockResource)
+
+    assert resp1 == MockResource(**mock_data1)
+    assert resp2 == MockResource(**mock_data2)
+    assert resp1 is not resp2
+
+    assert len(httpx_mock.get_requests(url=full_url1, method="GET")) == 1
+    assert len(httpx_mock.get_requests(url=full_url2, method="GET")) == 1
+
+
+@pytest.mark.asyncio
+async def test_cache_miss_different_params(
+    mock_settings_caching_enabled: ApiSettings, httpx_mock: HTTPXMock
+):
+    """Test that different query parameters result in cache misses."""
+    client = AireloomClient(
+        settings=mock_settings_caching_enabled, base_url=MOCK_BASE_URL
+    )
+    url_path = "/param_resource"
+    # httpx_mock needs the full URL including params for matching
+    full_url_p1 = f"{MOCK_BASE_URL}{url_path}?filter=A"
+    full_url_p2 = f"{MOCK_BASE_URL}{url_path}?filter=B"
+    full_url_p3 = (
+        f"{MOCK_BASE_URL}{url_path}?filter=A&sort=name"  # Different combination
+    )
+    full_url_p4 = (
+        f"{MOCK_BASE_URL}{url_path}?sort=name&filter=A"  # Same as p3, different order
+    )
+
+    mock_data_p1 = {"id": 1, "name": "Filtered A"}
+    mock_data_p2 = {"id": 2, "name": "Filtered B"}
+    mock_data_p3 = {"id": 3, "name": "Filtered A Sorted"}
+
+    httpx_mock.add_response(
+        url=full_url_p1, method="GET", status_code=200, json=mock_data_p1
+    )
+    httpx_mock.add_response(
+        url=full_url_p2, method="GET", status_code=200, json=mock_data_p2
+    )
+    httpx_mock.add_response(
+        url=full_url_p3, method="GET", status_code=200, json=mock_data_p3
+    )
+    # p4 should hit the cache for p3 due to sorted param key generation
+    # So, no separate httpx_mock.add_response for full_url_p4
+
+    async with client:
+        resp1 = await client.request(
+            "GET", url_path, params={"filter": "A"}, expected_model=MockResource
+        )
+        resp2 = await client.request(
+            "GET", url_path, params={"filter": "B"}, expected_model=MockResource
+        )
+        resp3 = await client.request(
+            "GET",
+            url_path,
+            params={"filter": "A", "sort": "name"},
+            expected_model=MockResource,
+        )
+        resp4 = await client.request(
+            "GET",
+            url_path,
+            params={"sort": "name", "filter": "A"},
+            expected_model=MockResource,
+        )
+
+    assert resp1 == MockResource(**mock_data_p1)
+    assert resp2 == MockResource(**mock_data_p2)
+    assert resp3 == MockResource(**mock_data_p3)
+    assert resp4 == resp3  # Should be a cache hit from resp3
+
+    assert len(httpx_mock.get_requests(url=full_url_p1, method="GET")) == 1
+    assert len(httpx_mock.get_requests(url=full_url_p2, method="GET")) == 1
+    assert len(httpx_mock.get_requests(url=full_url_p3, method="GET")) == 1
+    # Total GET requests to the base path /param_resource should be 3
+    assert len(httpx_mock.get_requests(method="GET")) == 3
+
+
+@pytest.mark.asyncio
+@patch("time.time")  # Mock time.time to control TTL
+async def test_cache_ttl_expiration(
+    mock_time: MagicMock,
+    mock_settings_caching_enabled: ApiSettings,
+    httpx_mock: HTTPXMock,
+):
+    """Test that cache entries expire after TTL."""
+    ttl_seconds = 10  # Use a short TTL for testing
+    mock_settings_caching_enabled.cache_ttl_seconds = ttl_seconds
+    client = AireloomClient(
+        settings=mock_settings_caching_enabled, base_url=MOCK_BASE_URL
+    )
+
+    url_path = "/ttl_resource"
+    full_url = f"{MOCK_BASE_URL}{url_path}"
+    mock_data_initial = {"id": 1, "name": "Initial Data"}
+    mock_data_refreshed = {"id": 2, "name": "Refreshed Data"}
+
+    # Initial time
+    current_time = time.time()  # Get a real timestamp to start
+    mock_time.return_value = current_time
+
+    # Mock responses: first call, then another after TTL expiry
+    httpx_mock.add_response(
+        url=full_url, method="GET", status_code=200, json=mock_data_initial
+    )
+    httpx_mock.add_response(
+        url=full_url, method="GET", status_code=200, json=mock_data_refreshed
+    )
+
+    async with client:
+        # First call - caches the item
+        resp1 = await client.request("GET", url_path, expected_model=MockResource)
+        assert resp1 == MockResource(**mock_data_initial)
+        assert len(httpx_mock.get_requests(url=full_url, method="GET")) == 1
+
+        # Second call immediately - should hit cache
+        resp2 = await client.request("GET", url_path, expected_model=MockResource)
+        assert resp2 == resp1  # Cache hit
+        assert len(httpx_mock.get_requests(url=full_url, method="GET")) == 1
+
+        # Advance time beyond TTL
+        mock_time.return_value = current_time + ttl_seconds + 5  # 5 seconds past TTL
+
+        # Third call - should be a cache miss due to TTL, makes new HTTP request
+        resp3 = await client.request("GET", url_path, expected_model=MockResource)
+        assert resp3 == MockResource(**mock_data_refreshed)
+        assert resp3 is not resp1  # New object
+        assert len(httpx_mock.get_requests(url=full_url, method="GET")) == 2
+
+
+@pytest.mark.asyncio
+async def test_cache_disabled(
+    mock_settings_caching_disabled: ApiSettings, httpx_mock: HTTPXMock
+):
+    """Test that no caching occurs if enable_caching is False."""
+    client = AireloomClient(
+        settings=mock_settings_caching_disabled, base_url=MOCK_BASE_URL
+    )
+    url_path = "/disabled_cache_resource"
+    full_url = f"{MOCK_BASE_URL}{url_path}"
+    mock_data = {"id": 1, "name": "No Cache Data"}
+
+    # Mock two responses, as both calls should hit the server
+    httpx_mock.add_response(url=full_url, method="GET", status_code=200, json=mock_data)
+    httpx_mock.add_response(url=full_url, method="GET", status_code=200, json=mock_data)
+
+    async with client:
+        resp1 = await client.request("GET", url_path, expected_model=MockResource)
+        resp2 = await client.request("GET", url_path, expected_model=MockResource)
+
+    assert resp1 == MockResource(**mock_data)
+    assert resp2 == MockResource(**mock_data)
+    assert resp1 is not resp2  # Should be different objects
+
+    assert len(httpx_mock.get_requests(url=full_url, method="GET")) == 2
+
+
+@pytest.mark.asyncio
+async def test_non_get_requests_not_cached(
+    mock_settings_caching_enabled: ApiSettings, httpx_mock: HTTPXMock
+):
+    """Test that non-GET requests (e.g., POST) are not cached or retrieved from cache."""
+    client = AireloomClient(
+        settings=mock_settings_caching_enabled, base_url=MOCK_BASE_URL
+    )
+    url_path = "/post_resource"
+    full_url = f"{MOCK_BASE_URL}{url_path}"
+    post_payload = {"data": "sample"}
+    mock_response_data = {"id": 1, "status": "created"}
+
+    # Mock two POST responses, as caching should not apply
+    httpx_mock.add_response(
+        url=full_url, method="POST", status_code=201, json=mock_response_data
+    )
+    httpx_mock.add_response(
+        url=full_url, method="POST", status_code=201, json=mock_response_data
+    )
+
+    async with client:
+        # First POST call
+        resp1 = await client.request(
+            "POST",
+            url_path,
+            json=post_payload,
+            expected_model=MockResource,  # Using MockResource for structure
+        )
+        # Second POST call (identical)
+        resp2 = await client.request(
+            "POST", url_path, json=post_payload, expected_model=MockResource
+        )
+
+    # Assuming MockResource can handle 'status' if 'name' is optional or has default
+    # For this test, we mainly care about the HTTP call count.
+    # If MockResource needs 'name', adjust mock_response_data or expected_model usage.
+    # Let's assume MockResource is flexible or we adapt the response.
+    # For simplicity, let's assume the response can be parsed by MockResource if id is present.
+    # A more specific model for POST response might be better in a real scenario.
+    # Here, we'll just check the HTTP call count.
+
+    assert len(httpx_mock.get_requests(url=full_url, method="POST")) == 2
+
+    # Also, try a GET request to the same path to ensure it's not polluted by POST
+    get_mock_data = {"id": 10, "name": "GET response"}
+    httpx_mock.add_response(
+        url=full_url, method="GET", status_code=200, json=get_mock_data
+    )
+    async with client:
+        get_resp = await client.request("GET", url_path, expected_model=MockResource)
+    assert get_resp == MockResource(**get_mock_data)
+    assert len(httpx_mock.get_requests(url=full_url, method="GET")) == 1
+
+
+# --- Hook System Tests ---
+
+
+@pytest.mark.asyncio
+async def test_client_pre_request_hook_called(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that a single pre-request hook is called with correct arguments."""
+    mock_pre_hook = MagicMock()
+    settings = mock_settings.model_copy(update={"pre_request_hooks": [mock_pre_hook]})
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hooktest_pre"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    request_params = {"key": "value"}
+    response_json = {"id": 1, "name": "Pre Hook Test"}
+
+    httpx_mock.add_response(
+        url=full_request_url,
+        method="GET",
+        json=response_json,
+        match_params=request_params,
+    )
+
+    async with client:
+        await client.request(
+            "GET", request_url_path, params=request_params, expected_model=MockResource
+        )
+
+    mock_pre_hook.assert_called_once()
+    args, _ = mock_pre_hook.call_args
+    assert args[0] == "GET"  # method
+    assert args[1] == full_request_url  # url
+    assert args[2] == request_params  # params (should be a dict)
+    assert isinstance(args[3], httpx.Headers)  # headers
+    # Check for User-Agent in headers passed to hook (set by auth or default)
+    assert args[3]["User-Agent"] == MOCK_USER_AGENT
+
+
+@pytest.mark.asyncio
+async def test_pre_request_hook_modifies_params_and_headers(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that pre-request hooks can modify request parameters and headers."""
+    original_params = {"param1": "original_value"}
+    modified_params = {"param1": "modified_value", "param2": "added_value"}
+    original_headers = {"X-Original-Header": "original"}
+    modified_headers_dict = {"X-Original-Header": "modified", "X-Added-Header": "added"}
+
+    def modifying_pre_hook(method, url, params, headers):
+        # Modify params
+        if params is not None:
+            params.clear()
+            params.update(modified_params)
+        # Modify headers
+        headers.clear()  # Clear existing headers like User-Agent for predictable testing
+        for k, v in modified_headers_dict.items():
+            headers[k] = v
+        headers["User-Agent"] = (
+            "Hooked-User-Agent"  # Ensure User-Agent can be overridden
+        )
+
+    settings = mock_settings.model_copy(
+        update={"pre_request_hooks": [modifying_pre_hook]}
+    )
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hook_modify_test"
+    # The URL for httpx_mock should match the *modified* params
+    # httpx_mock matches based on the final request sent
+    final_request_url_with_params = (
+        f"{MOCK_BASE_URL}{request_url_path}?param1=modified_value&param2=added_value"
+    )
+
+    httpx_mock.add_response(
+        url=final_request_url_with_params,  # This needs to match the URL with modified params
+        method="GET",
+        json={"id": 1, "name": "Modified by Hook"},
+    )
+
+    async with client:
+        await client.request(
+            "GET",
+            request_url_path,
+            params=original_params.copy(),  # Pass a copy so original_params isn't modified by client setup
+            expected_model=MockResource,
+        )
+
+    # Verify the request made to the server had modified params and headers
+    made_requests = httpx_mock.get_requests()
+    assert len(made_requests) == 1
+    final_request = made_requests[0]
+
+    # Check params (httpx.Request.url.params is an immutableQueryParams object)
+    assert str(final_request.url) == final_request_url_with_params
+
+    # Check headers
+    for key, value in modified_headers_dict.items():
+        assert final_request.headers[key] == value
+    assert final_request.headers["User-Agent"] == "Hooked-User-Agent"
+
+
+@pytest.mark.asyncio
+async def test_client_post_request_hook_called(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that a single post-request hook is called with response and parsed model."""
+    mock_post_hook = MagicMock()
+    settings = mock_settings.model_copy(update={"post_request_hooks": [mock_post_hook]})
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hooktest_post"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    response_json = {"id": 1, "name": "Post Hook Test", "value": 3.14}
+    expected_parsed_model = MockResource(**response_json)
+
+    httpx_mock.add_response(url=full_request_url, method="GET", json=response_json)
+
+    async with client:
+        parsed_model_result = await client.request(
+            "GET", request_url_path, expected_model=MockResource
+        )
+
+    assert parsed_model_result == expected_parsed_model
+    mock_post_hook.assert_called_once()
+    args, _ = mock_post_hook.call_args
+    assert isinstance(args[0], httpx.Response)  # raw httpx response
+    assert args[0].status_code == 200
+    assert args[0].json() == response_json
+    assert args[1] == expected_parsed_model  # parsed pydantic model
+
+
+@pytest.mark.asyncio
+async def test_client_post_request_hook_model_parse_failure(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test post-request hook is called with None for model if parsing fails."""
+    mock_post_hook = MagicMock()
+    settings = mock_settings.model_copy(update={"post_request_hooks": [mock_post_hook]})
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hooktest_post_fail"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    # Response that will fail MockResource validation (e.g., missing 'name')
+    response_json_malformed = {"id": 1, "val": 3.14}
+
+    httpx_mock.add_response(
+        url=full_request_url, method="GET", json=response_json_malformed
+    )
+
+    async with client:
+        # Request will return raw response due to parsing failure
+        raw_response = await client.request(
+            "GET", request_url_path, expected_model=MockResource
+        )
+
+    assert isinstance(raw_response, httpx.Response)  # Should get raw response
+    assert raw_response.json() == response_json_malformed
+
+    mock_post_hook.assert_called_once()
+    args, _ = mock_post_hook.call_args
+    assert isinstance(args[0], httpx.Response)
+    assert args[0].json() == response_json_malformed
+    assert args[1] is None  # Parsed model should be None
+
+
+@pytest.mark.asyncio
+async def test_client_multiple_hooks_called(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that multiple pre and post-request hooks are all called in order."""
+    mock_pre_hook1 = MagicMock()
+    mock_pre_hook2 = MagicMock()
+    mock_post_hook1 = MagicMock()
+    mock_post_hook2 = MagicMock()
+
+    # Use a list to check call order
+    call_order_recorder = []
+    mock_pre_hook1.side_effect = lambda *args: call_order_recorder.append("pre1")
+    mock_pre_hook2.side_effect = lambda *args: call_order_recorder.append("pre2")
+    mock_post_hook1.side_effect = lambda *args: call_order_recorder.append("post1")
+    mock_post_hook2.side_effect = lambda *args: call_order_recorder.append("post2")
+
+    settings = mock_settings.model_copy(
+        update={
+            "pre_request_hooks": [mock_pre_hook1, mock_pre_hook2],
+            "post_request_hooks": [mock_post_hook1, mock_post_hook2],
+        }
+    )
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hooktest_multiple"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    response_json = {"id": 1, "name": "Multiple Hooks"}
+
+    httpx_mock.add_response(url=full_request_url, method="GET", json=response_json)
+
+    async with client:
+        await client.request("GET", request_url_path, expected_model=MockResource)
+
+    mock_pre_hook1.assert_called_once()
+    mock_pre_hook2.assert_called_once()
+    mock_post_hook1.assert_called_once()
+    mock_post_hook2.assert_called_once()
+
+    assert call_order_recorder == ["pre1", "pre2", "post1", "post2"]
+
+
+@pytest.mark.asyncio
+async def test_client_no_hooks_works_correctly(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test client works correctly if no hooks are registered."""
+    # Settings will have empty hook lists by default if not specified
+    client = AireloomClient(settings=mock_settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hooktest_none"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    response_json = {"id": 1, "name": "No Hooks"}
+    expected_model = MockResource(**response_json)
+
+    httpx_mock.add_response(url=full_request_url, method="GET", json=response_json)
+
+    async with client:
+        result = await client.request(
+            "GET", request_url_path, expected_model=MockResource
+        )
+
+    assert result == expected_model
+    assert len(httpx_mock.get_requests()) == 1
+
+
+@pytest.mark.asyncio
+async def test_pre_request_hook_exception_does_not_stop_others_or_request(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that an exception in one pre-request hook doesn't stop others or the main request."""
+    mock_pre_hook_good1 = MagicMock()
+    mock_pre_hook_bad = MagicMock(side_effect=ValueError("Pre-hook error"))
+    mock_pre_hook_good2 = MagicMock()
+    mock_post_hook = MagicMock()
+
+    settings = mock_settings.model_copy(
+        update={
+            "pre_request_hooks": [
+                mock_pre_hook_good1,
+                mock_pre_hook_bad,
+                mock_pre_hook_good2,
+            ],
+            "post_request_hooks": [mock_post_hook],
+        }
+    )
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hook_exception_pre"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    response_json = {"id": 1, "name": "Pre Hook Exception Test"}
+
+    httpx_mock.add_response(url=full_request_url, method="GET", json=response_json)
+
+    async with client:
+        # The request should still succeed despite the hook error
+        await client.request("GET", request_url_path, expected_model=MockResource)
+
+    mock_pre_hook_good1.assert_called_once()
+    mock_pre_hook_bad.assert_called_once()
+    mock_pre_hook_good2.assert_called_once()  # Should still be called
+    mock_post_hook.assert_called_once()  # Post hook should also be called
+    assert len(httpx_mock.get_requests()) == 1  # Request should have been made
+
+
+@pytest.mark.asyncio
+async def test_post_request_hook_exception_does_not_stop_others(
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
+):
+    """Test that an exception in one post-request hook doesn't stop others."""
+    mock_post_hook_good1 = MagicMock()
+    mock_post_hook_bad = MagicMock(side_effect=ValueError("Post-hook error"))
+    mock_post_hook_good2 = MagicMock()
+
+    settings = mock_settings.model_copy(
+        update={
+            "post_request_hooks": [
+                mock_post_hook_good1,
+                mock_post_hook_bad,
+                mock_post_hook_good2,
+            ]
+        }
+    )
+    client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
+
+    request_url_path = "/hook_exception_post"
+    full_request_url = f"{MOCK_BASE_URL}{request_url_path}"
+    response_json = {"id": 1, "name": "Post Hook Exception Test"}
+
+    httpx_mock.add_response(url=full_request_url, method="GET", json=response_json)
+
+    async with client:
+        # The request result should be unaffected by post-hook errors
+        result = await client.request(
+            "GET", request_url_path, expected_model=MockResource
+        )
+
+    assert result == MockResource(**response_json)
+    mock_post_hook_good1.assert_called_once()
+    mock_post_hook_bad.assert_called_once()
+    mock_post_hook_good2.assert_called_once()  # Should still be called
+    assert len(httpx_mock.get_requests()) == 1

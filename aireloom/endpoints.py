@@ -1,5 +1,10 @@
 """Defines API endpoint paths and validation details."""
 
+from datetime import date
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
 # Base URLs
 GRAPH_API_BASE_URL = "https://api.graph.openaire.eu/v1/"
 SCHOLIX_API_BASE_URL = (
@@ -9,52 +14,123 @@ SCHOLIX_API_BASE_URL = (
 # --- Graph API Endpoint Paths ---
 RESEARCH_PRODUCTS = "researchProducts"
 ORGANIZATIONS = "organizations"
-DATA_SOURCES = "dataSources" # Corrected casing
+DATA_SOURCES = "dataSources"
 PROJECTS = "projects"
 SCHOLIX = "Links"  # Renamed for Scholexplorer
 
-# Basic definition structure: {path: {'filters': dict(), 'sort': dict()}}
+# --- Pydantic Models for Filter Parameters ---
+
+
+class ResearchProductsFilters(BaseModel):
+    search: str | None = None
+    mainTitle: str | None = None
+    description: str | None = None
+    id: str | None = None
+    pid: str | None = None
+    originalId: str | None = None
+    type: Literal["publication", "dataset", "software", "other"] | None = None
+    fromPublicationDate: date | None = None
+    toPublicationDate: date | None = None
+    subjects: list[str] | None = None
+    countryCode: str | None = None
+    authorFullName: str | None = None
+    authorOrcid: str | None = None
+    publisher: str | None = None
+    bestOpenAccessRightLabel: str | None = None
+    influenceClass: str | None = None
+    impulseClass: str | None = None
+    popularityClass: str | None = None
+    citationCountClass: str | None = None
+    instanceType: str | None = None
+    sdg: list[str] | None = None
+    fos: list[str] | None = None
+    isPeerReviewed: bool | None = None
+    isInDiamondJournal: bool | None = None
+    isPubliclyFunded: bool | None = None
+    isGreen: bool | None = None
+    openAccessColor: str | None = None
+    relOrganizationId: str | None = None
+    relCommunityId: str | None = None
+    relProjectId: str | None = None
+    relProjectCode: str | None = None
+    hasProjectRel: bool | None = None
+    relProjectFundingShortName: str | None = None
+    relProjectFundingStreamId: str | None = None
+    relHostingDataSourceId: str | None = None
+    relCollectedFromDatasourceId: str | None = None
+
+
+class OrganizationsFilters(BaseModel):
+    search: str | None = None
+    legalName: str | None = None
+    legalShortName: str | None = None
+    id: str | None = None
+    pid: str | None = None
+    country: str | None = Field(
+        default=None, alias="countryCode"
+    )  # Aliased to match test match_params
+    relCommunityId: str | None = None
+    relCollectedFromDatasourceId: str | None = None
+
+
+class DataSourcesFilters(BaseModel):
+    search: str | None = None
+    officialName: str | None = None
+    englishName: str | None = None
+    legalShortName: str | None = None
+    id: str | None = None
+    pid: str | None = None
+    subjects: list[str] | None = None
+    dataSourceTypeName: str | None = None
+    contentTypes: list[str] | None = None
+    openaireCompatibility: str | None = None  # Added based on test match_params
+    relOrganizationId: str | None = None
+    relCommunityId: str | None = None
+    relCollectedFromDatasourceId: str | None = None
+
+
+class ProjectsFilters(BaseModel):
+    search: str | None = None
+    title: str | None = None
+    keywords: list[str] | None = None
+    id: str | None = None
+    code: str | None = None
+    grantID: str | None = None  # Added based on test match_params
+    acronym: str | None = None
+    callIdentifier: str | None = None
+    fundingShortName: str | None = None
+    fundingStreamId: str | None = None
+    fromStartDate: date | None = None
+    toStartDate: date | None = None
+    fromEndDate: date | None = None
+    toEndDate: date | None = None
+    relOrganizationName: str | None = None
+    relOrganizationId: str | None = None
+    relCommunityId: str | None = None
+    relOrganizationCountryCode: str | None = None
+    relCollectedFromDatasourceId: str | None = None
+
+
+class ScholixFilters(BaseModel):
+    sourcePid: str | None = None
+    targetPid: str | None = None
+    sourcePublisher: str | None = None
+    targetPublisher: str | None = None
+    sourceType: Literal["Publication", "Dataset", "Software", "Other"] | None = None
+    targetType: Literal["Publication", "Dataset", "Software", "Other"] | None = None
+    relation: str | None = None
+    from_date: date | None = Field(default=None, alias="from")  # API uses "from"
+    to_date: date | None = Field(default=None, alias="to")  # API uses "to"
+
+    class Config:
+        populate_by_name = True
+
+
+# Basic definition structure: {path: {'filters_model': PydanticModel, 'sort': dict()}}
 ENDPOINT_DEFINITIONS = {
     RESEARCH_PRODUCTS: {
-        "filters": { # Map filter name to its definition (type, etc.)
-            "search": {"type": "str"},
-            "mainTitle": {"type": "str"},
-            "description": {"type": "str"},
-            "id": {"type": "str"},
-            "pid": {"type": "str"},
-            "originalId": {"type": "str"},
-            "type": {"type": "str"}, # Could be Literal/Enum later
-            "fromPublicationDate": {"type": "date"},
-            "toPublicationDate": {"type": "date"},
-            "subjects": {"type": "str"}, # Potentially list?
-            "countryCode": {"type": "str"},
-            "authorFullName": {"type": "str"},
-            "authorOrcid": {"type": "str"},
-            "publisher": {"type": "str"},
-            "bestOpenAccessRightLabel": {"type": "str"},
-            "influenceClass": {"type": "str"},
-            "impulseClass": {"type": "str"},
-            "popularityClass": {"type": "str"},
-            "citationCountClass": {"type": "str"},
-            "instanceType": {"type": "str"},
-            "sdg": {"type": "str"}, # Potentially list?
-            "fos": {"type": "str"}, # Potentially list?
-            "isPeerReviewed": {"type": "bool"},
-            "isInDiamondJournal": {"type": "bool"},
-            "isPubliclyFunded": {"type": "bool"},
-            "isGreen": {"type": "bool"},
-            "openAccessColor": {"type": "str"},
-            "relOrganizationId": {"type": "str"},
-            "relCommunityId": {"type": "str"},
-            "relProjectId": {"type": "str"},
-            "relProjectCode": {"type": "str"},
-            "hasProjectRel": {"type": "bool"},
-            "relProjectFundingShortName": {"type": "str"},
-            "relProjectFundingStreamId": {"type": "str"},
-            "relHostingDataSourceId": {"type": "str"},
-            "relCollectedFromDatasourceId": {"type": "str"},
-        },
-        "sort": { # Map sort field to its definition (currently empty)
+        "filters_model": ResearchProductsFilters,
+        "sort": {
             "relevance": {},
             "publicationDate": {},
             "dateOfCollection": {},
@@ -65,80 +141,22 @@ ENDPOINT_DEFINITIONS = {
         },
     },
     ORGANIZATIONS: {
-        "filters": {
-            "search": {"type": "str"},
-            "legalName": {"type": "str"},
-            "legalShortName": {"type": "str"},
-            "id": {"type": "str"},
-            "pid": {"type": "str"},
-            "countryCode": {"type": "str"},
-            "relCommunityId": {"type": "str"},
-            "relCollectedFromDatasourceId": {"type": "str"},
-        },
+        "filters_model": OrganizationsFilters,
         "sort": {"relevance": {}},
     },
     DATA_SOURCES: {
-        "filters": {
-            "search": {"type": "str"},
-            "officialName": {"type": "str"},
-            "englishName": {"type": "str"},
-            "legalShortName": {"type": "str"},
-            "id": {"type": "str"},
-            "pid": {"type": "str"},
-            "subjects": {"type": "str"}, # Potentially list?
-            "dataSourceTypeName": {"type": "str"},
-            "contentTypes": {"type": "str"}, # Potentially list?
-            "relOrganizationId": {"type": "str"},
-            "relCommunityId": {"type": "str"},
-            "relCollectedFromDatasourceId": {"type": "str"},
-        },
+        "filters_model": DataSourcesFilters,
         "sort": {"relevance": {}},
     },
     PROJECTS: {
-        "filters": {
-            "search": {"type": "str"},
-            "title": {"type": "str"},
-            "keywords": {"type": "str"}, # Potentially list?
-            "id": {"type": "str"},
-            "code": {"type": "str"},
-            "acronym": {"type": "str"},
-            "callIdentifier": {"type": "str"},
-            "fundingShortName": {"type": "str"},
-            "fundingStreamId": {"type": "str"},
-            "fromStartDate": {"type": "date"},
-            "toStartDate": {"type": "date"},
-            "fromEndDate": {"type": "date"},
-            "toEndDate": {"type": "date"},
-            "relOrganizationName": {"type": "str"},
-            "relOrganizationId": {"type": "str"},
-            "relCommunityId": {"type": "str"},
-            "relOrganizationCountryCode": {"type": "str"},
-            "relCollectedFromDatasourceId": {"type": "str"},
-        },
+        "filters_model": ProjectsFilters,
         "sort": {"relevance": {}, "startDate": {}, "endDate": {}},
     },
-    SCHOLIX: {  # Updated for Scholexplorer v3 /Links endpoint
-        "filters": { # Types based on Scholix v3 documentation
-            "sourcePid": {"type": "str"}, # Required (one of source/target Pid/Publisher/Type)
-            "targetPid": {"type": "str"},
-            "sourcePublisher": {"type": "str"},
-            "targetPublisher": {"type": "str"},
-            "sourceType": {"type": "str"}, # Enum: Publication, Dataset, Software, Other
-            "targetType": {"type": "str"}, # Enum: Publication, Dataset, Software, Other
-            "relation": {"type": "str"},
-            "from": {"type": "date"},
-            "to": {"type": "date"},
-        },
+    SCHOLIX: {
+        "filters_model": ScholixFilters,
         "sort": {},  # Sorting not specified for /Links endpoint
     },
 }
-
-
-def get_valid_filters(endpoint_path: str) -> set[str]:
-    """Returns the set of valid filter keys for a given endpoint path."""
-    definitions = ENDPOINT_DEFINITIONS.get(endpoint_path, {})
-    filter_definitions = definitions.get("filters", {})
-    return set(filter_definitions.keys())
 
 
 def get_valid_sort_fields(endpoint_path: str) -> set[str]:

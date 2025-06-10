@@ -1,5 +1,5 @@
 # aireloom/types.py
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 import httpx
@@ -15,7 +15,9 @@ class RequestData(BaseModel):
     json_data: Any | None = None
     data: Mapping[str, Any] | None = None
     headers: dict[str, str] = Field(default_factory=dict)
-    model_config = dict(extra="allow")
+
+    class Config:
+        extra = "allow"
 
     def build_request(self) -> httpx.Request:
         """Builds an httpx.Request object from the stored data."""
@@ -27,3 +29,12 @@ class RequestData(BaseModel):
             data=self.data,
             headers=self.headers,
         )
+
+
+PreRequestHook = Callable[[str, str, dict[str, Any] | None, httpx.Headers | None], None]
+# Args: method, url, params, headers
+# Return: None (hooks modify in place or trigger side effects)
+
+PostRequestHook = Callable[[httpx.Response, Any], None]
+# Args: httpx_response, parsed_response_model
+# Return: None
