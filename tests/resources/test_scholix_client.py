@@ -38,7 +38,7 @@ def scholix_client(mock_api_client_fixture: AsyncMock) -> ScholixClient:
 
 # Helper to create ScholixRelationship test data
 def create_mock_scholix_link_data(
-    source_pid: str, target_pid: str, rel_type: str = "references"
+    source_pid: str, target_pid: str, rel_type: str = "References"
 ) -> dict:
     return {
         "LinkProvider": [{"Name": "Test Provider"}],
@@ -128,10 +128,10 @@ async def test_iterate_scholix_links(
     page_size = 1
 
     link1_dict = create_mock_scholix_link_data(
-        "10.111/source1", target_pid_val, "isReferencedBy"
+        "10.111/source1", target_pid_val, "IsReferencedBy"
     )
     link2_dict = create_mock_scholix_link_data(
-        "10.222/source2", target_pid_val, "isSupplementTo"
+        "10.222/source2", target_pid_val, "IsSupplementTo"
     )
 
     expected_link1_model = ScholixRelationship.model_validate(link1_dict)

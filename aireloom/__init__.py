@@ -3,6 +3,8 @@
 __version__ = "0.1.0"  # Placeholder
 
 # Import Exceptions
+# Import main client class
+from .client import AireloomClient
 from .exceptions import (
     AireloomError,
     APIError,
@@ -29,8 +31,6 @@ from .models import (
 
 # Import main session class
 from .session import AireloomSession
-# Import main client class
-from .client import AireloomClient
 
 __all__ = [
     # Core Client/Session

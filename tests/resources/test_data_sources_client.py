@@ -30,7 +30,8 @@ def mock_api_client_fixture():  # Renamed
         },
         "results": [],
     }
-    mock_client.request.return_value = mock_http_response
+    # Make request return the response object directly, not as a coroutine
+    mock_client.request = AsyncMock(return_value=mock_http_response)
     return mock_client
 
 
@@ -50,13 +51,17 @@ async def test_get_data_source(
         "id": ds_id,
         "officialName": "Official Test Data Source Name",
         "dataSourceTypeName": "repository",
+        "type": {
+            "name": "repository",
+            "value": "repository",
+        },  # Add both name and value for ControlledField
     }
     expected_data_source = DataSource.model_validate(expected_ds_data_dict)
 
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = expected_ds_data_dict
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     data_source = await data_sources_client.get(ds_id)
 
@@ -124,7 +129,7 @@ async def test_search_data_sources_no_filters(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await data_sources_client.search(page=1, page_size=DEFAULT_PAGE_SIZE)
 
@@ -178,7 +183,7 @@ async def test_search_data_sources_with_filters_and_sort(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await data_sources_client.search(
         filters=filters_model, sort_by=sort_by, page=page, page_size=page_size
@@ -266,10 +271,12 @@ async def test_iterate_data_sources(
     mock_http_response_page2.status_code = 200
     mock_http_response_page2.json.return_value = mock_response_page2_json
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        mock_http_response_page2,
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            mock_http_response_page2,
+        ]
+    )
 
     iterated_ds = []
     async for ds_item in data_sources_client.iterate(
@@ -325,7 +332,7 @@ async def test_iterate_data_sources_no_results(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     count = 0
     async for _ in data_sources_client.iterate(
@@ -384,14 +391,16 @@ async def test_iterate_data_sources_api_error(
     error_response_mock.request = httpx.Request("GET", f"/{DATA_SOURCES}")
     error_response_mock.json.return_value = {"error": "auth error"}
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        httpx.HTTPStatusError(
-            message="Unauthorized '401'",
-            request=error_response_mock.request,
-            response=error_response_mock,
-        ),
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            httpx.HTTPStatusError(
+                message="Unauthorized '401'",
+                request=error_response_mock.request,
+                response=error_response_mock,
+            ),
+        ]
+    )
 
     iterated_ds = []
     with pytest.raises(AireloomError) as exc_info:

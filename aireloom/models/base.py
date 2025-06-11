@@ -1,9 +1,10 @@
 """Base Pydantic models for API entities and responses."""
 
-from typing import Any, Generic, TypeVar
 import logging
+from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel,  HttpUrl, field_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator  # Added Field
+from pydantic.config import ConfigDict  # Added ConfigDict
 
 # Generic type for the entity contained within the response results
 EntityType = TypeVar("EntityType", bound="BaseEntity")
@@ -21,7 +22,9 @@ class Header(BaseModel):
     queryTime: int | None = None
     numFound: int | None = None
     # next/prev can be full URLs or just the cursor string
-    nextCursor: str | HttpUrl | None = None
+    nextCursor: str | HttpUrl | None = Field(
+        default=None, alias="cursor"
+    )  # API might return "cursor"
     pageSize: int | None = None
 
     @field_validator("queryTime", "numFound", "pageSize", mode="before")
@@ -36,12 +39,12 @@ class Header(BaseModel):
                 return None
         # Allow integers through if they somehow bypass 'before' validation or API changes
         if isinstance(v, int):
-             return v
+            return v
         # Handle other unexpected types if necessary
         logger.warning(f"Unexpected type {type(v)} for header numeric value '{v}'.")
         return None
 
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class BaseEntity(BaseModel):
@@ -50,7 +53,7 @@ class BaseEntity(BaseModel):
     # Common identifier across most entities
     id: str
 
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class ApiResponse(BaseModel, Generic[EntityType]):
@@ -81,7 +84,7 @@ class ApiResponse(BaseModel, Generic[EntityType]):
         )
         return []
 
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 # Example of a specific response type (for illustration)

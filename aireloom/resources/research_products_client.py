@@ -3,12 +3,13 @@
 
 import http
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 from loguru import logger
 
-from ..client import AireloomClient
+if TYPE_CHECKING:
+    from ..client import AireloomClient
 from ..constants import DEFAULT_PAGE_SIZE  # RESEARCH_PRODUCTS is now in endpoints
 from ..endpoints import (  # Import model
     ENDPOINT_DEFINITIONS,
@@ -31,7 +32,7 @@ class ResearchProductsClient(BaseResourceClient):
     _entity_model: type[ResearchProduct] = ResearchProduct
     _response_model: type[ResearchProductResponse] = ResearchProductResponse
 
-    def __init__(self, api_client: AireloomClient):
+    def __init__(self, api_client: "AireloomClient"):
         """Initializes the ResearchProductsClient.
 
         Args:
@@ -98,7 +99,9 @@ class ResearchProductsClient(BaseResourceClient):
         """Generic method to fetch a single entity by ID."""
         endpoint = f"{self._entity_path}/{entity_id}"
         try:
-            response = await self._api_client.request("GET", endpoint)
+            response = await self._api_client.request(
+                "GET", endpoint, params=None, data=None, json_data=None
+            )
             return self._entity_model.model_validate(response.json())
         except httpx.HTTPStatusError as e:
             if e.response.status_code == http.HTTPStatus.NOT_FOUND:
@@ -129,11 +132,11 @@ class ResearchProductsClient(BaseResourceClient):
         """Generic method to search for entities."""
         try:
             response = await self._api_client.request(
-                "GET", self._entity_path, params=params
+                "GET", self._entity_path, params=params, data=None, json_data=None
             )
             return self._response_model.model_validate(response.json())
         except Exception as e:
-            if isinstance(e, (AireloomError, ValidationError)):
+            if isinstance(e, AireloomError | ValidationError):
                 raise
             logger.exception(
                 f"Failed to search {self._entity_path} with params {params}"
@@ -156,7 +159,11 @@ class ResearchProductsClient(BaseResourceClient):
                     f"Iterating {self._entity_path} with params: {current_params}"
                 )
                 response = await self._api_client.request(
-                    "GET", self._entity_path, params=current_params
+                    "GET",
+                    self._entity_path,
+                    params=current_params,
+                    data=None,
+                    json_data=None,
                 )
                 data = response.json()
                 # Use the generic ApiResponse for parsing iteration results
@@ -183,7 +190,7 @@ class ResearchProductsClient(BaseResourceClient):
                 current_params.pop("page", None)
 
             except Exception as e:
-                if isinstance(e, (AireloomError, ValidationError)):
+                if isinstance(e, AireloomError | ValidationError):
                     raise
                 logger.exception(
                     f"Failed during iteration of {self._entity_path} with params {current_params}"
@@ -269,7 +276,7 @@ class ResearchProductsClient(BaseResourceClient):
             filters.model_dump(exclude_none=True, by_alias=True) if filters else {}
         )
         logger.info(
-            f"Iterating research products: size={page_size}, sort='{sort_by}', "
+            f"Iterating research products: pageSize={page_size}, sort='{sort_by}', "
             f"filters={filter_dict}"
         )
         # self._validate_filters(mutable_filters) # Removed, Pydantic handles this

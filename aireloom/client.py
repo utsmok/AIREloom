@@ -98,6 +98,9 @@ class AireloomClient:
             retryable_status_codes: Set of HTTP status codes to retry on.
         """
         self._settings = settings or get_settings()
+        logger.debug(
+            f"AireloomClient.__init__ self._settings at LINE 100: id={id(self._settings)}, client_id={self._settings.openaire_client_id}, token={self._settings.openaire_api_token}, timeout={self._settings.request_timeout}"
+        )
         self._base_url = base_url.rstrip("/")
         self._scholix_base_url = scholix_base_url.rstrip("/")  # Store Scholix base URL
         self._retryable_status_codes = retryable_status_codes
@@ -116,17 +119,36 @@ class AireloomClient:
 
         self._auth_strategy: AuthStrategy
         if auth_strategy:
-            logger.info("Using explicitly provided authentication strategy.")
+            logger.info(
+                f"Using explicitly provided authentication strategy: {type(auth_strategy).__name__}"
+            )
             self._auth_strategy = auth_strategy
         else:
             # Use overrides if provided, otherwise use settings
+            logger.debug(
+                f"Auth decision: client_id_param={client_id}, "
+                f"settings_client_id={self._settings.openaire_client_id}, "
+                f"api_token_param={api_token}, "
+                f"settings_api_token={self._settings.openaire_api_token}"
+            )
+            logger.info(
+                "Did not receive an explicit auth_strategy, determining auth type based on provided parameters or settings."
+            )
             _client_id = client_id or self._settings.openaire_client_id
             _client_secret = client_secret or self._settings.openaire_client_secret
             _api_token = api_token or self._settings.openaire_api_token
             _token_url = self._settings.openaire_token_url
 
             if _client_id and _client_secret:
-                logger.info("Using Client Credentials authentication.")
+                logger.info(
+                    "_client_id and _client_secret available. Using Client Credentials authentication."
+                )
+                if client_id and client_secret:
+                    logger.info("id and secret were directly passed as parameters.")
+                else:
+                    logger.info(
+                        "id and secret were loaded from settings or environment variables."
+                    )
                 self._auth_strategy = ClientCredentialsAuth(
                     client_id=_client_id,
                     client_secret=_client_secret,
@@ -318,7 +340,7 @@ class AireloomClient:
                     )
                 except Exception as e:
                     logger.error(
-                        f"Error executing pre-request hook {hook.__name__}: {e}",
+                        f"Error executing pre-request hook {getattr(hook, '__name__', str(hook))}: {e}",
                         exc_info=True,
                     )
 
@@ -359,10 +381,15 @@ class AireloomClient:
                             or self._settings.rate_limit_retry_after_default
                         )
                         logger.info(
-                            f"Rate limit hit (429). Waiting for {wait_duration:.2f}s before raising RateLimitError."
+                            f"Rate limit hit (429). About to wait for {wait_duration:.2f}s. Client open: {not self._http_client.is_closed if self._http_client else 'N/A'}"
                         )
                         # Do not sleep here if tenacity is handling retries for RateLimitError
-                        # await asyncio.sleep(wait_duration) # Sleep is handled by tenacity or pre-check
+                        await asyncio.sleep(
+                            wait_duration
+                        )  # Sleep is handled by tenacity or pre-check
+                    logger.error(
+                        f"Raising RateLimitError after 429. Client open: {not self._http_client.is_closed if self._http_client else 'N/A'}"
+                    )
                     raise RateLimitError("API rate limit exceeded.", response=response)
                 raise APIError(
                     f"API request failed with status {response.status_code}",
@@ -391,7 +418,7 @@ class AireloomClient:
                         hook(response, parsed_model)  # parsed_model can be None
                     except Exception as e:
                         logger.error(
-                            f"Error executing post-request hook {hook.__name__}: {e}",
+                            f"Error executing post-request hook {getattr(hook, '__name__', str(hook))}: {e}",
                             exc_info=True,
                         )
 
@@ -697,7 +724,7 @@ class AireloomClient:
             # For complex objects, a more robust serialization might be needed.
             try:
                 processed_params = {
-                    k: str(v) if not isinstance(v, (str, int, float, bool)) else v
+                    k: str(v) if not isinstance(v, str | int | float | bool) else v
                     for k, v in params.items()
                 }
                 sorted_params = sorted(processed_params.items())
@@ -814,9 +841,22 @@ class AireloomClient:
 
     async def aclose(self) -> None:
         """Closes the underlying HTTP client and any auth-specific clients."""
-        if self._should_close_client and self._http_client:
+        logger.info(
+            f"AireloomClient.aclose() called. Client ID: {id(self)}. HTTP client to close: {self._should_close_client and self._http_client is not None}. HTTP client closed: {self._http_client.is_closed if self._http_client else 'N/A'}"
+        )
+        if (
+            self._should_close_client
+            and self._http_client
+            and not self._http_client.is_closed
+        ):
             await self._http_client.aclose()
-            logger.info("AireloomClient internal HTTP client closed.")
+            logger.info(
+                f"AireloomClient internal HTTP client closed. Client ID: {id(self)}."
+            )
+        elif self._http_client and self._http_client.is_closed:
+            logger.info(
+                f"AireloomClient.aclose(): HTTP client was already closed. Client ID: {id(self)}"
+            )
         # Close auth strategy client if it has an async_close method
         if hasattr(self._auth_strategy, "async_close") and callable(
             self._auth_strategy.async_close
@@ -824,7 +864,16 @@ class AireloomClient:
             await self._auth_strategy.async_close()  # type: ignore
 
     async def __aenter__(self) -> Self:
+        logger.info(
+            f"AireloomClient.__aenter__() called. Client ID: {id(self)}. HTTP client closed: {self._http_client.is_closed if self._http_client else 'N/A'}"
+        )
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        logger.info(
+            f"AireloomClient.__aexit__() called. Client ID: {id(self)}. HTTP client closed before aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
+        )
         await self.aclose()
+        logger.info(
+            f"AireloomClient.__aexit__() finished. Client ID: {id(self)}. HTTP client closed after aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
+        )

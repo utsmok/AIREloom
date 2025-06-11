@@ -1,4 +1,6 @@
 # tests/test_session.py
+import urllib.parse
+
 import pytest
 from dotenv import load_dotenv
 from pytest_httpx import HTTPXMock
@@ -86,7 +88,7 @@ MOCK_SCHOLIX_RESPONSE = {
 @pytest.mark.asyncio
 async def test_session_initialization_no_token():
     """Test initializing AireloomSession without providing a token."""
-    async with AireloomSession() as session:
+    async with AireloomSession(auth_strategy=NoAuth()) as session:
         assert session is not None
         assert isinstance(session._api_client._auth_strategy, NoAuth)
         assert isinstance(session.research_products, ResearchProductsClient)
@@ -122,7 +124,9 @@ async def test_session_initialization_with_custom_timeout():
     custom_timeout_float = 45.0
     custom_timeout_int = int(custom_timeout_float)  # AireloomSession expects int | None
 
-    async with AireloomSession(timeout=custom_timeout_int) as session:
+    async with AireloomSession(
+        auth_strategy=NoAuth(), timeout=custom_timeout_int
+    ) as session:
         assert session is not None
         assert isinstance(session._api_client._auth_strategy, NoAuth)
         # AireloomClient's _settings will have the updated timeout
@@ -155,7 +159,17 @@ async def test_session_context_manager_aclose():
 @pytest.mark.asyncio
 async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
     product_id = "rp123"
+    token_url = "https://aai.openaire.eu/oidc/token"  # Standard token URL
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}/{product_id}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "id": product_id,
         "titles": [{"value": "Mocked Research Product Title"}],
@@ -173,9 +187,19 @@ async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_search_research_products_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     expected_url = (
         f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
     )
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "header": {
             "page": 1,
@@ -194,11 +218,11 @@ async def test_session_search_research_products_integration(httpx_mock: HTTPXMoc
             }
         ],
     }
+    _params_tsrp_int = {"mainTitle": "Test Search", "page": "1", "pageSize": "1"}
     httpx_mock.add_response(
-        url=expected_url,
+        url=f"{expected_url}?{urllib.parse.urlencode(_params_tsrp_int)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"mainTitle": "Test Search", "page": "1", "size": "1"},
     )
     async with AireloomSession() as session:
         filters = ResearchProductsFilters(mainTitle="Test Search")
@@ -214,7 +238,17 @@ async def test_session_search_research_products_integration(httpx_mock: HTTPXMoc
 
 @pytest.mark.asyncio
 async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = {
         "header": {
             "page": 1,
@@ -251,17 +285,21 @@ async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMo
             }
         ],
     }
+    _params_tirp_int_1 = {"mainTitle": "Iterate Me", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tirp_int_1)}",
         method="GET",
         json=mock_response_page1,
-        match_params={"mainTitle": "Iterate Me", "size": "1", "cursor": "*"},
     )
+    _params_tirp_int_2 = {
+        "mainTitle": "Iterate Me",
+        "pageSize": "1",
+        "cursor": "cursor1",
+    }
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tirp_int_2)}",
         method="GET",
         json=mock_response_page2,
-        match_params={"mainTitle": "Iterate Me", "size": "1", "cursor": "cursor1"},
     )
     products_iterated = []
     async with AireloomSession() as session:
@@ -281,10 +319,20 @@ async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMo
 # --- Organizations ---
 @pytest.mark.asyncio
 async def test_session_get_organization_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     org_id = "org123"
     expected_url = (
         f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}/{org_id}"
     )
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "id": org_id,
         "legalName": "Mocked Org Name",
@@ -300,7 +348,17 @@ async def test_session_get_organization_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "header": {
             "page": 1,
@@ -317,11 +375,11 @@ async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tso_int = {"countryCode": "GR", "page": "1", "pageSize": "1"}
     httpx_mock.add_response(
-        url=expected_url,
+        url=f"{expected_url}?{urllib.parse.urlencode(_params_tso_int)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"countryCode": "GR", "page": "1", "size": "1"},
     )  # API uses countryCode
     async with AireloomSession() as session:
         filters = OrganizationsFilters(
@@ -339,7 +397,17 @@ async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = {
         "header": {
             "page": 1,
@@ -372,17 +440,17 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tio_int_1 = {"countryCode": "EU", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_1)}",
         method="GET",
         json=mock_response_page1,
-        match_params={"countryCode": "EU", "size": "1", "cursor": "*"},
     )
+    _params_tio_int_2 = {"countryCode": "EU", "pageSize": "1", "cursor": "cursor_org1"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_2)}",
         method="GET",
         json=mock_response_page2,
-        match_params={"countryCode": "EU", "size": "1", "cursor": "cursor_org1"},
     )
     orgs_iterated = []
     async with AireloomSession() as session:
@@ -402,10 +470,20 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
 # --- Projects ---
 @pytest.mark.asyncio
 async def test_session_get_project_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     project_id = "proj123"
     expected_url = (
         f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}/{project_id}"
     )
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "id": project_id,
         "acronym": "MOCKPROJ",
@@ -425,7 +503,17 @@ async def test_session_get_project_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "header": {
             "page": 1,
@@ -446,11 +534,11 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tsp_int = {"grantID": "H2020", "page": "1", "pageSize": "1"}
     httpx_mock.add_response(
-        url=expected_url,
+        url=f"{expected_url}?{urllib.parse.urlencode(_params_tsp_int)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"grantID": "H2020", "page": "1", "size": "1"},
     )
     async with AireloomSession() as session:
         filters = ProjectsFilters(grantID="H2020")
@@ -464,7 +552,17 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = {
         "header": {
             "page": 1,
@@ -505,17 +603,21 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tip_int_1 = {"fundingShortName": "EC", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tip_int_1)}",
         method="GET",
         json=mock_response_page1,
-        match_params={"fundingShortName": "EC", "size": "1", "cursor": "*"},
     )  # API uses fundingShortName
+    _params_tip_int_2 = {
+        "fundingShortName": "EC",
+        "pageSize": "1",
+        "cursor": "cursor_proj1",
+    }
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tip_int_2)}",
         method="GET",
         json=mock_response_page2,
-        match_params={"fundingShortName": "EC", "size": "1", "cursor": "cursor_proj1"},
     )
     projects_iterated = []
     async with AireloomSession() as session:
@@ -533,10 +635,20 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
 # --- DataSources ---
 @pytest.mark.asyncio
 async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     ds_id = "ds123"
     expected_url = (
         f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}/{ds_id}"
     )
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "id": ds_id,
         "officialName": "Mocked Data Source",
@@ -554,7 +666,17 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "header": {
             "page": 1,
@@ -573,11 +695,15 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tsds_int = {
+        "openaireCompatibility": "UNKNOWN",
+        "page": "1",
+        "pageSize": "1",
+    }
     httpx_mock.add_response(
-        url=expected_url,
+        url=f"{expected_url}?{urllib.parse.urlencode(_params_tsds_int)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"openaireCompatibility": "UNKNOWN", "page": "1", "size": "1"},
     )
     async with AireloomSession() as session:
         filters = DataSourcesFilters(openaireCompatibility="UNKNOWN")
@@ -593,7 +719,17 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = {
         "header": {
             "page": 1,
@@ -630,23 +766,20 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tids_int_1 = {"pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tids_int_1)}",
         method="GET",
         json=mock_response_page1,
-        # DataSourcesFilters does not have countryCode, so remove from match_params
+        # DataSourcesFilters does not have countryCode, so remove from params
         # Assuming the iteration is based on some other filter or no filter for this mock
-        match_params={"size": "1", "cursor": "*"},  # Example: Removed countryCode
     )
+    _params_tids_int_2 = {"pageSize": "1", "cursor": "cursor_ds1"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tids_int_2)}",
         method="GET",
         json=mock_response_page2,
-        # DataSourcesFilters does not have countryCode, so remove from match_params
-        match_params={
-            "size": "1",
-            "cursor": "cursor_ds1",
-        },  # Example: Removed countryCode
+        # DataSourcesFilters does not have countryCode, so remove from params
     )
     ds_iterated = []
     async with AireloomSession() as session:
@@ -667,8 +800,18 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
 # --- Scholix ---
 @pytest.mark.asyncio
 async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.1234/source"
     expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "currentPage": 0,
         "totalLinks": 1,
@@ -677,10 +820,10 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
             {
                 "LinkProvider": [{"Name": "Mock Provider"}],
                 "LinkPublicationDate": "2023-01-01T00:00:00Z",
-                "RelationshipType": {"Name": "Cites"},
+                "RelationshipType": {"Name": "References"},
                 "Source": {
                     "Identifier": [{"ID": source_pid, "IDScheme": "doi"}],
-                    "Type": "literature",
+                    "Type": "publication",
                 },
                 "Target": {
                     "Identifier": [{"ID": "10.5678/target", "IDScheme": "doi"}],
@@ -689,11 +832,11 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tss_int = {"sourcePid": source_pid, "page": "0", "rows": "1"}
     httpx_mock.add_response(
-        url=expected_url,
+        url=f"{expected_url}?{urllib.parse.urlencode(_params_tss_int)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"sourcePid": source_pid, "page": "0", "rows": "1"},
     )
     async with AireloomSession() as session:
         filters = ScholixFilters(sourcePid=source_pid)
@@ -709,8 +852,18 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.9876/iter_source"
     base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page0 = {
         "currentPage": 0,
         "totalLinks": 2,
@@ -751,17 +904,17 @@ async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tis_int_1 = {"sourcePid": source_pid, "rows": "1", "page": "0"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tis_int_1)}",
         method="GET",
         json=mock_response_page0,
-        match_params={"sourcePid": source_pid, "rows": "1", "page": "0"},
     )
+    _params_tis_int_2 = {"sourcePid": source_pid, "rows": "1", "page": "1"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tis_int_2)}",
         method="GET",
         json=mock_response_page1,
-        match_params={"sourcePid": source_pid, "rows": "1", "page": "1"},
     )
     links_iterated = []
     async with AireloomSession() as session:
@@ -785,7 +938,17 @@ async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
 # --- Legacy Test Stubs (to be removed or integrated if still relevant) ---
 @pytest.mark.asyncio
 async def test_get_research_product_success(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     product_id = "oai:zenodo.org:7668094"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_product_response = {
         "id": product_id,
         "titles": [{"value": "Mocked Test Product Title"}],
@@ -808,7 +971,17 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     product_id = "nonexistent:id_123456789_invalid"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     httpx_mock.add_response(
         url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
         method="GET",
@@ -822,6 +995,16 @@ async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_search_research_products_simple(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_api_response_json = {
         "header": {
             "page": 1,
@@ -839,11 +1022,11 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tsrps = {"mainTitle": "Open Science", "pageSize": "5", "page": "1"}
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts?{urllib.parse.urlencode(_params_tsrps)}",
         method="GET",
         json=mock_api_response_json,
-        match_params={"mainTitle": "Open Science", "size": "5", "page": "1"},
     )
     async with AireloomSession() as session:
         filters = ResearchProductsFilters(mainTitle="Open Science")
@@ -859,7 +1042,17 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_iterate_research_products(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = {
         "header": {
             "numFound": 2,
@@ -887,21 +1080,21 @@ async def test_iterate_research_products(httpx_mock: HTTPXMock):
             }
         ],
     }
+    _params_tirp_1 = {"mainTitle": "FAIR data", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tirp_1)}",
         method="GET",
         json=mock_response_page1,
-        match_params={"mainTitle": "FAIR data", "size": "1", "cursor": "*"},
     )
+    _params_tirp_2 = {
+        "mainTitle": "FAIR data",
+        "pageSize": "1",
+        "cursor": "cursor_legacy1",
+    }
     httpx_mock.add_response(
-        url=base_url,
+        url=f"{base_url}?{urllib.parse.urlencode(_params_tirp_2)}",
         method="GET",
         json=mock_response_page2,
-        match_params={
-            "mainTitle": "FAIR data",
-            "size": "1",
-            "cursor": "cursor_legacy1",
-        },
     )
     async with AireloomSession() as session:
         count = 0
@@ -920,6 +1113,16 @@ async def test_iterate_research_products(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     httpx_mock.add_response(
         url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&rows=10",
         method="GET",
@@ -947,6 +1150,16 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
 
 @pytest.mark.asyncio
 async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
+    token_url = "https://aai.openaire.eu/oidc/token"
+
+    # Mock for the token acquisition
+    httpx_mock.add_response(
+        url=token_url,
+        method="POST",
+        json={"access_token": "mock_test_token", "expires_in": 3600},
+        status_code=200,
+    )
+
     mock_response_page1 = MOCK_SCHOLIX_RESPONSE.copy()
     mock_response_page1["currentPage"] = 0
     mock_response_page1["totalLinks"] = 7
@@ -1025,31 +1238,39 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         assert count == max_items_to_iterate
 
 
+from pydantic import ValidationError
+
+
 @pytest.mark.asyncio
 async def test_search_scholix_ignored_invalid_filter_key(httpx_mock: HTTPXMock):
-    """Test that an invalid filter key in ScholixFilters is ignored."""
+    """Test that providing an invalid filter key to ScholixFilters raises a ValidationError."""
     source_pid = KNOWN_DOI_WITH_LINKS
-    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+    # expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}" # Not needed as API call won't happen
 
-    mocked_api_response_for_test = MOCK_SCHOLIX_RESPONSE.copy()
+    # mocked_api_response_for_test = MOCK_SCHOLIX_RESPONSE.copy() # Not needed
 
-    httpx_mock.add_response(
-        url=expected_url,
-        method="GET",
-        json=mocked_api_response_for_test,
-        match_params={"sourcePid": source_pid, "page": "0", "rows": "10"},
-    )
+    # httpx_mock.add_response( # Not needed as API call won't happen
+    #     url=expected_url,
+    #     method="GET",
+    #     json=mocked_api_response_for_test,
+    #     params={"sourcePid": source_pid, "page": "0", "rows": "10"},
+    # )
 
-    async with AireloomSession() as session:
-        filters_with_extra = ScholixFilters(
-            sourcePid=source_pid, someMadeUpFilterKey="someValue"
-        )
+    # async with AireloomSession() as session: # Session not needed for this check
+    with pytest.raises(ValidationError) as excinfo:
+        ScholixFilters(sourcePid=source_pid, someMadeUpFilterKey="someValue")  # type: ignore[call-arg]
 
-        response: ScholixResponse = await session.scholix.search_links(
-            filters=filters_with_extra, page_size=10, page=0
-        )
+    assert "someMadeUpFilterKey" in str(excinfo.value)
+    assert "Extra inputs are not permitted" in str(
+        excinfo.value
+    )  # Pydantic v2 error message for extra fields
 
-        assert response is not None
-        assert response.total_links == mocked_api_response_for_test["totalLinks"]
-        if response.result:
-            assert len(response.result) == len(mocked_api_response_for_test["result"])
+    # The following lines are not reachable if ValidationError is raised as expected.
+    # response: ScholixResponse = await session.scholix.search_links(
+    #     filters=filters_with_extra, page_size=10, page=0
+    # )
+
+    # assert response is not None
+    # assert response.total_links == mocked_api_response_for_test["totalLinks"]
+    # if response.result:
+    #     assert len(response.result) == len(mocked_api_response_for_test["result"])

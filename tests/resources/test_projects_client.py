@@ -186,8 +186,8 @@ async def test_search_projects_with_filters_and_sort(
 
     expected_params = {
         "title": "Climate Change Research",
-        "fundingShortName": "EU",  # Corrected to fundingShortName
-        "code": "CCR_EU",  # ProjectsFilters uses 'code'
+        "funder": "EU",
+        "code": "CCR_EU",
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,

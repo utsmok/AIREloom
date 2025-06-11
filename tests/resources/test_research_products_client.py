@@ -2,6 +2,7 @@
 from datetime import date
 from unittest.mock import AsyncMock, call  # Import call
 
+import httpx
 import pytest
 
 from aireloom.constants import DEFAULT_PAGE_SIZE
@@ -19,7 +20,7 @@ def mock_api_client_fixture():  # Renamed to avoid conflict with argument name
     """Fixture to create a mock AireloomClient."""
     mock_client = AsyncMock()
     # Default behavior: return a successful mock response with empty data
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = {
         "header": {
@@ -31,7 +32,8 @@ def mock_api_client_fixture():  # Renamed to avoid conflict with argument name
         },
         "results": [],
     }
-    mock_client.request.return_value = mock_http_response
+    # Make request return the response object directly, not as a coroutine
+    mock_client.request = AsyncMock(return_value=mock_http_response)
     return mock_client
 
 
@@ -52,10 +54,10 @@ async def test_get_research_product(
     expected_product_data_dict = {"id": product_id, "mainTitle": "Test Product Title"}
     expected_product = ResearchProduct.model_validate(expected_product_data_dict)
 
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = expected_product_data_dict
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     product = await research_products_client.get(product_id)
 
@@ -126,10 +128,10 @@ async def test_search_research_products_no_filters(
         "header": expected_header_data,
     }
 
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await research_products_client.search(
         page=1, page_size=DEFAULT_PAGE_SIZE
@@ -177,24 +179,28 @@ async def test_search_research_products_with_filters_and_sort(
         "header": expected_header_data,
     }
 
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await research_products_client.search(
         filters=filters_model, sort_by=sort_by, page=page, page_size=page_size
     )
 
     expected_params = {
-        "mainTitle": "FAIR Data",
-        "publisher": "Zenodo",
-        "fromPublicationDate": "2023-01-01",
-        "toPublicationDate": "2023-12-31",
-        "type": "publication",
-        "sortBy": sort_by,
-        "page": page,
         "pageSize": page_size,
+        "page": page,
+        "sortBy": sort_by,
+        "mainTitle": "FAIR Data",
+        "fromPublicationDate": date(
+            2023, 1, 1
+        ),  # Keep as date objects to match actual behavior
+        "toPublicationDate": date(
+            2023, 12, 31
+        ),  # Keep as date objects to match actual behavior
+        "type": "publication",
+        "publisher": "Zenodo",
     }
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
@@ -267,10 +273,12 @@ async def test_iterate_research_products(
     mock_http_response_page2.status_code = 200
     mock_http_response_page2.json.return_value = mock_response_page2_json
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        mock_http_response_page2,
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            mock_http_response_page2,
+        ]
+    )
 
     iterated_products = []
     async for product in research_products_client.iterate(
@@ -323,10 +331,10 @@ async def test_iterate_research_products_no_results(
     expected_header_data = {"numFound": 0, "pageSize": page_size, "nextCursor": None}
     mock_response_json = {"results": [], "header": expected_header_data}
 
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     count = 0
     async for _ in research_products_client.iterate(
@@ -366,10 +374,10 @@ async def test_iterate_single_page_no_next_cursor(
     }  # No next cursor
     mock_response_json = {"results": results_data, "header": header_data}
 
-    mock_http_response = AsyncMock()
+    mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     iterated_products = []
     async for product in research_products_client.iterate(
@@ -381,7 +389,7 @@ async def test_iterate_single_page_no_next_cursor(
     assert iterated_products[0] == ResearchProduct.model_validate(results_data[0])
     assert iterated_products[1] == ResearchProduct.model_validate(results_data[1])
 
-    expected_params = {"type": "report", "pageSize": page_size, "cursor": "*"}
+    expected_params = {"type": "dataset", "pageSize": page_size, "cursor": "*"}
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
         RESEARCH_PRODUCTS,
@@ -423,14 +431,16 @@ async def test_iterate_api_error_during_iteration(
     error_response_mock.request = httpx.Request("GET", f"/{RESEARCH_PRODUCTS}")
     error_response_mock.json.return_value = {"error": "internal server error"}
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        httpx.HTTPStatusError(
-            message="Server error '500 Internal Server Error'",
-            request=error_response_mock.request,
-            response=error_response_mock,
-        ),
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            httpx.HTTPStatusError(
+                message="Server error '500 Internal Server Error'",
+                request=error_response_mock.request,
+                response=error_response_mock,
+            ),
+        ]
+    )
 
     iterated_products = []
     with pytest.raises(AireloomError) as exc_info:

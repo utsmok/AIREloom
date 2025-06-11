@@ -2,11 +2,12 @@
 """Client for interacting with OpenAIRE Scholix (Scholexplorer) API."""
 
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
-from ..client import AireloomClient
+if TYPE_CHECKING:
+    from ..client import AireloomClient
 from ..constants import (  # SCHOLIX is now in endpoints
     DEFAULT_PAGE_SIZE,
     OPENAIRE_SCHOLIX_API_BASE_URL,
@@ -27,7 +28,9 @@ class ScholixClient(BaseResourceClient):
         SCHOLIX  # This is the endpoint path, not an entity type like others
     )
 
-    def __init__(self, api_client: AireloomClient, scholix_base_url: str | None = None):
+    def __init__(
+        self, api_client: "AireloomClient", scholix_base_url: str | None = None
+    ):
         """Initializes the ScholixClient.
 
         Args:
@@ -108,11 +111,13 @@ class ScholixClient(BaseResourceClient):
                 path=self._entity_path,  # SCHOLIX constant
                 params=params,
                 base_url_override=self._scholix_base_url,
+                data=None,
+                json_data=None,
             )
             return ScholixResponse.model_validate(response.json())
         except Exception as e:
             if isinstance(
-                e, (AireloomError, ValidationError)
+                e, AireloomError | ValidationError
             ):  # ValidationError can come from Pydantic
                 raise
             logger.exception(
@@ -189,7 +194,7 @@ class ScholixClient(BaseResourceClient):
                 current_page += 1
 
             except Exception as e:
-                if isinstance(e, (AireloomError, ValidationError)):
+                if isinstance(e, AireloomError | ValidationError):
                     raise
                 logger.exception(
                     f"Failed during iteration of {self._entity_path} on page {current_page}"

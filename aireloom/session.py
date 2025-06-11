@@ -2,7 +2,7 @@
 
 from loguru import logger
 
-from .auth import AuthStrategy, NoAuth
+from .auth import AuthStrategy
 from .client import AireloomClient
 from .config import ApiSettings, get_settings  # Added ApiSettings
 from .constants import (
@@ -46,7 +46,7 @@ class AireloomSession:
             api_base_url: Base URL for the OpenAIRE Graph API.
             scholix_base_url: Base URL for the Scholexplorer API.
         """
-        self._auth_strategy = auth_strategy or NoAuth()
+        # self._auth_strategy = auth_strategy or NoAuth() # Client will handle defaulting
         _api_base_url = api_base_url or OPENAIRE_GRAPH_API_BASE_URL
         _scholix_base_url = scholix_base_url or OPENAIRE_SCHOLIX_API_BASE_URL
 
@@ -60,9 +60,14 @@ class AireloomSession:
         else:
             session_specific_settings = current_settings
 
+        # Pass the original auth_strategy (which can be None) to the client.
+        # The client will then decide its auth based on this and its settings.
+        logger.debug(
+            f"AireloomSession: Initializing AireloomClient with auth_strategy param: {type(auth_strategy)}"
+        )
         self._api_client = AireloomClient(
             settings=session_specific_settings,
-            auth_strategy=self._auth_strategy,
+            auth_strategy=auth_strategy,  # Pass the original auth_strategy parameter
             base_url=_api_base_url,  # Pass Graph API base URL
             scholix_base_url=_scholix_base_url,  # Pass Scholix base URL
         )

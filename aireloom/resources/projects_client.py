@@ -3,12 +3,13 @@
 
 import http
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
 from loguru import logger
 
-from ..client import AireloomClient
+if TYPE_CHECKING:
+    from ..client import AireloomClient
 from ..constants import DEFAULT_PAGE_SIZE  # PROJECTS is now in endpoints
 from ..endpoints import ENDPOINT_DEFINITIONS, PROJECTS, ProjectsFilters  # Import model
 from ..exceptions import AireloomError, ValidationError
@@ -27,7 +28,7 @@ class ProjectsClient(BaseResourceClient):
     _entity_model: type[Project] = Project
     _response_model: type[ProjectResponse] = ProjectResponse
 
-    def __init__(self, api_client: AireloomClient):
+    def __init__(self, api_client: "AireloomClient"):
         """Initializes the ProjectsClient.
 
         Args:
@@ -88,7 +89,9 @@ class ProjectsClient(BaseResourceClient):
         """Generic method to fetch a single entity by ID."""
         endpoint = f"{self._entity_path}/{entity_id}"
         try:
-            response = await self._api_client.request("GET", endpoint)
+            response = await self._api_client.request(
+                "GET", endpoint, params=None, data=None, json_data=None
+            )
             return self._entity_model.model_validate(response.json())
         except httpx.HTTPStatusError as e:
             if e.response.status_code == http.HTTPStatus.NOT_FOUND:
@@ -117,11 +120,11 @@ class ProjectsClient(BaseResourceClient):
         """Generic method to search for entities."""
         try:
             response = await self._api_client.request(
-                "GET", self._entity_path, params=params
+                "GET", self._entity_path, params=params, data=None, json_data=None
             )
             return self._response_model.model_validate(response.json())
         except Exception as e:
-            if isinstance(e, (AireloomError, ValidationError)):
+            if isinstance(e, AireloomError | ValidationError):
                 raise
             logger.exception(
                 f"Failed to search {self._entity_path} with params {params}"
@@ -141,7 +144,11 @@ class ProjectsClient(BaseResourceClient):
                     f"Iterating {self._entity_path} with params: {current_params}"
                 )
                 response = await self._api_client.request(
-                    "GET", self._entity_path, params=current_params
+                    "GET",
+                    self._entity_path,
+                    params=current_params,
+                    data=None,
+                    json_data=None,
                 )
                 data = response.json()
                 api_response = ApiResponse[self._entity_model].model_validate(data)
@@ -161,7 +168,7 @@ class ProjectsClient(BaseResourceClient):
                 current_params["cursor"] = next_cursor
                 current_params.pop("page", None)
             except Exception as e:
-                if isinstance(e, (AireloomError, ValidationError)):
+                if isinstance(e, AireloomError | ValidationError):
                     raise
                 logger.exception(
                     f"Failed during iteration of {self._entity_path} with params {current_params}"

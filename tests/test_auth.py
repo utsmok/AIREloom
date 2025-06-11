@@ -1,5 +1,6 @@
 # tests/test_auth.py
 import asyncio
+
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
@@ -63,7 +64,7 @@ async def test_client_credentials_auth_init_success():
     assert strategy._client_secret == MOCK_CLIENT_SECRET
     assert strategy._token_url == MOCK_TOKEN_URL
     assert strategy._access_token is None
-    await strategy.close()  # Clean up
+    await strategy.async_close()  # Clean up
 
 
 @pytest.mark.asyncio
@@ -114,7 +115,7 @@ async def test_client_credentials_auth_fetch_token_success(httpx_mock: HTTPXMock
     assert strategy._access_token == MOCK_ACCESS_TOKEN
     assert "Authorization" in request.headers
     assert request.headers["Authorization"] == f"Bearer {MOCK_ACCESS_TOKEN}"
-    await strategy.close()
+    await strategy.async_close()
 
 
 @pytest.mark.asyncio
@@ -148,7 +149,7 @@ async def test_client_credentials_auth_fetch_token_cached(httpx_mock: HTTPXMock)
     # Assert that no new request was made to the token endpoint
     assert len(httpx_mock.get_requests()) == 1
 
-    await strategy.close()
+    await strategy.async_close()
 
 
 @pytest.mark.asyncio
@@ -172,7 +173,7 @@ async def test_client_credentials_auth_fetch_token_http_error(httpx_mock: HTTPXM
         await strategy.async_authenticate(request)
 
     assert strategy._access_token is None
-    await strategy.close()
+    await strategy.async_close()
 
 
 @pytest.mark.asyncio
@@ -193,7 +194,7 @@ async def test_client_credentials_auth_fetch_token_network_error(httpx_mock: HTT
         await strategy.async_authenticate(request)
 
     assert strategy._access_token is None
-    await strategy.close()
+    await strategy.async_close()
 
 
 @pytest.mark.asyncio
@@ -219,7 +220,7 @@ async def test_client_credentials_auth_fetch_token_missing_in_response(
         await strategy.async_authenticate(request)
 
     assert strategy._access_token is None
-    await strategy.close()
+    await strategy.async_close()
 
 
 @pytest.mark.asyncio
@@ -235,7 +236,7 @@ async def test_client_credentials_auth_close():
     assert internal_client is not None
     assert not internal_client.is_closed
 
-    await strategy.close()
+    await strategy.async_close()
 
     assert strategy._token_client is None
     # Optionally check if the original client object is closed if needed,
@@ -280,4 +281,4 @@ async def test_client_credentials_auth_concurrent_fetch(httpx_mock: HTTPXMock):
     assert request2.headers["Authorization"] == f"Bearer {MOCK_ACCESS_TOKEN}"
     assert strategy._access_token == MOCK_ACCESS_TOKEN
 
-    await strategy.close()
+    await strategy.async_close()

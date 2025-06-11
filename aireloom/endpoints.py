@@ -122,8 +122,7 @@ class ScholixFilters(BaseModel):
     from_date: date | None = Field(default=None, alias="from")  # API uses "from"
     to_date: date | None = Field(default=None, alias="to")  # API uses "to"
 
-    class Config:
-        populate_by_name = True
+    model_config = {"extra": "forbid", "populate_by_name": True}
 
 
 # Basic definition structure: {path: {'filters_model': PydanticModel, 'sort': dict()}}
@@ -142,15 +141,21 @@ ENDPOINT_DEFINITIONS = {
     },
     ORGANIZATIONS: {
         "filters_model": OrganizationsFilters,
-        "sort": {"relevance": {}},
+        "sort": {"relevance": {}, "legalname": {}, "id": {}},
     },
     DATA_SOURCES: {
         "filters_model": DataSourcesFilters,
-        "sort": {"relevance": {}},
+        "sort": {"relevance": {}, "officialName": {}, "id": {}},
     },
     PROJECTS: {
         "filters_model": ProjectsFilters,
-        "sort": {"relevance": {}, "startDate": {}, "endDate": {}},
+        "sort": {
+            "relevance": {},
+            "startDate": {},
+            "endDate": {},
+            "title": {},
+            "acronym": {},
+        },
     },
     SCHOLIX: {
         "filters_model": ScholixFilters,

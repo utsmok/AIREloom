@@ -1,4 +1,7 @@
-from aireloom.client import AireloomClient
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aireloom.client import AireloomClient
 
 
 class BaseResourceClient:
@@ -6,7 +9,7 @@ class BaseResourceClient:
     Base class for all resource clients.
     """
 
-    def __init__(self, api_client: AireloomClient):
+    def __init__(self, api_client: "AireloomClient"):
         """
         Initialize the base resource client.
 

@@ -175,8 +175,8 @@ async def test_search_organizations_with_filters_and_sort(
     )
 
     expected_params = {
-        "legalname": "Specific University",  # Note: Pydantic model might use alias for legalName
-        "country": "DE",  # Note: Pydantic model might use alias for countryCode
+        "legalName": "Specific University",
+        "country": "DE",
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,
@@ -319,7 +319,7 @@ async def test_iterate_organizations_no_results(
 
     assert count == 0
     expected_params = {
-        "legalname": "Imaginary Org",
+        "legalName": "Imaginary Org",
         "pageSize": page_size,
         "cursor": "*",
     }

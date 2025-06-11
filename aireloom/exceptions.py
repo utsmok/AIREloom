@@ -27,7 +27,7 @@ class AireloomError(Exception):
     def __str__(self) -> str:
         if self.response:
             # Prefer response info if available
-            url_info = getattr(getattr(self.response, 'request', None), 'url', 'N/A')
+            url_info = getattr(getattr(self.response, "request", None), "url", "N/A")
             return f"{self.message} (Status: {self.response.status_code}, URL: {url_info})"
         # Check type before accessing attribute
         if isinstance(self.request, httpx.Request):
