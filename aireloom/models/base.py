@@ -20,11 +20,8 @@ class Header(BaseModel):
     message: str | None = None
     # total and count are often strings in the API response, needs validation/coercion
     queryTime: int | None = None
-    numFound: int | None = None
-    # next/prev can be full URLs or just the cursor string
-    nextCursor: str | HttpUrl | None = Field(
-        default=None, alias="cursor"
-    )  # API might return "cursor"
+    numFound: int | None = None  # next/prev can be full URLs or just the cursor string
+    nextCursor: str | HttpUrl | None = Field(default=None)  # API returns "nextCursor"
     pageSize: int | None = None
 
     @field_validator("queryTime", "numFound", "pageSize", mode="before")
