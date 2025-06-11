@@ -19,7 +19,6 @@ from aireloom.exceptions import (
     APIError,
     AuthError,
     NetworkError,
-    RateLimitError,
     TimeoutError,
 )
 
@@ -698,47 +697,49 @@ async def test_client_preemptive_delay_low_remaining(
 
 
 @pytest.mark.asyncio
-@patch("asyncio.sleep", new_callable=AsyncMock)
 async def test_client_429_with_retry_after_seconds(
-    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
 ):
-    """Test client waits according to Retry-After header (seconds) on 429."""
+    """Test client handles 429 with Retry-After header (seconds) via tenacity."""
     settings = mock_settings
     settings.enable_rate_limiting = True
-    settings.max_retries = 0  # Disable tenacity retries to isolate rate limit sleep
+    settings.max_retries = 1  # Allow one retry to test tenacity behavior
 
     client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
 
+    # First response: 429 with Retry-After header
     httpx_mock.add_response(
         url=f"{MOCK_BASE_URL}/limited",
         method="GET",
         status_code=429,
         headers={"Retry-After": "15"},
     )
-    # by tenacity. The test expects RateLimitError after the initial sleep.
-    # The second mock for a 200 OK response is not needed as max_retries = 0
-    # means tenacity won't make another attempt after RateLimitError is raised.
+    # Second response: Success after retry
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
 
     async with client:
-        with pytest.raises(RateLimitError) as excinfo:
-            await client.request("GET", "/limited")
+        response = await client.request("GET", "/limited")
 
-    assert excinfo.value.response is not None
-    assert excinfo.value.response.status_code == 429
-    mock_sleep.assert_called_once()
-    args, _ = mock_sleep.call_args
-    assert args[0] == 15
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+    # Verify both requests were made (initial + retry)
+    requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/limited")
+    assert len(requests) == 2
 
 
 @pytest.mark.asyncio
-@patch("asyncio.sleep", new_callable=AsyncMock)
 async def test_client_429_with_retry_after_http_date(
-    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
 ):
-    """Test client waits according to Retry-After header (HTTP-date) on 429."""
+    """Test client handles 429 with Retry-After header (HTTP-date) via tenacity."""
     settings = mock_settings
     settings.enable_rate_limiting = True
-    settings.max_retries = 0  # Disable tenacity retries
+    settings.max_retries = 1  # Allow one retry to test tenacity behavior
 
     client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
 
@@ -746,56 +747,65 @@ async def test_client_429_with_retry_after_http_date(
     # Format as RFC 1123 (HTTP-date)
     retry_after_http_date = retry_after_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
+    # First response: 429 with Retry-After header (HTTP date)
     httpx_mock.add_response(
         url=f"{MOCK_BASE_URL}/limited_date",
         method="GET",
         status_code=429,
         headers={"Retry-After": retry_after_http_date},
     )
-    # No second mock needed as max_retries = 0
+    # Second response: Success after retry
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited_date",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
 
     async with client:
-        with pytest.raises(RateLimitError) as excinfo:
-            await client.request("GET", "/limited_date")
+        response = await client.request("GET", "/limited_date")
 
-    assert excinfo.value.response is not None
-    assert excinfo.value.response.status_code == 429
-    mock_sleep.assert_called_once()
-    args, _ = mock_sleep.call_args
-    # Check sleep duration is close to 20 seconds
-    assert 19 < args[0] <= 20.5
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+    # Verify both requests were made (initial + retry)
+    requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/limited_date")
+    assert len(requests) == 2
 
 
 @pytest.mark.asyncio
-@patch("asyncio.sleep", new_callable=AsyncMock)
 async def test_client_429_with_no_retry_after(
-    mock_sleep: AsyncMock, httpx_mock: HTTPXMock, mock_settings: ApiSettings
+    httpx_mock: HTTPXMock, mock_settings: ApiSettings
 ):
-    """Test client uses default retry after on 429 if Retry-After is missing."""
+    """Test client handles 429 without Retry-After header via tenacity."""
     settings = mock_settings
     settings.enable_rate_limiting = True
-    settings.max_retries = 0  # Disable tenacity retries
-    default_retry_sec = settings.rate_limit_retry_after_default
+    settings.max_retries = 1  # Allow one retry to test tenacity behavior
 
     client = AireloomClient(settings=settings, base_url=MOCK_BASE_URL)
 
+    # First response: 429 without Retry-After header
     httpx_mock.add_response(
         url=f"{MOCK_BASE_URL}/limited_no_header",
         method="GET",
         status_code=429,
         # No Retry-After header
     )
-    # No second mock needed as max_retries = 0
+    # Second response: Success after retry
+    httpx_mock.add_response(
+        url=f"{MOCK_BASE_URL}/limited_no_header",
+        method="GET",
+        status_code=200,
+        json={"ok": True},
+    )
 
     async with client:
-        with pytest.raises(RateLimitError) as excinfo:
-            await client.request("GET", "/limited_no_header")
+        response = await client.request("GET", "/limited_no_header")
 
-    assert excinfo.value.response is not None
-    assert excinfo.value.response.status_code == 429
-    mock_sleep.assert_called_once()
-    args, _ = mock_sleep.call_args
-    assert args[0] == default_retry_sec
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+    # Verify both requests were made (initial + retry)
+    requests = httpx_mock.get_requests(url=f"{MOCK_BASE_URL}/limited_no_header")
+    assert len(requests) == 2
 
 
 @pytest.mark.asyncio

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
 ScholixRelationshipNameValue = Literal[
@@ -20,21 +20,21 @@ class ScholixIdentifier(BaseModel):
     id_scheme: str = Field(alias="IDScheme")
     id_url: HttpUrl | None = Field(alias="IDURL", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixCreator(BaseModel):
     name: str | None = Field(alias="Name", default=None)
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixPublisher(BaseModel):
     name: str = Field(alias="Name")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixEntity(BaseModel):
@@ -46,7 +46,7 @@ class ScholixEntity(BaseModel):
     publication_date: str | None = Field(alias="PublicationDate", default=None)
     publisher: list[ScholixPublisher] | None = Field(alias="Publisher", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixRelationshipType(BaseModel):
@@ -54,14 +54,14 @@ class ScholixRelationshipType(BaseModel):
     sub_type: str | None = Field(alias="SubType", default=None)
     sub_type_schema: HttpUrl | None = Field(alias="SubTypeSchema", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixLinkProvider(BaseModel):
     name: str = Field(alias="Name")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixRelationship(BaseModel):
@@ -79,7 +79,7 @@ class ScholixRelationship(BaseModel):
     license_url: HttpUrl | None = Field(alias="LicenseURL", default=None)
     harvest_date: str | None = Field(alias="HarvestDate", default=None)
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
 
 
 class ScholixResponse(BaseModel):
@@ -98,4 +98,4 @@ class ScholixResponse(BaseModel):
         alias="result", description="List of Scholix relationship links."
     )
 
-    model_config = dict(populate_by_name=True, extra="allow")
+    model_config = ConfigDict(populate_by_name=True, extra="allow")

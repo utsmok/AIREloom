@@ -36,18 +36,12 @@ All settings below can be configured by setting the corresponding environment va
 
 ### API Base URLs
 
-While generally not needing modification unless OpenAIRE changes its API structure or you are using a proxy/mock server, these are also configurable:
+**Note:** Base URLs are currently hardcoded in `aireloom.endpoints` and are not configurable through `ApiSettings`. They are set as constants:
 
-*   `openaire_graph_api_base_url` (str):
-    *   Description: Base URL for the OpenAIRE Graph API.
-    *   Environment Variable: `AIRELOOM_OPENAIRE_GRAPH_API_BASE_URL`
-    *   Default: `https://api.openaire.eu/graph/v1` (from `aireloom.constants`)
-*   `openaire_scholix_api_base_url` (str):
-    *   Description: Base URL for the OpenAIRE Scholexplorer API.
-    *   Environment Variable: `AIRELOOM_OPENAIRE_SCHOLIX_API_BASE_URL`
-    *   Default: `https://api.scholexplorer.openaire.eu/v3` (from `aireloom.constants`)
+*   Graph API Base URL: `https://api.graph.openaire.eu/v1/` (defined in `aireloom.endpoints.GRAPH_API_BASE_URL`)
+*   Scholexplorer API Base URL: `https://api-beta.scholexplorer.openaire.eu/v3/` (defined in `aireloom.endpoints.SCHOLIX_API_BASE_URL`)
 
-*Note: Base URLs are typically set within the client initialization if not overridden by `ApiSettings` directly passed to `AireloomClient`.*
+These URLs are used internally by the client and cannot be overridden via environment variables or ApiSettings in the current version.
 
 ### Authentication
 

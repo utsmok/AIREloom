@@ -176,14 +176,11 @@ async def test_search_organizations_with_filters_and_sort(
 
     expected_params = {
         "legalName": "Specific University",
-        "country": "DE",
+        "country": "DE",  # countryCode gets aliased to 'country'
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,
     }
-    # Adjust legalname and country if by_alias=True in model_dump changes them
-    # For OrganizationsFilters, legalName -> legalname, countryCode -> country
-    # This is based on typical OpenAIRE API parameter naming.
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
@@ -270,7 +267,7 @@ async def test_iterate_organizations(
             "GET",
             ORGANIZATIONS,
             params={
-                "country": "FR",
+                "country": "FR",  # countryCode gets aliased to 'country'
                 "pageSize": page_size,
                 "sortBy": sort_by,
                 "cursor": "*",
@@ -282,7 +279,7 @@ async def test_iterate_organizations(
             "GET",
             ORGANIZATIONS,
             params={
-                "country": "FR",
+                "country": "FR",  # countryCode gets aliased to 'country'
                 "pageSize": page_size,
                 "sortBy": sort_by,
                 "cursor": "cursor_org_page2",
@@ -388,7 +385,11 @@ async def test_iterate_organizations_api_error(
         call(
             "GET",
             ORGANIZATIONS,
-            params={"country": "ES", "pageSize": page_size, "cursor": "*"},
+            params={
+                "country": "ES",
+                "pageSize": page_size,
+                "cursor": "*",
+            },  # countryCode gets aliased to 'country'
             data=None,
             json_data=None,
         ),
@@ -396,7 +397,7 @@ async def test_iterate_organizations_api_error(
             "GET",
             ORGANIZATIONS,
             params={
-                "country": "ES",
+                "country": "ES",  # countryCode gets aliased to 'country'
                 "pageSize": page_size,
                 "cursor": "cursor_es_page2",
             },

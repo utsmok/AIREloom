@@ -3,7 +3,7 @@ from collections.abc import Callable, Mapping
 from typing import Any
 
 import httpx
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RequestData(BaseModel):
@@ -16,8 +16,7 @@ class RequestData(BaseModel):
     data: Mapping[str, Any] | None = None
     headers: dict[str, str] = Field(default_factory=dict)
 
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
     def build_request(self) -> httpx.Request:
         """Builds an httpx.Request object from the stored data."""

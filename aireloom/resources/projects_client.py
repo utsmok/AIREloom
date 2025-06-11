@@ -71,6 +71,7 @@ class ProjectsClient(BaseResourceClient):
         page_size: int,
         sort_by: str | None,
         filters: dict[str, Any] | None,  # Changed to Optional[dict]
+        *,
         is_iteration: bool = False,
     ) -> dict[str, Any]:
         """Builds the query parameter dictionary."""

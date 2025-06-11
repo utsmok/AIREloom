@@ -110,12 +110,17 @@ async def run_example():
             print(f"Attempting to fetch product with ID: {product_id}")
             product = await session.research_products.get(product_id)
             print(f"Fetched Product: {product.title}")
-            # Accessing the DOI directly from the model
-            doi_value = product.doi
+            # Accessing the DOI from the pids list structure
+            doi_value = None
+            if product.pids:
+                for pid in product.pids:
+                    if pid.id and pid.id.scheme == "doi":
+                        doi_value = pid.id.value
+                        break
             print(f"  DOI: {doi_value if doi_value else 'Not available'}")
             # Accessing nested Pydantic model data safely
-            print(f"  Type: {product.originaltype.attrs.get('classname') if product.originaltype and product.originaltype.attrs else 'N/A'}")
-            print(f"  Publication Date: {product.dateofacceptance.value if product.dateofacceptance else 'N/A'}")
+            print(f"  Type: {product.type if product.type else 'N/A'}")
+            print(f"  Publication Date: {product.publicationDate if product.publicationDate else 'N/A'}")
 
         except AireloomError as e:
             print(f"An API or client error occurred: {e}")
@@ -142,7 +147,8 @@ Use the `get` method on the specific resource client (e.g., `session.research_pr
 
 ```python
 import asyncio
-from aireloom import AireloomSession, NoAuth
+from aireloom import AireloomSession
+from aireloom.auth import NoAuth
 from aireloom.exceptions import AireloomError, NotFoundError
 
 async def get_entities():
@@ -152,7 +158,14 @@ async def get_entities():
             product_id = "openaire____::doi:10.5281/zenodo.7664304" # Example, use a real ID
             print(f"\nFetching Product ID: {product_id}")
             product = await session.research_products.get(product_id)
-            print(f"-> Product '{product.title}' fetched. DOI: {product.doi}")
+            # Extract DOI from pids structure
+            doi_value = None
+            if product.pids:
+                for pid in product.pids:
+                    if pid.id and pid.id.scheme == "doi":
+                        doi_value = pid.id.value
+                        break
+            print(f"-> Product '{product.title}' fetched. DOI: {doi_value if doi_value else 'Not available'}")
 
             # Get Organization by OpenAIRE ID
             org_id = "openaire____::orgID:grid.5522.e" # Example: University of Twente (using a GRID ID format)
@@ -203,7 +216,7 @@ async def search_entities():
             print("\nSearching Research Products...")
             rp_filters = ResearchProductsFilters( # Create filter model instance
                 type="article",
-                mainTitle="climate modelling", # Example title search
+                mainTitle="climate modelling", # Filter field name is mainTitle
                 fromPublicationDate="2023-01-01",
                 toPublicationDate="2023-12-31",
                 # countryCode="NL", # Example country filter
@@ -219,9 +232,15 @@ async def search_entities():
             print(f"Showing page {search_response.header.pageNumber} of {search_response.header.totalPages} (page size {search_response.header.pageSize}):")
             if search_response.results:
                 for product in search_response.results:
-                    pub_date_obj = product.publicationDate or product.dateofacceptance # Prioritize publicationDate
-                    pub_date_str = pub_date_obj.value if pub_date_obj else "N/A"
-                    print(f"- {product.title} ({pub_date_str}) - DOI: {product.doi}")
+                    pub_date_str = product.publicationDate if product.publicationDate else "N/A"
+                    # Extract DOI from pids structure
+                    doi_value = None
+                    if product.pids:
+                        for pid in product.pids:
+                            if pid.id and pid.id.scheme == "doi":
+                                doi_value = pid.id.value
+                                break
+                    print(f"- {product.title} ({pub_date_str}) - DOI: {doi_value if doi_value else 'Not available'}")
             else:
                 print("No products found for this page/filter combination.")
 
@@ -288,8 +307,7 @@ async def iterate_all_results():
                 sortBy="publicationDate desc" # Get newest first
             ):
                 count += 1
-                pub_date_obj = product.publicationDate or product.dateofacceptance
-                pub_date_str = pub_date_obj.value if pub_date_obj else "N/A"
+                pub_date_str = product.publicationDate if product.publicationDate else "N/A"
                 print(f"#{count}: {product.title} ({pub_date_str})")
                 if count >= max_results_to_fetch:
                     print(f"\nStopping iteration early after fetching {max_results_to_fetch} results.")

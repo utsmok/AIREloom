@@ -6,12 +6,13 @@ import httpx
 class AireloomError(Exception):
     """Base exception class for all Aireloom errors."""
 
-    def __init__(self, 
-                 message: str, 
-                 *, 
-                 response: httpx.Response | None = None,
-                 request: httpx.Request | None = None
-                 ):
+    def __init__(
+        self,
+        message: str,
+        *,
+        response: httpx.Response | None = None,
+        request: httpx.Request | None = None,
+    ):
         """Initializes the base exception.
 
         Args:
@@ -28,7 +29,9 @@ class AireloomError(Exception):
         if self.response:
             # Prefer response info if available
             url_info = getattr(getattr(self.response, "request", None), "url", "N/A")
-            return f"{self.message} (Status: {self.response.status_code}, URL: {url_info})"
+            return (
+                f"{self.message} (Status: {self.response.status_code}, URL: {url_info})"
+            )
         # Check type before accessing attribute
         if isinstance(self.request, httpx.Request):
             # Fallback to request info if response is missing and request is valid
@@ -69,8 +72,8 @@ class TimeoutError(AireloomError):
 
     def __init__(self, message: str, *, request: httpx.Request | None = None):
         # Timeout errors typically don't have a response, but do have the request
-        super().__init__(message, response=None) # Base class handles message
-        self.request = request # Store the request associated with the timeout
+        super().__init__(message, response=None)  # Base class handles message
+        self.request = request  # Store the request associated with the timeout
 
     def __str__(self) -> str:
         if self.request:

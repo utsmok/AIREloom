@@ -277,7 +277,9 @@ async def test_iterate_scholix_links_api_error(
 
     assert len(iterated_links) == 1
     assert iterated_links[0] == expected_link_model_page1
-    assert f"Failed during iteration of {SCHOLIX} on page 1" in str(exc_info.value)
+    assert f"Unexpected error searching {SCHOLIX}: Scholix Server Error '500'" in str(
+        exc_info.value
+    )
 
     expected_calls = [
         call(

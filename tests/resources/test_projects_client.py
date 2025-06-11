@@ -149,7 +149,7 @@ async def test_search_projects_with_filters_and_sort(
     filters_model = ProjectsFilters(
         title="Climate Change Research",
         fundingShortName="EU",
-        code="CCR_EU",  # Changed funder to fundingShortName
+        code="CCR_EU",
     )
     # Assuming 'title' is a valid sort field for projects from ENDPOINT_DEFINITIONS
     sort_by = "title asc"
@@ -186,13 +186,12 @@ async def test_search_projects_with_filters_and_sort(
 
     expected_params = {
         "title": "Climate Change Research",
-        "funder": "EU",
+        "funder": "EU",  # fundingShortName gets aliased to 'funder'
         "code": "CCR_EU",
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,
     }
-    # Ensure ProjectsFilters.model_dump(by_alias=True) produces these keys
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
@@ -286,11 +285,11 @@ async def test_iterate_projects(
             "GET",
             PROJECTS,
             params={
-                "fundingStream": "H2020",
+                "fundingStreamId": "H2020",  # No alias for fundingStreamId
                 "pageSize": page_size,
                 "sortBy": sort_by,
                 "cursor": "*",
-            },  # fundingStreamId -> fundingStream
+            },
             data=None,
             json_data=None,
         ),
@@ -298,7 +297,7 @@ async def test_iterate_projects(
             "GET",
             PROJECTS,
             params={
-                "fundingStream": "H2020",
+                "fundingStreamId": "H2020",  # No alias for fundingStreamId
                 "pageSize": page_size,
                 "sortBy": sort_by,
                 "cursor": "cursor_proj_p2",

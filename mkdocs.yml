@@ -32,10 +32,10 @@ theme:
 
 plugins:
   - search
-  # For mkdocs-python-extractor (simple doc extraction)
-  # This will look for ::: identifiers in markdown
-  - "python-extractor":
-      module_dir: "aireloom" # Path to your Python package
+  # Note: python-extractor plugin may not be properly installed
+  # Comment out until plugin is confirmed working or replace with mkdocstrings
+  # - "python-extractor":
+  #     module_dir: "aireloom" # Path to your Python package
 
 nav:
   - Home: index.md
@@ -51,6 +51,8 @@ nav:
   - Configuration: configuration.md
   - API Reference (Basic): api_reference.md # For mkdocs-python-extractor
   - Advanced:
+    - Configuration: advanced/configuration.md
     - Hooks: advanced/hooks.md
-  #   - Rate Limiting: advanced/rate_limiting.md
-  #   - Error Handling: advanced/error_handling.md
+    - Rate Limiting: advanced/rate_limiting.md
+    - Error Handling: advanced/error_handling.md
+    - Caching: advanced/caching.md

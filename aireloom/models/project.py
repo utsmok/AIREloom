@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # Import base classes
 from .base import ApiResponse, BaseEntity
@@ -13,7 +13,7 @@ class FundingStream(BaseModel):
 
     description: str | None = None
     id: str | None = None
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class Funding(BaseModel):
@@ -23,7 +23,7 @@ class Funding(BaseModel):
     jurisdiction: str | None = None
     name: str | None = None
     shortName: str | None = None
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class Grant(BaseModel):
@@ -32,7 +32,7 @@ class Grant(BaseModel):
     currency: str | None = None
     fundedAmount: float | None = None
     totalCost: float | None = None
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class H2020Programme(BaseModel):
@@ -40,7 +40,7 @@ class H2020Programme(BaseModel):
 
     code: str | None = None
     description: str | None = None
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 class Project(BaseEntity):
@@ -66,7 +66,7 @@ class Project(BaseEntity):
     summary: str | None = None
     websiteUrl: str | None = None
 
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     @field_validator("keywords", mode="before")
     @classmethod

@@ -68,7 +68,7 @@ These settings are used to configure authentication with OpenAIRE APIs. See the 
 
 *   **`AIRELOOM_OPENAIRE_TOKEN_URL`**
     *   Description: OAuth2 Token Endpoint URL. This is used by `ClientCredentialsAuth` to fetch an access token.
-    *   Default: (The OpenAIRE registered service API token URL, e.g., `https://services.openaire.eu/uoa-oidc-host/token`)
+    *   Default: The OpenAIRE registered service API token URL (defined in constants.py as REGISTERED_SERVICE_API_TOKEN_URL)
     *   Example: `export AIRELOOM_OPENAIRE_TOKEN_URL="https://custom.openaire.token/url"`
 
 ## Programmatic Configuration

@@ -28,6 +28,8 @@ from aireloom.models import (
     Organization,
     Project,
     ResearchProduct,
+)
+from aireloom.models import (
     ScholixRelationship as ScholixLink,  # Alias for test consistency
 )
 from aireloom.models.base import ApiResponse
@@ -172,9 +174,8 @@ async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
 
     mock_api_response_json = {
         "id": product_id,
-        "titles": [{"value": "Mocked Research Product Title"}],
-        "mainTitle": "Mocked Research Product Title",
-        "type": {"name": "publication", "type": "article"},
+        "title": "Mocked Research Product Title",
+        "type": "publication",
         "publicationDate": "2023-01-01",
     }
     httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
@@ -182,7 +183,7 @@ async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
         product = await session.research_products.get(product_id)
     assert isinstance(product, ResearchProduct)
     assert product.id == product_id
-    assert product.mainTitle == "Mocked Research Product Title"
+    assert product.title == "Mocked Research Product Title"
 
 
 @pytest.mark.asyncio
@@ -211,9 +212,8 @@ async def test_session_search_research_products_integration(httpx_mock: HTTPXMoc
         "results": [
             {
                 "id": "rp456",
-                "titles": [{"value": "Searched Research Product"}],
-                "mainTitle": "Searched Research Product",
-                "type": {"name": "publication", "type": "article"},
+                "title": "Searched Research Product",
+                "type": "publication",
                 "publicationDate": "2023-02-01",
             }
         ],
@@ -255,14 +255,13 @@ async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMo
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": "cursor1",
+            "nextCursor": "cursor1",
         },
         "results": [
             {
                 "id": "rp_iter1",
-                "titles": [{"value": "Iter Product 1"}],
-                "mainTitle": "Iter Product 1",
-                "type": {"name": "publication", "type": "article"},
+                "title": "Iter Product 1",
+                "type": "publication",
                 "publicationDate": "2023-03-01",
             }
         ],
@@ -273,14 +272,13 @@ async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMo
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": None,
+            "nextCursor": None,
         },
         "results": [
             {
                 "id": "rp_iter2",
-                "titles": [{"value": "Iter Product 2"}],
-                "mainTitle": "Iter Product 2",
-                "type": {"name": "publication", "type": "article"},
+                "title": "Iter Product 2",
+                "type": "publication",
                 "publicationDate": "2023-03-02",
             }
         ],
@@ -375,12 +373,12 @@ async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tso_int = {"countryCode": "GR", "page": "1", "pageSize": "1"}
+    _params_tso_int = {"country": "GR", "page": "1", "pageSize": "1"}
     httpx_mock.add_response(
         url=f"{expected_url}?{urllib.parse.urlencode(_params_tso_int)}",
         method="GET",
         json=mock_api_response_json,
-    )  # API uses countryCode
+    )  # API uses country (aliased from countryCode)
     async with AireloomSession() as session:
         filters = OrganizationsFilters(
             countryCode="GR"
@@ -414,7 +412,7 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": "cursor_org1",
+            "nextCursor": "cursor_org1",
         },
         "results": [
             {
@@ -430,7 +428,7 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": None,
+            "nextCursor": None,
         },
         "results": [
             {
@@ -440,13 +438,13 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tio_int_1 = {"countryCode": "EU", "pageSize": "1", "cursor": "*"}
+    _params_tio_int_1 = {"country": "EU", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_1)}",
         method="GET",
         json=mock_response_page1,
     )
-    _params_tio_int_2 = {"countryCode": "EU", "pageSize": "1", "cursor": "cursor_org1"}
+    _params_tio_int_2 = {"country": "EU", "pageSize": "1", "cursor": "cursor_org1"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_2)}",
         method="GET",
@@ -569,7 +567,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": "cursor_proj1",
+            "nextCursor": "cursor_proj1",
         },
         "results": [
             {
@@ -589,7 +587,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": None,
+            "nextCursor": None,
         },
         "results": [
             {
@@ -603,14 +601,14 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tip_int_1 = {"fundingShortName": "EC", "pageSize": "1", "cursor": "*"}
+    _params_tip_int_1 = {"funder": "EC", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tip_int_1)}",
         method="GET",
         json=mock_response_page1,
-    )  # API uses fundingShortName
+    )  # API uses funder (aliased from fundingShortName)
     _params_tip_int_2 = {
-        "fundingShortName": "EC",
+        "funder": "EC",
         "pageSize": "1",
         "cursor": "cursor_proj1",
     }
@@ -736,7 +734,7 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": "cursor_ds1",
+            "nextCursor": "cursor_ds1",
         },
         "results": [
             {
@@ -754,7 +752,7 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
             "size": 1,
             "numFound": 2,
             "totalPages": 2,
-            "cursor": None,
+            "nextCursor": None,
         },
         "results": [
             {
@@ -951,9 +949,8 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
 
     mock_product_response = {
         "id": product_id,
-        "titles": [{"value": "Mocked Test Product Title"}],
-        "mainTitle": "Mocked Test Product Title",
-        "type": {"name": "publication", "type": "article"},
+        "title": "Mocked Test Product Title",
+        "type": "publication",
         "publicationDate": "2023-01-01",
     }
     httpx_mock.add_response(
@@ -966,7 +963,7 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
         product = await session.research_products.get(product_id)
         assert product is not None
         assert product.id == product_id
-        assert isinstance(product.mainTitle, str)
+        assert isinstance(product.title, str)
 
 
 @pytest.mark.asyncio
@@ -1015,9 +1012,8 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
         "results": [
             {
                 "id": "rp_search_legacy",
-                "titles": [{"value": "Legacy Search Product"}],
-                "mainTitle": "Legacy Search Product",
-                "type": {"name": "publication", "type": "article"},
+                "title": "Legacy Search Product",
+                "type": "publication",
                 "publicationDate": "2023-04-01",
             }
         ],
@@ -1037,7 +1033,7 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
         assert response.results is not None and len(response.results) <= 5
         if response.results:
             assert isinstance(response.results[0].id, str)
-            assert isinstance(response.results[0].mainTitle, str)
+            assert isinstance(response.results[0].title, str)
 
 
 @pytest.mark.asyncio
@@ -1056,26 +1052,31 @@ async def test_iterate_research_products(httpx_mock: HTTPXMock):
     mock_response_page1 = {
         "header": {
             "numFound": 2,
-            "cursor": "cursor_legacy1",
+            "nextCursor": "cursor_legacy1",
             "size": 1,
             "page": 1,
         },  # Use numFound
         "results": [
             {
                 "id": "id_legacy1",
-                "mainTitle": "Title Legacy 1",
-                "type": {"name": "dataset"},
+                "title": "Title Legacy 1",
+                "type": "dataset",
                 "publicationDate": "2023-01-01",
             }
         ],
     }
     mock_response_page2 = {
-        "header": {"numFound": 2, "cursor": None, "size": 1, "page": 2},  # Use numFound
+        "header": {
+            "numFound": 2,
+            "nextCursor": None,
+            "size": 1,
+            "page": 2,
+        },  # Use numFound
         "results": [
             {
                 "id": "id_legacy2",
-                "mainTitle": "Title Legacy 2",
-                "type": {"name": "software"},
+                "title": "Title Legacy 2",
+                "type": "software",
                 "publicationDate": "2023-01-02",
             }
         ],

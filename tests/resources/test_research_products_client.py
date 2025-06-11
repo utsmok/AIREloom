@@ -51,7 +51,7 @@ async def test_get_research_product(
 ):
     """Test getting a single research product."""
     product_id = "test_product_id_123"
-    expected_product_data_dict = {"id": product_id, "mainTitle": "Test Product Title"}
+    expected_product_data_dict = {"id": product_id, "title": "Test Product Title"}
     expected_product = ResearchProduct.model_validate(expected_product_data_dict)
 
     mock_http_response = AsyncMock(spec=httpx.Response)
@@ -116,7 +116,7 @@ async def test_search_research_products_no_filters(
     research_products_client: ResearchProductsClient, mock_api_client_fixture: AsyncMock
 ):
     """Test searching research products with no filters."""
-    expected_results_data = [{"id": "prod1", "mainTitle": "Product 1"}]
+    expected_results_data = [{"id": "prod1", "title": "Product 1"}]
     expected_header_data = {
         "numFound": 1,
         "pageSize": DEFAULT_PAGE_SIZE,
@@ -167,7 +167,7 @@ async def test_search_research_products_with_filters_and_sort(
     page = 2
     page_size = 20
 
-    expected_results_data = [{"id": "prod3", "mainTitle": "FAIR Data on Zenodo 2023"}]
+    expected_results_data = [{"id": "prod3", "title": "FAIR Data on Zenodo 2023"}]
     expected_header_data = {
         "numFound": 1,
         "pageSize": page_size,
@@ -241,7 +241,7 @@ async def test_iterate_research_products(
     sort_by = "publicationDate desc"
 
     # Page 1
-    page1_results_data = [{"id": "iter1", "mainTitle": "Dataset Iter 1"}]
+    page1_results_data = [{"id": "iter1", "title": "Dataset Iter 1"}]
     page1_header_data = {
         "numFound": 2,
         "pageSize": page_size,
@@ -253,7 +253,7 @@ async def test_iterate_research_products(
     }
 
     # Page 2
-    page2_results_data = [{"id": "iter2", "mainTitle": "Dataset Iter 2"}]
+    page2_results_data = [{"id": "iter2", "title": "Dataset Iter 2"}]
     page2_header_data = {
         "numFound": 2,
         "pageSize": page_size,
@@ -364,8 +364,8 @@ async def test_iterate_single_page_no_next_cursor(
     page_size = 2
 
     results_data = [
-        {"id": "report1", "mainTitle": "Report 1"},
-        {"id": "report2", "mainTitle": "Report 2"},
+        {"id": "report1", "title": "Report 1"},
+        {"id": "report2", "title": "Report 2"},
     ]
     header_data = {
         "numFound": 2,
@@ -408,7 +408,7 @@ async def test_iterate_api_error_during_iteration(
     page_size = 1
 
     # Page 1 - success
-    page1_results_data = [{"id": "soft1", "mainTitle": "Software Iter 1"}]
+    page1_results_data = [{"id": "soft1", "title": "Software Iter 1"}]
     page1_header_data = {
         "numFound": 2,
         "pageSize": page_size,
@@ -451,9 +451,7 @@ async def test_iterate_api_error_during_iteration(
 
     assert len(iterated_products) == 1  # Only first page processed
     assert iterated_products[0] == ResearchProduct.model_validate(page1_results_data[0])
-    assert "Unexpected error during iteration" in str(
-        exc_info.value
-    )  # From _iterate_entities_impl
+    assert "Unexpected error during iteration" in str(exc_info.value)
 
     expected_calls = [
         call(

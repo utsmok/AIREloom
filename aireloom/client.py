@@ -1,5 +1,4 @@
 import asyncio
-import json as py_json  # Added for serializing params in cache key
 import ssl
 import time  # Added time import
 from collections.abc import (
@@ -381,12 +380,10 @@ class AireloomClient:
                             or self._settings.rate_limit_retry_after_default
                         )
                         logger.info(
-                            f"Rate limit hit (429). About to wait for {wait_duration:.2f}s. Client open: {not self._http_client.is_closed if self._http_client else 'N/A'}"
+                            f"Rate limit hit (429). Raising RateLimitError. Retry will be handled by tenacity with appropriate wait. Wait duration hint from server: {wait_duration:.2f}s. Client open: {not self._http_client.is_closed if self._http_client else 'N/A'}"
                         )
-                        # Do not sleep here if tenacity is handling retries for RateLimitError
-                        await asyncio.sleep(
-                            wait_duration
-                        )  # Sleep is handled by tenacity or pre-check
+                        # Removed direct asyncio.sleep(wait_duration) here.
+                        # Tenacity will handle retries and waiting for RateLimitError.
                     logger.error(
                         f"Raising RateLimitError after 429. Client open: {not self._http_client.is_closed if self._http_client else 'N/A'}"
                     )
@@ -575,17 +572,17 @@ class AireloomClient:
                                     f"Waiting for {wait_time:.2f}s until reset."
                                 )
                                 await asyncio.sleep(wait_time)
-                            elif (
-                                self._rate_limit_remaining == 0
-                            ):  # Reset time is past but remaining is 0
-                                logger.warning(
-                                    f"Rate limit reset time {self._rate_limit_reset_timestamp} is past "
-                                    f"but remaining requests is {self._rate_limit_remaining}. "
-                                    f"Waiting for default: {self._settings.rate_limit_retry_after_default}s."
-                                )
-                                await asyncio.sleep(
-                                    self._settings.rate_limit_retry_after_default
-                                )
+                        elif (
+                            self._rate_limit_remaining == 0
+                        ):  # Reset time is past but remaining is 0
+                            logger.warning(
+                                f"Rate limit reset time {self._rate_limit_reset_timestamp} is past "
+                                f"but remaining requests is {self._rate_limit_remaining}. "
+                                f"Waiting for default: {self._settings.rate_limit_retry_after_default}s."
+                            )
+                            await asyncio.sleep(
+                                self._settings.rate_limit_retry_after_default
+                            )
                         elif (
                             self._rate_limit_remaining == 0
                         ):  # No reset time, but remaining is 0
@@ -621,122 +618,87 @@ class AireloomClient:
 
         # Prepare retry strategy
         retry_strategy = AsyncRetrying(
-            stop=stop_after_attempt(self._settings.max_retries + 1),
+            stop=stop_after_attempt(
+                self._settings.max_retries + 1
+            ),  # +1 for initial attempt
             wait=wait_exponential(
-                multiplier=self._settings.backoff_factor, min=0.1, max=10
+                multiplier=self._settings.backoff_factor,
             ),
             retry=self._should_retry_request,
-            reraise=True,  # Reraise the last exception if all retries fail
+            reraise=True,  # Reraise the exception if all retries fail
+            before_sleep=self._before_retry_sleep,  # Log before sleeping
         )
-
         try:
-            # Pass expected_model to _execute_single_request through tenacity
-            # _execute_single_request will handle pre-request hooks internally now
-            # using the headers already populated by the auth strategy.
-            response, parsed_model = await retry_strategy(
-                self._execute_single_request,
-                request_data,
-                expected_model=expected_model,
+            return await retry_strategy.__call__(
+                self._execute_single_request, request_data, expected_model
             )
-            return response, parsed_model
-
-        except AuthError as e:
-            logger.error(f"Authentication error during request execution: {e}")
-            raise e
-        except TimeoutError as e:
-            logger.warning(
-                f"Request timed out after retries: {e.request.url if e.request else 'N/A'}"
+        except RetryError as e:  # This catches tenacity's RetryError
+            logger.error(
+                f"All retries failed for {request_data.url}. Last exception: {e.last_attempt.exception() if e.last_attempt else 'Unknown'}"
             )
-            raise e
-        except NetworkError as e:
-            logger.warning(
-                f"Network error after retries: {e.request.url if e.request else 'N/A'}"
-            )
-            raise e
-
-        except RateLimitError as e:
-            logger.warning(
-                f"Rate limit error after retries: {e.request.url if e.request else 'N/A'}"
-            )
-            raise e
-
-        except APIError as e:
-            logger.warning(
-                f"API error {e.response.status_code if e.response else 'N/A'} after retries: {e.request.url if e.request else 'N/A'}"
-            )
-            raise e
-
-        except httpx.TimeoutException as e:
-            logger.warning(
-                f"Request timed out after retries (httpx): {getattr(e.request, 'url', 'N/A')}"
-            )
-            raise TimeoutError("Request timed out", request=e.request) from e
-
-        except httpx.NetworkError as e:
-            logger.warning(
-                f"Network error after retries (httpx): {getattr(e.request, 'url', 'N/A')}"
-            )
-            raise NetworkError("Connection failed", request=e.request) from e
-
-        except httpx.HTTPStatusError as e:
-            logger.warning(
-                f"HTTP error after retries (httpx): Status {e.response.status_code}, URL: {e.request.url}"
-            )
-            if e.response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-                raise RateLimitError(
-                    "API rate limit exceeded.", response=e.response, request=e.request
-                ) from e
-            # No else needed after raise
-            raise APIError(
-                f"API request failed with status {e.response.status_code}",
-                response=e.response,
-                request=e.request,
-            ) from e
-
-        except RetryError as e:
-            logger.error(f"Request failed after multiple retries: {e}")
-            raise AireloomError("Request failed after multiple retries") from e
-
-        except AireloomError as e:
-            raise e  # Re-raise without further wrapping
-
-        except Exception as e:
-            logger.exception(f"Unexpected error during request processing: {e}")
-            request_info = getattr(e, "request", None)
-            # Use | for isinstance check
-            if not isinstance(request_info, httpx.Request | type(None)):
-                request_info = None
-            if isinstance(e, AireloomError):
-                raise e
+            # Re-raise the original exception that caused the retries to fail
+            if e.last_attempt and e.last_attempt.failed:
+                original_exception = e.last_attempt.exception()
+                if original_exception:
+                    raise original_exception from e
+            # Fallback if for some reason last_attempt is not available
             raise AireloomError(
-                f"An unexpected error occurred: {e}", request=request_info
+                f"All retries failed for {request_data.url}. No specific last exception captured."
             ) from e
+
+    async def _before_retry_sleep(self, retry_state: tenacity.RetryCallState) -> None:
+        """Log details before tenacity sleeps between retries."""
+        if not retry_state.outcome:  # Should not happen
+            return
+
+        exc = retry_state.outcome.exception()
+        url = "N/A"
+        request_info = ""
+        if exc and hasattr(exc, "request") and getattr(exc, "request", None):
+            request = exc.request
+            url = str(getattr(request, "url", "N/A"))
+            method = str(getattr(request, "method", "N/A"))
+            request_info = f"for {method} {url}"
+
+        sleep_time = (
+            getattr(retry_state.next_action, "sleep", 0)
+            if retry_state.next_action
+            else 0
+        )
+        logger.info(
+            f"Retrying request {request_info} in {sleep_time:.2f} seconds "
+            f"after {retry_state.attempt_number} attempt(s) due to: {type(exc).__name__} - {exc}"
+        )
 
     def _generate_cache_key(
         self, method: str, url: str, params: Mapping[str, Any] | None = None
     ) -> str:
-        """Generates a cache key for a request."""
-        key_parts = [method.upper(), url]
-        if params:
-            # Sort params by key and serialize to ensure consistent key
-            # Ensure all param values are converted to strings for consistent serialization
-            # and handle cases where params might not be simple types directly serializable.
-            # For complex objects, a more robust serialization might be needed.
-            try:
-                processed_params = {
-                    k: str(v) if not isinstance(v, str | int | float | bool) else v
-                    for k, v in params.items()
-                }
-                sorted_params = sorted(processed_params.items())
-                key_parts.append(py_json.dumps(sorted_params, sort_keys=True))
-            except TypeError as e:
-                logger.warning(
-                    f"Could not serialize params for cache key {params}: {e}"
-                )
-                # Fallback to a less specific key part if serialization fails
-                key_parts.append(str(sorted(params.items())))
+        """
+        Generate a cache key from the request method, URL, and parameters.
 
-        return ":".join(key_parts)
+        Args:
+            method: HTTP method (e.g., 'GET', 'POST')
+            url: Full URL for the request
+            params: Query parameters dict
+
+        Returns:
+            A unique cache key string
+        """
+        import hashlib
+        import json
+
+        # Start with method and URL
+        key_parts = [method.upper(), url]
+
+        # Add sorted parameters if they exist
+        if params:
+            # Sort parameters to ensure consistent cache keys
+            sorted_params = json.dumps(params, sort_keys=True, separators=(",", ":"))
+            key_parts.append(sorted_params)
+
+        # Create a hash of the combined key parts
+        cache_key_string = "|".join(key_parts)
+        return hashlib.md5(cache_key_string.encode("utf-8")).hexdigest()
 
     async def request(
         self,

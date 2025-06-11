@@ -1,7 +1,7 @@
 # https://graph.openaire.eu/docs/data-model/entities/data-source
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field  # Added ConfigDict
 
 from .base import ApiResponse, BaseEntity
 from .research_product import Container
@@ -14,10 +14,11 @@ DatabaseRestrictionType = Literal["feeRequired", "registration", "other"]
 # Base classes for controlled fields
 class ControlledField(BaseModel):
     """Represents a controlled vocabulary field with scheme and value."""
+
     scheme: str | None = None
     value: str | None = None
 
-    model_config = dict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
 
 # Main DataSource model
@@ -51,6 +52,8 @@ class DataSource(BaseEntity):
     missionStatementUrl: str | None = None
     # Added based on documentation/analysis
     journal: Container | None = None
+
+    model_config = ConfigDict(extra="allow")
 
 
 # Define the specific response type for data sources

@@ -199,68 +199,64 @@ class Container(BaseModel):
 class GeoLocation(BaseModel):
     box: str | None = None
     place: str | None = None
-    point: str | None = None
 
     model_config = ConfigDict(extra="allow")
 
 
 # Update main ResearchProduct model
 class ResearchProduct(BaseEntity):
+    """Model representing an OpenAIRE Research Product entity."""
+
+    # id is inherited from BaseEntity
+    originalIds: list[str] | None = Field(default_factory=list)
+    pids: list[Pid] | None = Field(default_factory=list)
     type: ResearchProductType | None = None
-    originalId: list[str] = Field(default_factory=list)
-    mainTitle: str | None = None
-    subTitle: str | None = None
-    author: list[Author] = Field(default_factory=list)
+    title: str | None = None
+    authors: list[Author] | None = Field(default_factory=list)
     bestAccessRight: BestAccessRight | None = None
-    contributors: list[str] | None = None
-    country: list[ResultCountry] = Field(default_factory=list)
-    coverages: list[str] | None = None
-    dateOfCollection: str | None = None
-    descriptions: list[str] = Field(default_factory=list)
-    embargoEndDate: str | None = None
-    indicators: Indicator | None = None
-    instance: list[Instance] = Field(default_factory=list)
-    language: Language | None = None
-    lastUpdateTimeStamp: int | None = None
-    pid: list[ResultPid] = Field(default_factory=list)
+    country: ResultCountry | None = None
+    description: str | None = None
     publicationDate: str | None = None
     publisher: str | None = None
-    source: list[str] = Field(default_factory=list)
-    formats: list[str] | None = None
-    subjects: list[Subject] | None = None
-    isGreen: bool | None = None
-    openAccessColor: str | None = None
-    isInDiamondJournal: bool | None = None
-    publiclyFunded: bool | None = None
-
-    # Optional nested objects for specific types
+    indicators: Indicator | None = None
+    instances: list[Instance] | None = Field(default_factory=list)
+    language: Language | None = None
+    subjects: list[Subject] | None = Field(default_factory=list)
     container: Container | None = None
-    # for datasets
-    size: str | None = None
-    version: str | None = None
-    geolocations: list[GeoLocation] = Field(default_factory=list)
-    # for software
-    documentationUrls: list[str] | None = None
-    codeRepositoryUrl: str | None = None
-    programmingLanguage: str | None = None
-    # for other research products
-    contactPeople: list[str] | None = None
-    contactGroups: list[str] | None = None
-    tools: list[str] | None = None
-
-    @field_validator("type", mode="before")
-    @classmethod
-    def flatten_type_field(cls, v: Any) -> str | None:
-        if isinstance(v, dict):
-            return v.get("name")
-        if isinstance(v, str) or v is None:
-            return v
-        logger.warning(
-            f"Unexpected value for ResearchProduct.type: {v}. Expected dict, str, or None."
-        )
-        return None  # Or raise ValueError if strictness is preferred
+    geoLocation: GeoLocation | None = None
+    # Added based on documentation/analysis
+    keywords: list[str] | None = Field(default_factory=list)
+    journal: Container | None = (
+        None  # Alias for container, if needed for specific mapping
+    )
+    # Fields from OpenAIRE documentation that might be relevant
+    # dateOfAcceptance: str | None = None
+    # firstOnlineDate: str | None = None
+    # lastUpdateDate: str | None = None
+    # embargoEndDate: str | None = None
+    # alternativeAbstracts: list[dict[str, str]] | None = Field(default_factory=list)
+    # fundingReferences: list[dict[str, Any]] | None = Field(default_factory=list) # Complex, define if needed
+    # relatedProducts: list[dict[str, Any]] | None = Field(default_factory=list) # Complex, define if needed
+    # alternateIdentifiers: list[dict[str, str]] | None = Field(default_factory=list)
+    # formats: list[str] | None = Field(default_factory=list)
+    # rights: list[dict[str, str]] | None = Field(default_factory=list)
+    # sources: list[str] | None = Field(default_factory=list)
+    # relevance: float | None = None # Often part of search result metadata, not the entity itself
 
     model_config = ConfigDict(extra="allow")
+
+    @field_validator("keywords", mode="before")
+    @classmethod
+    def split_keywords(cls, v: Any) -> list[str] | None:
+        """Split comma-separated keywords into a list."""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            return [kw.strip() for kw in v.split(",") if kw.strip()]
+        logger.warning(
+            f"Unexpected value for ResearchProduct.keywords: {v}. Expected string or None."
+        )
+        return None  # Or raise ValueError if strictness is preferred
 
 
 # Define the specific response type for ResearchProduct results
