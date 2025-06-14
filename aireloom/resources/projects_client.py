@@ -70,7 +70,7 @@ class ProjectsClient(BaseResourceClient):
         page: int | None,
         page_size: int,
         sort_by: str | None,
-        filters: dict[str, Any] | None,  # Changed to Optional[dict]
+        filters: dict[str, Any] | None,
         *,
         is_iteration: bool = False,
     ) -> dict[str, Any]:

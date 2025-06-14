@@ -54,7 +54,7 @@ EntityType = Literal[
 # - Country Codes (ISO 3166-1 alpha-2)
 # - etc.
 
-AIRELOOM_VERSION: str = "0.1.0"
+AIRELOOM_VERSION: str = "1.0.0"
 DEFAULT_USER_AGENT: str = f"aireloom/{AIRELOOM_VERSION}"
 CLIENT_HEADERS: dict[str, str] = {
     "accept": "application/json",

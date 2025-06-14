@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # Base URLs
 GRAPH_API_BASE_URL = "https://api.graph.openaire.eu/v1/"
@@ -22,6 +22,8 @@ SCHOLIX = "Links"  # Renamed for Scholexplorer
 
 
 class ResearchProductsFilters(BaseModel):
+    """Filter model for Research Products API endpoint."""
+
     search: str | None = None
     mainTitle: str | None = None
     description: str | None = None
@@ -59,8 +61,12 @@ class ResearchProductsFilters(BaseModel):
     relHostingDataSourceId: str | None = None
     relCollectedFromDatasourceId: str | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class OrganizationsFilters(BaseModel):
+    """Filter model for Organizations API endpoint."""
+
     search: str | None = None
     legalName: str | None = None
     legalShortName: str | None = None
@@ -72,8 +78,12 @@ class OrganizationsFilters(BaseModel):
     relCommunityId: str | None = None
     relCollectedFromDatasourceId: str | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class DataSourcesFilters(BaseModel):
+    """Filter model for Data Sources API endpoint."""
+
     search: str | None = None
     officialName: str | None = None
     englishName: str | None = None
@@ -88,8 +98,12 @@ class DataSourcesFilters(BaseModel):
     relCommunityId: str | None = None
     relCollectedFromDatasourceId: str | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
 
 class ProjectsFilters(BaseModel):
+    """Filter model for Projects API endpoint."""
+
     search: str | None = None
     title: str | None = None
     keywords: list[str] | None = None
@@ -111,6 +125,8 @@ class ProjectsFilters(BaseModel):
     relCommunityId: str | None = None
     relOrganizationCountryCode: str | None = None
     relCollectedFromDatasourceId: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class ScholixFilters(BaseModel):

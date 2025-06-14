@@ -59,26 +59,28 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
     # Define a mock get_settings that ensures no client_id/secret from .env files
     # interfere, while still loading other env vars like token and timeout.
     def mock_get_settings_for_token_test():
-        # Create settings based on current environment (respecting .env and os.environ)
-        # This ensures AIRELOOM_REQUEST_TIMEOUT="10" and AIRELOOM_OPENAIRE_API_TOKEN="env_token_67890"
-        # are picked up from the monkeypatched os.environ.
-        # Pydantic-settings loads .env first, then actual env vars, then explicit model_construct.
-        # By calling ApiSettings(), we get the combined view.
-        settings = ApiSettings()
-
-        # Explicitly ensure client_id/secret are None for this specific test scenario,
-        # overriding any values that might have been loaded from a .env file.
-        settings.openaire_client_id = None
-        settings.openaire_client_secret = None
-        # Ensure the token is what we expect, in case .env had a different one.
-        settings.openaire_api_token = "env_token_67890"
+        # Create a fresh settings instance with explicit values to ensure test isolation
+        # Bypass .env file loading by using explicit model construction
+        settings = ApiSettings.model_construct(
+            openaire_client_id=None,  # Explicitly set to None
+            openaire_client_secret=None,  # Explicitly set to None
+            openaire_api_token="env_token_67890",  # From monkeypatch
+            request_timeout=10.0,  # From monkeypatch
+        )
         print(
             f"MOCK_GET_SETTINGS: client_id={settings.openaire_client_id}, token={settings.openaire_api_token}, timeout={settings.request_timeout}"
         )
         return settings
 
+    # Patch both the import in session.py and client.py
     monkeypatch.setattr(
         "aireloom.config.get_settings", mock_get_settings_for_token_test
+    )
+    monkeypatch.setattr(
+        "aireloom.session.get_settings", mock_get_settings_for_token_test
+    )
+    monkeypatch.setattr(
+        "aireloom.client.get_settings", mock_get_settings_for_token_test
     )
 
     async with AireloomSession() as session_env:  # No auth_strategy passed

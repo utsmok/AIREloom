@@ -1,6 +1,6 @@
 """AIREloom: A Python client for the OpenAIRE Graph API."""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 # Import Exceptions
 # Import main client class

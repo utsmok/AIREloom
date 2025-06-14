@@ -1,11 +1,9 @@
 import asyncio
 import ssl
-import time  # Added time import
-from collections.abc import (
-    Mapping,
-)
-from datetime import UTC, datetime as dt  # Added datetime, timezone
-from email.utils import parsedate_to_datetime  # Added parsedate_to_datetime
+import time
+from collections.abc import Mapping
+from datetime import UTC, datetime as dt
+from email.utils import parsedate_to_datetime
 from http import HTTPStatus
 from typing import Any, Self
 
@@ -317,11 +315,9 @@ class AireloomClient:
         """
         # --- Pre-Request Hooks ---
         # Prepare mutable versions of params and headers for hooks
-        # request_data.params is Mapping | None, hook expects Optional[Dict[str, Any]]
         hook_params: dict[str, Any] | None = (
             dict(request_data.params) if request_data.params is not None else None
         )
-        # request_data.headers is dict[str, str], hook expects Optional[httpx.Headers]
         hook_headers: httpx.Headers = httpx.Headers(request_data.headers)
 
         if self._settings.pre_request_hooks:
@@ -334,8 +330,8 @@ class AireloomClient:
                     hook(
                         request_data.method,
                         request_data.url,
-                        hook_params,  # Pass the Optional[Dict[str, Any]]
-                        hook_headers,  # Pass the httpx.Headers object
+                        hook_params,
+                        hook_headers,
                     )
                 except Exception as e:
                     logger.error(
@@ -655,10 +651,11 @@ class AireloomClient:
         url = "N/A"
         request_info = ""
         if exc and hasattr(exc, "request") and getattr(exc, "request", None):
-            request = exc.request
-            url = str(getattr(request, "url", "N/A"))
-            method = str(getattr(request, "method", "N/A"))
-            request_info = f"for {method} {url}"
+            request = getattr(exc, "request", None)
+            if request:
+                url = str(getattr(request, "url", "N/A"))
+                method = str(getattr(request, "method", "N/A"))
+                request_info = f"for {method} {url}"
 
         sleep_time = (
             getattr(retry_state.next_action, "sleep", 0)

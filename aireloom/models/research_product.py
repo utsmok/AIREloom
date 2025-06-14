@@ -7,7 +7,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    field_validator,  # model_validator was in the original thought process but not used here. Keeping for consistency if other models use it.
+    field_validator,
 )
 
 from .base import ApiResponse, BaseEntity
