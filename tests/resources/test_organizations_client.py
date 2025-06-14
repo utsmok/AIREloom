@@ -51,15 +51,19 @@ async def test_get_organization(
 
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
-    mock_http_response.json.return_value = expected_org_data_dict
+    # Use search response format with results array
+    mock_http_response.json.return_value = {
+        "results": [expected_org_data_dict],
+        "header": {"numFound": 1, "pageSize": 1},
+    }
     mock_api_client_fixture.request.return_value = mock_http_response
 
     organization = await organizations_client.get(org_id)
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{ORGANIZATIONS}/{org_id}",
-        params=None,
+        ORGANIZATIONS,
+        params={"id": org_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
@@ -87,11 +91,13 @@ async def test_get_organization_not_found(
     with pytest.raises(AireloomError) as exc_info:
         await organizations_client.get(org_id)
 
-    assert f"Organization with ID '{org_id}' not found" in str(exc_info.value)
+    assert f"API error fetching Organization {org_id}: Status 404" in str(
+        exc_info.value
+    )
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{ORGANIZATIONS}/{org_id}",
-        params=None,
+        ORGANIZATIONS,
+        params={"id": org_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
@@ -176,7 +182,7 @@ async def test_search_organizations_with_filters_and_sort(
 
     expected_params = {
         "legalName": "Specific University",
-        "country": "DE",  # countryCode gets aliased to 'country'
+        "countryCode": "DE",  # Direct parameter name without alias
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,

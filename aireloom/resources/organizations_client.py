@@ -1,7 +1,6 @@
 # aireloom/resources/organizations_client.py
 """Client for interacting with OpenAIRE Organizations."""
 
-import http
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
@@ -91,19 +90,27 @@ class OrganizationsClient(BaseResourceClient):
         return {k: v for k, v in params.items() if v is not None}
 
     async def _fetch_single_entity_impl(self, entity_id: str) -> Organization:
-        """Generic method to fetch a single entity by ID."""
-        endpoint = f"{self._entity_path}/{entity_id}"
+        """Generic method to fetch a single entity by ID using search-by-ID."""
         try:
+            # Use search with ID parameter instead of direct GET
+            params = {"id": entity_id, "pageSize": 1}
             response = await self._api_client.request(
-                "GET", endpoint, params=None, data=None, json_data=None
+                "GET", self._entity_path, params=params, data=None, json_data=None
             )
-            return self._entity_model.model_validate(response.json())
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == http.HTTPStatus.NOT_FOUND:
+            data = response.json()
+
+            # Parse the search response
+            search_response = self._response_model.model_validate(data)
+
+            if not search_response.results:
                 raise AireloomError(
-                    f"{self._entity_model.__name__} with ID '{entity_id}' not found "
-                    f"at {self._entity_path}."
-                ) from e
+                    f"{self._entity_model.__name__} with ID '{entity_id}' not found."
+                )
+
+            # Return the first (and should be only) result
+            return search_response.results[0]
+
+        except httpx.HTTPStatusError as e:
             logger.error(
                 f"HTTPStatusError for {self._entity_model.__name__} ID '{entity_id}': {e.response.status_code}"
             )

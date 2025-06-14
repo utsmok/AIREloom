@@ -28,8 +28,6 @@ from aireloom.models import (
     Organization,
     Project,
     ResearchProduct,
-)
-from aireloom.models import (
     ScholixRelationship as ScholixLink,  # Alias for test consistency
 )
 from aireloom.models.base import ApiResponse
@@ -162,7 +160,9 @@ async def test_session_context_manager_aclose():
 async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
     product_id = "rp123"
     token_url = "https://aai.openaire.eu/oidc/token"  # Standard token URL
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}/{product_id}"
+    expected_url = (
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+    )
 
     # Mock for the token acquisition
     httpx_mock.add_response(
@@ -173,12 +173,21 @@ async def test_session_get_research_product_integration(httpx_mock: HTTPXMock):
     )
 
     mock_api_response_json = {
-        "id": product_id,
-        "title": "Mocked Research Product Title",
-        "type": "publication",
-        "publicationDate": "2023-01-01",
+        "results": [
+            {
+                "id": product_id,
+                "title": "Mocked Research Product Title",
+                "type": "publication",
+                "publicationDate": "2023-01-01",
+            }
+        ],
+        "header": {"numFound": 1, "pageSize": 1},
     }
-    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    httpx_mock.add_response(
+        url=f"{expected_url}?id={product_id}&pageSize=1",
+        method="GET",
+        json=mock_api_response_json,
+    )
     async with AireloomSession() as session:
         product = await session.research_products.get(product_id)
     assert isinstance(product, ResearchProduct)
@@ -319,9 +328,7 @@ async def test_session_iterate_research_products_integration(httpx_mock: HTTPXMo
 async def test_session_get_organization_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     org_id = "org123"
-    expected_url = (
-        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}/{org_id}"
-    )
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
 
     # Mock for the token acquisition
     httpx_mock.add_response(
@@ -332,11 +339,20 @@ async def test_session_get_organization_integration(httpx_mock: HTTPXMock):
     )
 
     mock_api_response_json = {
-        "id": org_id,
-        "legalName": "Mocked Org Name",
-        "country": {"code": "GR", "name": "Greece"},
+        "results": [
+            {
+                "id": org_id,
+                "legalName": "Mocked Org Name",
+                "country": {"code": "GR", "name": "Greece"},
+            }
+        ],
+        "header": {"numFound": 1, "pageSize": 1},
     }
-    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    httpx_mock.add_response(
+        url=f"{expected_url}?id={org_id}&pageSize=1",
+        method="GET",
+        json=mock_api_response_json,
+    )
     async with AireloomSession() as session:
         organization = await session.organizations.get(org_id)
     assert isinstance(organization, Organization)
@@ -373,7 +389,7 @@ async def test_session_search_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tso_int = {"country": "GR", "page": "1", "pageSize": "1"}
+    _params_tso_int = {"countryCode": "GR", "page": "1", "pageSize": "1"}
     httpx_mock.add_response(
         url=f"{expected_url}?{urllib.parse.urlencode(_params_tso_int)}",
         method="GET",
@@ -438,13 +454,13 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tio_int_1 = {"country": "EU", "pageSize": "1", "cursor": "*"}
+    _params_tio_int_1 = {"countryCode": "EU", "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_1)}",
         method="GET",
         json=mock_response_page1,
     )
-    _params_tio_int_2 = {"country": "EU", "pageSize": "1", "cursor": "cursor_org1"}
+    _params_tio_int_2 = {"countryCode": "EU", "pageSize": "1", "cursor": "cursor_org1"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tio_int_2)}",
         method="GET",
@@ -470,9 +486,7 @@ async def test_session_iterate_organizations_integration(httpx_mock: HTTPXMock):
 async def test_session_get_project_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     project_id = "proj123"
-    expected_url = (
-        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}/{project_id}"
-    )
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
 
     # Mock for the token acquisition
     httpx_mock.add_response(
@@ -483,15 +497,24 @@ async def test_session_get_project_integration(httpx_mock: HTTPXMock):
     )
 
     mock_api_response_json = {
-        "id": project_id,
-        "acronym": "MOCKPROJ",
-        "code": "FP7-123",
-        "title": "Mocked Project Title",
-        "fundingTree": [{"id": "fund1", "name": "EC"}],
-        "startDate": "2022-01-01",
-        "endDate": "2023-01-01",
+        "results": [
+            {
+                "id": project_id,
+                "acronym": "MOCKPROJ",
+                "code": "FP7-123",
+                "title": "Mocked Project Title",
+                "fundingTree": [{"id": "fund1", "name": "EC"}],
+                "startDate": "2022-01-01",
+                "endDate": "2023-01-01",
+            }
+        ],
+        "header": {"numFound": 1, "pageSize": 1},
     }
-    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    httpx_mock.add_response(
+        url=f"{expected_url}?id={project_id}&pageSize=1",
+        method="GET",
+        json=mock_api_response_json,
+    )
     async with AireloomSession() as session:
         project = await session.projects.get(project_id)
     assert isinstance(project, Project)
@@ -608,7 +631,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
         json=mock_response_page1,
     )  # API uses funder (aliased from fundingShortName)
     _params_tip_int_2 = {
-        "funder": "EC",
+        "fundingStreamId": "EC",
         "pageSize": "1",
         "cursor": "cursor_proj1",
     }
@@ -619,7 +642,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
     )
     projects_iterated = []
     async with AireloomSession() as session:
-        filters = ProjectsFilters(fundingShortName="EC")
+        filters = ProjectsFilters(fundingStreamId="EC")
         async for project in session.projects.iterate(filters=filters, page_size=1):
             projects_iterated.append(project)
     assert len(projects_iterated) == 2
@@ -635,9 +658,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
 async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     ds_id = "ds123"
-    expected_url = (
-        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}/{ds_id}"
-    )
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
 
     # Mock for the token acquisition
     httpx_mock.add_response(
@@ -648,13 +669,22 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
     )
 
     mock_api_response_json = {
-        "id": ds_id,
-        "officialName": "Mocked Data Source",
-        "englishName": "Mocked Data Source EN",
-        "websiteUrl": "http://example.com/ds",
-        "type": {"name": "repository"},
+        "results": [
+            {
+                "id": ds_id,
+                "officialName": "Mocked Data Source",
+                "englishName": "Mocked Data Source EN",
+                "websiteUrl": "http://example.com/ds",
+                "type": {"name": "repository"},
+            }
+        ],
+        "header": {"numFound": 1, "pageSize": 1},
     }
-    httpx_mock.add_response(url=expected_url, method="GET", json=mock_api_response_json)
+    httpx_mock.add_response(
+        url=f"{expected_url}?id={ds_id}&pageSize=1",
+        method="GET",
+        json=mock_api_response_json,
+    )
     async with AireloomSession() as session:
         data_source = await session.data_sources.get(ds_id)
     assert isinstance(data_source, DataSource)
@@ -954,9 +984,12 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
         "publicationDate": "2023-01-01",
     }
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts?id={product_id}&pageSize=1",
         method="GET",
-        json=mock_product_response,
+        json={
+            "results": [mock_product_response],
+            "header": {"numFound": 1, "pageSize": 1},
+        },
         status_code=200,
     )
     async with AireloomSession() as session:
@@ -980,7 +1013,7 @@ async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
     )
 
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts/{product_id}",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/researchProducts?id={product_id}&pageSize=1",
         method="GET",
         status_code=404,
         json={"message": "Not Found"},

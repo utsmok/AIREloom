@@ -8,9 +8,12 @@ from aireloom.auth import StaticTokenAuth
 async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
     # Mock an API call that would depend on a setting
     httpx_mock.add_response(
-        url="https://api.openaire.eu/graph/v1/researchProducts/progcfg123",
+        url="https://api.openaire.eu/graph/v1/researchProducts?id=progcfg123&pageSize=1",
         method="GET",
-        json={"id": "progcfg123", "title": "Prog Config Test"},
+        json={
+            "results": [{"id": "progcfg123", "title": "Prog Config Test"}],
+            "header": {"numFound": 1, "pageSize": 1},
+        },
         match_headers={"Authorization": "Bearer override_token_12345"},
     )
 

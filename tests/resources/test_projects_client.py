@@ -56,15 +56,19 @@ async def test_get_project(
 
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
-    mock_http_response.json.return_value = expected_project_data_dict
+    # Use search response format with results array
+    mock_http_response.json.return_value = {
+        "results": [expected_project_data_dict],
+        "header": {"numFound": 1, "pageSize": 1},
+    }
     mock_api_client_fixture.request.return_value = mock_http_response
 
     project = await projects_client.get(project_id)
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{PROJECTS}/{project_id}",
-        params=None,
+        PROJECTS,
+        params={"id": project_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
@@ -93,11 +97,11 @@ async def test_get_project_not_found(
     with pytest.raises(AireloomError) as exc_info:
         await projects_client.get(project_id)
 
-    assert f"Project with ID '{project_id}' not found" in str(exc_info.value)
+    assert f"API error fetching Project {project_id}: Status 404" in str(exc_info.value)
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{PROJECTS}/{project_id}",
-        params=None,
+        PROJECTS,
+        params={"id": project_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
@@ -148,7 +152,7 @@ async def test_search_projects_with_filters_and_sort(
     """Test searching projects with filters and sorting."""
     filters_model = ProjectsFilters(
         title="Climate Change Research",
-        fundingShortName="EU",
+        fundingStreamId="EU",  # Changed from fundingShortName to fundingStreamId
         code="CCR_EU",
     )
     # Assuming 'title' is a valid sort field for projects from ENDPOINT_DEFINITIONS
@@ -186,7 +190,7 @@ async def test_search_projects_with_filters_and_sort(
 
     expected_params = {
         "title": "Climate Change Research",
-        "funder": "EU",  # fundingShortName gets aliased to 'funder'
+        "fundingStreamId": "EU",  # Direct parameter name without alias
         "code": "CCR_EU",
         "sortBy": sort_by,
         "page": page,

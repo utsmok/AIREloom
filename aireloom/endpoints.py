@@ -72,9 +72,7 @@ class OrganizationsFilters(BaseModel):
     legalShortName: str | None = None
     id: str | None = None
     pid: str | None = None
-    countryCode: str | None = Field(
-        default=None, serialization_alias="country"
-    )  # API expects 'country' parameter
+    countryCode: str | None = None
     relCommunityId: str | None = None
     relCollectedFromDatasourceId: str | None = None
 
@@ -112,9 +110,6 @@ class ProjectsFilters(BaseModel):
     grantID: str | None = None  # Added based on test match_params
     acronym: str | None = None
     callIdentifier: str | None = None
-    fundingShortName: str | None = Field(
-        default=None, serialization_alias="funder"
-    )  # API expects 'funder' parameter
     fundingStreamId: str | None = None
     fromStartDate: date | None = None
     toStartDate: date | None = None

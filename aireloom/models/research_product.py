@@ -163,6 +163,24 @@ class Instance(BaseModel):
     type: str | None = None
     urls: list[str] = Field(default_factory=list)
 
+    @field_validator("license", mode="before")
+    @classmethod
+    def handle_string_license(cls, v: Any) -> License | None:
+        """Handle cases where license is provided as a simple string instead of an object."""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            # If it's a string, create a License object with the string as both code and label
+            return License(code=v, label=v)
+        if isinstance(v, dict):
+            return License(**v)
+        if isinstance(v, License):
+            return v
+        logger.warning(
+            f"Unexpected license format: {v}. Expected string, dict, or License object."
+        )
+        return None
+
     model_config = ConfigDict(extra="allow")
 
 

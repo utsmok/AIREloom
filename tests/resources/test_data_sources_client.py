@@ -60,15 +60,19 @@ async def test_get_data_source(
 
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
-    mock_http_response.json.return_value = expected_ds_data_dict
+    # Use search response format with results array
+    mock_http_response.json.return_value = {
+        "results": [expected_ds_data_dict],
+        "header": {"numFound": 1, "pageSize": 1},
+    }
     mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     data_source = await data_sources_client.get(ds_id)
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{DATA_SOURCES}/{ds_id}",
-        params=None,
+        DATA_SOURCES,
+        params={"id": ds_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
@@ -99,11 +103,11 @@ async def test_get_data_source_not_found(
     with pytest.raises(AireloomError) as exc_info:
         await data_sources_client.get(ds_id)
 
-    assert f"DataSource with ID '{ds_id}' not found" in str(exc_info.value)
+    assert f"API error fetching DataSource {ds_id}: Status 404" in str(exc_info.value)
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{DATA_SOURCES}/{ds_id}",
-        params=None,
+        DATA_SOURCES,
+        params={"id": ds_id, "pageSize": 1},
         data=None,
         json_data=None,
     )

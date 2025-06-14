@@ -56,15 +56,22 @@ async def test_get_research_product(
 
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
-    mock_http_response.json.return_value = expected_product_data_dict
+    # Use search response format with results array
+    mock_http_response.json.return_value = {
+        "results": [expected_product_data_dict],
+        "header": {"numFound": 1, "pageSize": 1},
+    }
     mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     product = await research_products_client.get(product_id)
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{RESEARCH_PRODUCTS}/{product_id}",
-        params=None,  # get by id has no params
+        RESEARCH_PRODUCTS,
+        params={
+            "id": product_id,
+            "pageSize": 1,
+        },  # get by id now uses search with params
         data=None,
         json_data=None,
     )
@@ -99,11 +106,13 @@ async def test_get_research_product_not_found(
     with pytest.raises(AireloomError) as exc_info:
         await research_products_client.get(product_id)
 
-    assert f"ResearchProduct with ID '{product_id}' not found" in str(exc_info.value)
+    assert f"API error fetching ResearchProduct {product_id}: Status 404" in str(
+        exc_info.value
+    )
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
-        f"{RESEARCH_PRODUCTS}/{product_id}",
-        params=None,
+        RESEARCH_PRODUCTS,
+        params={"id": product_id, "pageSize": 1},
         data=None,
         json_data=None,
     )
