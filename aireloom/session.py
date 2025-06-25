@@ -1,15 +1,14 @@
 """Main user-facing session class for interacting with the OpenAIRE Graph API and Scholexplorer."""
 
-from loguru import logger
+from bibliofabric.auth import AuthStrategy
+from bibliofabric.log_config import configure_logging, logger
 
-from .auth import AuthStrategy
 from .client import AireloomClient
 from .config import ApiSettings, get_settings  # Added ApiSettings
 from .constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
-from .log_config import configure_logging
 from .resources import (
     DataSourcesClient,
     OrganizationsClient,

@@ -65,7 +65,7 @@ You can enable and configure caching by passing an `ApiSettings` instance when c
 import asyncio
 from aireloom import AireloomSession
 from aireloom.config import ApiSettings
-from aireloom.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
 
 async def main():
     custom_settings = ApiSettings(

@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, call
 
 import httpx  # Import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError  # Added ValidationError
 
 from aireloom.constants import DEFAULT_PAGE_SIZE, OPENAIRE_SCHOLIX_API_BASE_URL
 from aireloom.endpoints import SCHOLIX, ScholixFilters
-from aireloom.exceptions import AireloomError  # Added ValidationError
 from aireloom.models import (
     ScholixRelationship,  # Added
 )
@@ -269,7 +269,7 @@ async def test_iterate_scholix_links_api_error(
 
     iterated_links = []
     filters = ScholixFilters(targetPid=target_pid_val)
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         async for link in scholix_client.iterate_links(
             filters=filters, page_size=page_size
         ):

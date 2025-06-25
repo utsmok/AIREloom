@@ -9,7 +9,7 @@ The `ProjectsClient` is accessed via an `AireloomSession` instance:
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
 
 async def main():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -29,8 +29,8 @@ To retrieve a specific project by its OpenAIRE ID, use the `get()` method.
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
-from aireloom.exceptions import NotFoundError, AireloomError
+from bibliofabric.auth import NoAuth
+from bibliofabric.exceptions import NotFoundError, BibliofabricError
 
 # Example OpenAIRE ID for a project
 # This format can vary based on the source (e.g., CORDIS H2020, national funders)
@@ -63,7 +63,7 @@ async def fetch_single_project():
 
         except NotFoundError:
             print(f"Error: Project with ID '{PROJECT_ID}' not found.")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -82,9 +82,9 @@ To search for projects based on various criteria, use the `search()` method. Thi
 import asyncio
 from math import ceil
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ProjectsFilters # Import the filter model
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def search_projects_example():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -130,7 +130,7 @@ async def search_projects_example():
 
         except ValidationError as e:
             print(f"Validation error during search: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during search: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during search: {e}")
@@ -180,9 +180,9 @@ To process all projects matching criteria without manual pagination, use the `it
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ProjectsFilters
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def iterate_all_projects():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -213,7 +213,7 @@ async def iterate_all_projects():
 
         except ValidationError as e:
             print(f"Validation error during iteration: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during iteration: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during iteration: {e}")

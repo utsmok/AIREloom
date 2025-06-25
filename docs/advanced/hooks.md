@@ -74,7 +74,7 @@ Hooks are registered by providing lists of these callable functions to the `ApiS
 import asyncio
 from aireloom import AireloomSession
 from aireloom.config import ApiSettings
-from aireloom.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
 
 # --- Define your hook functions (as above) ---
 # def my_pre_request_logger(request: httpx.Request) -> None: ...

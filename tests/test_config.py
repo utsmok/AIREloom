@@ -1,7 +1,7 @@
 import pytest
+from bibliofabric.auth import StaticTokenAuth
 
 from aireloom import AireloomSession
-from aireloom.auth import StaticTokenAuth
 
 
 @pytest.mark.asyncio

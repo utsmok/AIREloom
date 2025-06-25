@@ -4,22 +4,22 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
+from bibliofabric.auth import ClientCredentialsAuth, NoAuth, StaticTokenAuth
+from bibliofabric.exceptions import (
+    APIError,
+    AuthError,
+    NetworkError,
+    TimeoutError,
+)
 from cachetools import TTLCache  # Needed for the factory
 from pydantic import BaseModel  # Added for test model
 from pytest_httpx import HTTPXMock
 
-from aireloom.auth import ClientCredentialsAuth, NoAuth, StaticTokenAuth
 from aireloom.client import AireloomClient
 from aireloom.config import ApiSettings
 from aireloom.constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
-)
-from aireloom.exceptions import (
-    APIError,
-    AuthError,
-    NetworkError,
-    TimeoutError,
 )
 
 # --- Constants for Testing ---

@@ -132,7 +132,7 @@ You can override any setting by creating an `ApiSettings` instance and passing i
 import asyncio
 from aireloom import AireloomSession
 from aireloom.config import ApiSettings
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 
 async def main():
     # Create custom settings

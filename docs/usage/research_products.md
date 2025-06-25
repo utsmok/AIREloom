@@ -9,7 +9,7 @@ The `ResearchProductsClient` is accessed via an `AireloomSession` instance:
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
 
 async def main():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -29,8 +29,8 @@ To retrieve a specific research product by its OpenAIRE ID, use the `get()` meth
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
-from aireloom.exceptions import NotFoundError, AireloomError
+from bibliofabric.auth import NoAuth
+from bibliofabric.exceptions import NotFoundError, BibliofabricError
 
 # Example OpenAIRE ID for a research product
 # This format typically includes a prefix indicating the original source and the identifier type.
@@ -65,7 +65,7 @@ async def fetch_single_product():
 
         except NotFoundError:
             print(f"Error: Research product with ID '{PRODUCT_ID}' not found.")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -84,9 +84,9 @@ To search for research products based on various criteria, use the `search()` me
 import asyncio
 from math import ceil
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ResearchProductsFilters # Import the filter model
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def search_products():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -135,7 +135,7 @@ async def search_products():
 
         except ValidationError as e:
             print(f"Validation error during search: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during search: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during search: {e}")
@@ -190,9 +190,9 @@ If you need to process all research products matching certain criteria without m
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ResearchProductsFilters
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def iterate_all_products():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -225,7 +225,7 @@ async def iterate_all_products():
 
         except ValidationError as e:
             print(f"Validation error during iteration: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during iteration: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during iteration: {e}")

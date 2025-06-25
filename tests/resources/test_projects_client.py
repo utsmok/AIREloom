@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock
 
 import httpx  # Import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.constants import DEFAULT_PAGE_SIZE
 from aireloom.endpoints import PROJECTS, ProjectsFilters
-from aireloom.exceptions import AireloomError, ValidationError
 from aireloom.models import (
     Header,
     Project,  # For type hinting search results
@@ -94,7 +94,7 @@ async def test_get_project_not_found(
         response=mock_response,
     )
 
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         await projects_client.get(project_id)
 
     assert f"API error fetching Project {project_id}: Status 404" in str(exc_info.value)
@@ -369,7 +369,7 @@ async def test_iterate_projects_api_error(
     ]
 
     iterated_projects = []
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         async for proj in projects_client.iterate(
             filters=filters_model, page_size=page_size
         ):

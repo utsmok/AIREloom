@@ -24,6 +24,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import polars as pl
+from bibliofabric.exceptions import RateLimitError
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.logging import RichHandler
@@ -40,7 +41,6 @@ from rich.table import Table
 # AIREloom imports
 from aireloom import AireloomClient, Project, ResearchProduct
 from aireloom.endpoints import ResearchProductsFilters, ScholixFilters
-from aireloom.exceptions import RateLimitError
 
 # Configure rich console and logging
 console = Console()

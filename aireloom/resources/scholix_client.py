@@ -4,16 +4,17 @@
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
-from loguru import logger
+from bibliofabric.log_config import logger
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
+from bibliofabric.exceptions import BibliofabricError, ValidationError
+
 from ..constants import (  # SCHOLIX is now in endpoints
     DEFAULT_PAGE_SIZE,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
 from ..endpoints import ENDPOINT_DEFINITIONS, SCHOLIX, ScholixFilters  # Import model
-from ..exceptions import AireloomError, ValidationError
 from ..models import (
     ScholixRelationship,
     ScholixResponse,
@@ -84,7 +85,7 @@ class ScholixClient(BaseResourceClient):
 
         Raises:
             ValueError: If neither sourcePid nor targetPid is provided in the filters model.
-            AireloomError: For API communication errors or unexpected issues.
+            BibliofabricError: For API communication errors or unexpected issues.
         """
         filter_dict = (
             filters.model_dump(exclude_none=True, by_alias=True) if filters else {}
@@ -117,13 +118,13 @@ class ScholixClient(BaseResourceClient):
             return ScholixResponse.model_validate(response.json())
         except Exception as e:
             if isinstance(
-                e, AireloomError | ValidationError
+                e, BibliofabricError | ValidationError
             ):  # ValidationError can come from Pydantic
                 raise
             logger.exception(
                 f"Failed to search {self._entity_path} with params {params} at {self._scholix_base_url}"
             )
-            raise AireloomError(
+            raise BibliofabricError(
                 f"Unexpected error searching {self._entity_path}: {e}"
             ) from e
 
@@ -146,7 +147,7 @@ class ScholixClient(BaseResourceClient):
 
         Raises:
             ValueError: If neither sourcePid nor targetPid is provided in the filters.
-            AireloomError: For API communication errors or unexpected issues.
+            BibliofabricError: For API communication errors or unexpected issues.
         """
         # The Pydantic model (ScholixFilters) will be passed to search_links,
         # which now expects the model instance.
@@ -194,12 +195,12 @@ class ScholixClient(BaseResourceClient):
                 current_page += 1
 
             except Exception as e:
-                if isinstance(e, AireloomError | ValidationError):
+                if isinstance(e, BibliofabricError | ValidationError):
                     raise
                 logger.exception(
                     f"Failed during iteration of {self._entity_path} on page {current_page}"
                 )
-                raise AireloomError(
+                raise BibliofabricError(
                     f"Failed during iteration of {self._entity_path} on page {current_page}: {e}"
                 ) from e
         logger.debug("Scholix iteration finished.")

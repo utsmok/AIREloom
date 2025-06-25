@@ -54,7 +54,7 @@ You can pass an authentication strategy instance directly when creating `Aireloo
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth, StaticTokenAuth, ClientCredentialsAuth
+from bibliofabric.auth import NoAuth, StaticTokenAuth, ClientCredentialsAuth
 
 # 1. No Authentication
 no_auth_session = AireloomSession(auth_strategy=NoAuth())
@@ -96,8 +96,8 @@ The primary way to interact with the APIs is through `AireloomSession`. It provi
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or other auth strategies
-from aireloom.exceptions import AireloomError
+from bibliofabric.auth import NoAuth # Or other auth strategies
+from bibliofabric.exceptions import BibliofabricError
 
 async def run_example():
     # Initialize with desired auth strategy (or let it auto-detect)
@@ -122,7 +122,7 @@ async def run_example():
             print(f"  Type: {product.type if product.type else 'N/A'}")
             print(f"  Publication Date: {product.publicationDate if product.publicationDate else 'N/A'}")
 
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An API or client error occurred: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
@@ -148,8 +148,8 @@ Use the `get` method on the specific resource client (e.g., `session.research_pr
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
-from aireloom.exceptions import AireloomError, NotFoundError
+from bibliofabric.auth import NoAuth
+from bibliofabric.exceptions import BibliofabricError, NotFoundError
 
 async def get_entities():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -187,7 +187,7 @@ async def get_entities():
 
         except NotFoundError as e:
             print(f"Error: Entity not found. {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             # Specific handling for other API errors
             print(f"Error fetching entity: {e}")
             if hasattr(e, 'response') and e.response is not None:
@@ -206,7 +206,7 @@ Use the `search` method on the specific resource client. These support paginatio
 ```python
 import asyncio
 from aireloom import AireloomSession, NoAuth
-from aireloom.exceptions import AireloomError, ValidationError
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 from aireloom.endpoints import ResearchProductsFilters, ProjectsFilters # Import filter models
 
 async def search_entities():
@@ -262,7 +262,7 @@ async def search_entities():
 
         except ValidationError as e:
             print(f"Invalid search parameters: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"API Error during search: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during search: {e}")
@@ -284,7 +284,7 @@ For retrieving all results matching criteria without manual pagination, use the 
 ```python
 import asyncio
 from aireloom import AireloomSession, NoAuth
-from aireloom.exceptions import AireloomError, ValidationError
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 from aireloom.endpoints import ResearchProductsFilters # Import filter model
 
 async def iterate_all_results():
@@ -316,7 +316,7 @@ async def iterate_all_results():
 
         except ValidationError as e:
             print(f"Invalid parameters for iteration: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"API Error during iteration: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during iteration: {e}")
@@ -336,7 +336,7 @@ Use `session.scholix.search_links` or `session.scholix.iterate_links` to find re
 ```python
 import asyncio
 from aireloom import AireloomSession, NoAuth
-from aireloom.exceptions import AireloomError, ValidationError
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 from aireloom.endpoints import ScholixFilters # Import filter model
 
 async def search_scholix():
@@ -389,7 +389,7 @@ async def search_scholix():
              print(f"Validation Error: {ve}")
         except ValidationError as ve: # Pydantic validation error
              print(f"Invalid Scholix filter parameter: {ve}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"API Error searching Scholix: {e}")
         except Exception as e:
             print(f"An unexpected error occurred searching Scholix: {e}")
@@ -400,9 +400,9 @@ if __name__ == "__main__":
 
 ## Error Handling
 
-AIREloom raises specific exceptions found in `aireloom.exceptions`:
+AIREloom raises specific exceptions found in `bibliofabric.exceptions`:
 
-*   `AireloomError`: Base exception for the library.
+*   `BibliofabricError`: Base exception for the library.
 *   `APIError`: For non-success HTTP status codes (4xx, 5xx) from the API after retries. Contains the `response` and `request` objects.
 *   `NotFoundError`: Subclass of `APIError` for 404 status codes.
 *   `RateLimitError`: Subclass of `APIError` specifically for 429 status codes.
@@ -417,8 +417,8 @@ Wrap API calls in `try...except` blocks to handle potential issues gracefully.
 ```python
 import asyncio
 from aireloom import AireloomSession, NoAuth
-from aireloom.exceptions import (
-    AireloomError, APIError, NotFoundError, RateLimitError, TimeoutError, NetworkError, AuthError, ValidationError
+from bibliofabric.exceptions import (
+    BibliofabricError, APIError, NotFoundError, RateLimitError, TimeoutError, NetworkError, AuthError, ValidationError
 )
 from aireloom.endpoints import ResearchProductsFilters
 
@@ -448,7 +448,7 @@ async def error_handling_example():
             print(f"Caught expected NotFoundError: {e}")
         except APIError as e:
             print(f"Caught other API error: Status {e.response.status_code if e.response else 'N/A'}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"Caught other Aireloom error: {e}")
         except Exception as e:
             print(f"Caught unexpected error: {e}")
@@ -467,7 +467,7 @@ if __name__ == "__main__":
 import asyncio
 import httpx
 from aireloom.client import AireloomClient
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.config import ApiSettings
 from aireloom.endpoints import ResearchProductsFilters
 

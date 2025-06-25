@@ -3,10 +3,9 @@ import asyncio
 
 import httpx
 import pytest
+from bibliofabric.auth import ClientCredentialsAuth, NoAuth, StaticTokenAuth
+from bibliofabric.exceptions import AuthError, ConfigurationError
 from pytest_httpx import HTTPXMock
-
-from aireloom.auth import ClientCredentialsAuth, NoAuth, StaticTokenAuth
-from aireloom.exceptions import AuthError, ConfigurationError
 
 # --- Constants for Testing ---
 MOCK_TOKEN_URL = "https://fake-token-endpoint.com/token"

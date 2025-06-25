@@ -44,8 +44,8 @@ Let's write a simple asynchronous script to interact with the OpenAIRE API.
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or StaticTokenAuth if you have a token
-from aireloom.exceptions import AireloomError, APIError
+from bibliofabric.auth import NoAuth # Or StaticTokenAuth if you have a token
+from bibliofabric.exceptions import BibliofabricError, APIError
 from aireloom.endpoints import ResearchProductsFilters # For searching
 
 # --- Configuration ---
@@ -81,7 +81,7 @@ async def main():
                 print(f"  Error: Product with ID {EXAMPLE_PRODUCT_ID} not found (404).")
             else:
                 print(f"  API Error fetching product: {e} (Status: {e.response.status_code if e.response else 'N/A'})")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"  Aireloom Error fetching product: {e}")
         except Exception as e:
             print(f"  An unexpected error occurred: {e}")
@@ -120,7 +120,7 @@ async def main():
             else:
                 print("  No products found for this page/filter combination.")
 
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"  Aireloom Error during search: {e}")
         except Exception as e:
             print(f"  An unexpected error occurred during search: {e}")
@@ -169,7 +169,7 @@ You should see output indicating the session initialization, the result of fetch
 *   **`iterate()` method:** (Briefly shown) Efficiently retrieves all results for a query, handling pagination automatically.
 *   **Asynchronous Operations:** All API calls are `async` and need to be `await`ed.
 *   **Pydantic Models:** API responses are parsed into Pydantic models, providing type-hinted and easy-to-access data.
-*   **Error Handling:** Wrap API calls in `try...except` blocks to catch potential `AireloomError` exceptions or more specific ones like `APIError`.
+*   **Error Handling:** Wrap API calls in `try...except` blocks to catch potential `BibliofabricError` exceptions or more specific ones like `APIError`.
 
 ## Next Steps
 

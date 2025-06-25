@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock
 
 import httpx  # Import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.constants import DEFAULT_PAGE_SIZE
 from aireloom.endpoints import ORGANIZATIONS, OrganizationsFilters
-from aireloom.exceptions import AireloomError, ValidationError
 from aireloom.models import (
     Header,
     Organization,  # For type hinting search results
@@ -88,7 +88,7 @@ async def test_get_organization_not_found(
         response=mock_response,
     )
 
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         await organizations_client.get(org_id)
 
     assert f"API error fetching Organization {org_id}: Status 404" in str(
@@ -355,7 +355,7 @@ async def test_iterate_organizations_api_error(
     ]
 
     iterated_orgs = []
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         async for org in organizations_client.iterate(
             filters=filters_model, page_size=page_size
         ):

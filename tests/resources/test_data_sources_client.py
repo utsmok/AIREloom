@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock
 
 import httpx  # Import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.constants import DEFAULT_PAGE_SIZE
 from aireloom.endpoints import DATA_SOURCES, DataSourcesFilters
-from aireloom.exceptions import AireloomError, ValidationError
 from aireloom.models import (
     DataSource,
     Header,
@@ -100,7 +100,7 @@ async def test_get_data_source_not_found(
         response=mock_response,
     )
 
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         await data_sources_client.get(ds_id)
 
     assert f"API error fetching DataSource {ds_id}: Status 404" in str(exc_info.value)
@@ -392,7 +392,7 @@ async def test_iterate_data_sources_api_error(
     )
 
     iterated_ds = []
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         async for ds_item in data_sources_client.iterate(
             filters=filters_model, page_size=page_size
         ):

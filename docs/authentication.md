@@ -50,7 +50,7 @@ AIREloom will automatically request an access token using these credentials and 
 
 ## Explicit Authentication Strategies
 
-You can explicitly define the authentication strategy when creating an `AireloomSession` by passing an instance of an authentication class from `aireloom.auth`.
+You can explicitly define the authentication strategy when creating an `AireloomSession` by passing an instance of an authentication class from `bibliofabric.auth`.
 
 ### 1. No Authentication (`NoAuth`)
 
@@ -58,7 +58,7 @@ For APIs or endpoints that do not require authentication.
 
 ```python
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 
 async with AireloomSession(auth_strategy=NoAuth()) as session:
     # API calls will be made without any Authorization header
@@ -71,7 +71,7 @@ Uses a pre-obtained static API token.
 
 ```python
 from aireloom import AireloomSession
-from aireloom.auth import StaticTokenAuth
+from bibliofabric.auth import StaticTokenAuth
 
 # Token can be provided directly
 auth_strategy = StaticTokenAuth(token="your_actual_api_token")
@@ -92,7 +92,7 @@ Manages fetching and refreshing OAuth2 access tokens using the client credential
 
 ```python
 from aireloom import AireloomSession
-from aireloom.auth import ClientCredentialsAuth
+from bibliofabric.auth import ClientCredentialsAuth
 
 # Credentials can be provided directly:
 # auth_strategy = ClientCredentialsAuth(

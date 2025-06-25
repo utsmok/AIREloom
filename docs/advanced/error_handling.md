@@ -2,27 +2,27 @@
 
 AIREloom uses a hierarchy of custom exceptions to signal various issues that can occur during API interactions, configuration, or client-side validation. Understanding these exceptions is key to building robust applications.
 
-All AIREloom-specific exceptions inherit from `AireloomError`.
+All AIREloom-specific exceptions inherit from `BibliofabricError`.
 
 ## Exception Hierarchy and Details
 
 Here are the main exceptions you might encounter:
 
-*   **`AireloomError(Exception)`**:
+*   **`BibliofabricError(Exception)`**:
     *   The base class for all errors raised by the AIREloom library.
     *   Attributes:
         *   `message` (str): The primary error message.
         *   `response` (Optional[`httpx.Response`]): The `httpx.Response` object if the error is related to an API response.
         *   `request` (Optional[`httpx.Request`]): The `httpx.Request` object associated with the error, if available.
 
-*   **`APIError(AireloomError)`**:
+*   **`APIError(BibliofabricError)`**:
     *   Represents a generic error returned by the OpenAIRE API, typically corresponding to non-success HTTP status codes (4xx or 5xx) that are not covered by more specific exceptions below.
-    *   Inherits `message`, `response`, and `request` from `AireloomError`.
+    *   Inherits `message`, `response`, and `request` from `BibliofabricError`.
 
 *   **`NotFoundError(APIError)`**:
     *   A specific type of `APIError` raised when the API returns a `404 Not Found` status, indicating that the requested resource does not exist.
 
-*   **`ValidationError(AireloomError)`**:
+*   **`ValidationError(BibliofabricError)`**:
     *   Raised for several reasons:
         *   Client-side validation failure before sending a request (e.g., invalid filter parameters, incorrect sort field format).
         *   API response indicating a validation error, often a `400 Bad Request` or `422 Unprocessable Entity`.
@@ -32,21 +32,21 @@ Here are the main exceptions you might encounter:
     *   A specific type of `APIError` raised when the API returns a `429 Too Many Requests` status, indicating that your application has exceeded its allocated rate limit.
     *   See the [Rate Limiting Guide](rate_limiting.md) for how AIREloom handles these.
 
-*   **`TimeoutError(AireloomError)`**:
+*   **`TimeoutError(BibliofabricError)`**:
     *   Raised when a request to the API times out after exhausting configured retries.
     *   The `response` attribute will typically be `None`.
     *   The `request` attribute will contain the `httpx.Request` object that timed out.
 
-*   **`NetworkError(AireloomError)`**:
+*   **`NetworkError(BibliofabricError)`**:
     *   Raised for network-level issues that prevent communication with the API, such as DNS resolution failures, connection refused, or other `httpx.NetworkError` subtypes.
     *   The `response` attribute will typically be `None`.
     *   The `request` attribute will contain the `httpx.Request` object that failed.
 
-*   **`ConfigurationError(AireloomError)`**:
+*   **`ConfigurationError(BibliofabricError)`**:
     *   Raised if there's an issue with the AIREloom client's configuration (e.g., missing required settings for an authentication strategy).
     *   Typically does not have `response` or `request` attributes.
 
-*   **`AuthError(AireloomError)`**:
+*   **`AuthError(BibliofabricError)`**:
     *   Raised when an authentication-specific error occurs. This could be due to:
         *   Failure to obtain an OAuth2 token (e.g., invalid client credentials).
         *   An API response indicating an authentication or authorization failure (e.g., `401 Unauthorized`, `403 Forbidden`).
@@ -54,15 +54,15 @@ Here are the main exceptions you might encounter:
 
 ## Handling Exceptions
 
-It's crucial to wrap your AIREloom API calls in `try...except` blocks to gracefully handle potential errors. You can catch specific exceptions or the general `AireloomError`.
+It's crucial to wrap your AIREloom API calls in `try...except` blocks to gracefully handle potential errors. You can catch specific exceptions or the general `BibliofabricError`.
 
 ```python
 import asyncio
 import httpx # For type hinting if needed
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or your preferred auth strategy
-from aireloom.exceptions import (
-    AireloomError,
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.exceptions import (
+    BibliofabricError,
     APIError,
     NotFoundError,
     ValidationError,
@@ -140,7 +140,7 @@ async def fetch_data_example():
         except ConfigurationError as e:
             print(f"Configuration error: {e.message}")
 
-        except AireloomError as e: # Catch-all for any other Aireloom specific errors
+        except BibliofabricError as e: # Catch-all for any other Aireloom specific errors
             print(f"An Aireloom error occurred: {e.message}")
             if e.response:
                 print(f"  Status: {e.response.status_code}, URL: {e.request.url if e.request else 'N/A'}")
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
 ## Best Practices
 
-*   **Be Specific:** Catch the most specific exceptions you anticipate first (e.g., `NotFoundError`, `RateLimitError`), followed by more general ones like `APIError`, and finally `AireloomError`.
+*   **Be Specific:** Catch the most specific exceptions you anticipate first (e.g., `NotFoundError`, `RateLimitError`), followed by more general ones like `APIError`, and finally `BibliofabricError`.
 *   **Inspect `response` and `request`:** For errors like `APIError`, the `response` attribute can provide valuable details from the API (status code, headers, body). The `request` attribute helps identify which call failed.
 *   **Logging:** In a production application, log detailed error information, including stack traces and the content of `request` and `response` objects, to help diagnose issues.
 *   **User Feedback:** Provide clear feedback to users when errors occur, especially for issues like timeouts or resources not being found.

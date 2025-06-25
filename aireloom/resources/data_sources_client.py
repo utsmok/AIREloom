@@ -5,17 +5,18 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 
 import httpx
-from loguru import logger
+from bibliofabric.log_config import logger
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
+from bibliofabric.exceptions import BibliofabricError, ValidationError
+
 from ..constants import DEFAULT_PAGE_SIZE  # DATA_SOURCES is now in endpoints
 from ..endpoints import (  # Import model
     DATA_SOURCES,
     ENDPOINT_DEFINITIONS,
     DataSourcesFilters,
 )
-from ..exceptions import AireloomError, ValidationError
 from ..models import (
     ApiResponse,
     DataSource,
@@ -103,7 +104,7 @@ class DataSourcesClient(BaseResourceClient):
             search_response = self._response_model.model_validate(data)
 
             if not search_response.results:
-                raise AireloomError(
+                raise BibliofabricError(
                     f"{self._entity_model.__name__} with ID '{entity_id}' not found."
                 )
 
@@ -114,17 +115,17 @@ class DataSourcesClient(BaseResourceClient):
             logger.error(
                 f"HTTPStatusError for {self._entity_model.__name__} ID '{entity_id}': {e.response.status_code}"
             )
-            raise AireloomError(
+            raise BibliofabricError(
                 f"API error fetching {self._entity_model.__name__} {entity_id}: "
                 f"Status {e.response.status_code}"
             ) from e
         except Exception as e:
-            if isinstance(e, AireloomError):
+            if isinstance(e, BibliofabricError):
                 raise
             logger.exception(
                 f"Failed to fetch {self._entity_model.__name__} {entity_id} from {self._entity_path}"
             )
-            raise AireloomError(
+            raise BibliofabricError(
                 f"Unexpected error fetching {self._entity_model.__name__} {entity_id}: {e}"
             ) from e
 
@@ -136,12 +137,12 @@ class DataSourcesClient(BaseResourceClient):
             )
             return self._response_model.model_validate(response.json())
         except Exception as e:
-            if isinstance(e, AireloomError | ValidationError):
+            if isinstance(e, BibliofabricError | ValidationError):
                 raise
             logger.exception(
                 f"Failed to search {self._entity_path} with params {params}"
             )
-            raise AireloomError(
+            raise BibliofabricError(
                 f"Unexpected error searching {self._entity_path}: {e}"
             ) from e
 
@@ -180,12 +181,12 @@ class DataSourcesClient(BaseResourceClient):
                 current_params["cursor"] = next_cursor
                 current_params.pop("page", None)
             except Exception as e:
-                if isinstance(e, AireloomError | ValidationError):
+                if isinstance(e, BibliofabricError | ValidationError):
                     raise
                 logger.exception(
                     f"Failed during iteration of {self._entity_path} with params {current_params}"
                 )
-                raise AireloomError(
+                raise BibliofabricError(
                     f"Unexpected error during iteration of {self._entity_path}: {e}"
                 ) from e
 

@@ -9,6 +9,7 @@ readme = "README.md"
 license = {text= "MIT"}
 requires-python = ">=3.12"
 dependencies = [
+    "bibliofabric @ {root:uri}/../bibliofabric",
     "httpx",
     "polars",
     "loguru",
@@ -54,6 +55,9 @@ test = ["pytest", "pytest-randomly"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.uv.pip]
 generate-hashes = true

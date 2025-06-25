@@ -2,13 +2,11 @@
 
 __version__ = "1.0.0"
 
-# Import Exceptions
-# Import main client class
-from .client import AireloomClient
-from .exceptions import (
-    AireloomError,
+# Import Exceptions from bibliofabric
+from bibliofabric.exceptions import (
     APIError,
     AuthError,
+    BibliofabricError,
     ConfigurationError,
     NetworkError,
     NotFoundError,
@@ -16,6 +14,9 @@ from .exceptions import (
     TimeoutError,
     ValidationError,
 )
+
+# Import main client class
+from .client import AireloomClient
 
 # Re-export key models from the models subpackage
 from .models import (
@@ -37,7 +38,7 @@ __all__ = [
     "AireloomClient",
     "AireloomSession",
     # Core Exceptions
-    "AireloomError",
+    "BibliofabricError",
     "APIError",
     "AuthError",
     "ConfigurationError",

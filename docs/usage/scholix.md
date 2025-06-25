@@ -9,7 +9,7 @@ The `ScholixClient` is accessed via an `AireloomSession` instance:
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth # Or your preferred auth strategy
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
 
 async def main():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -32,9 +32,9 @@ To search for Scholix links, use the `search_links()` method. This method suppor
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ScholixFilters # Import the filter model
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def search_scholix_links_example():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -96,7 +96,7 @@ async def search_scholix_links_example():
             print(f"Validation Error: {ve}")
         except ValidationError as e: # Raised for other Pydantic validation issues
             print(f"Pydantic Validation error during search: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during search: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during search: {e}")
@@ -133,9 +133,9 @@ If you need to process all Scholix links matching certain criteria without manua
 ```python
 import asyncio
 from aireloom import AireloomSession
-from aireloom.auth import NoAuth
+from bibliofabric.auth import NoAuth
 from aireloom.endpoints import ScholixFilters
-from aireloom.exceptions import ValidationError, AireloomError
+from bibliofabric.exceptions import ValidationError, BibliofabricError
 
 async def iterate_all_scholix_links():
     async with AireloomSession(auth_strategy=NoAuth()) as session:
@@ -172,7 +172,7 @@ async def iterate_all_scholix_links():
              print(f"Validation Error: {ve}")
         except ValidationError as e:
             print(f"Pydantic Validation error during iteration: {e}")
-        except AireloomError as e:
+        except BibliofabricError as e:
             print(f"An Aireloom error occurred during iteration: {e}")
         except Exception as e:
             print(f"An unexpected error occurred during iteration: {e}")

@@ -14,13 +14,14 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any
 
+from bibliofabric.auth import NoAuth, StaticTokenAuth
+
 # AIREloom imports
 from aireloom import (
     AireloomSession,
     NotFoundError,
     ValidationError,
 )
-from aireloom.auth import NoAuth, StaticTokenAuth
 from aireloom.endpoints import (
     DataSourcesFilters,
     OrganizationsFilters,
@@ -173,18 +174,19 @@ class AIREloomVerifier:
         """Verify all necessary imports work correctly."""
         try:
             # Test core imports
-            from aireloom import AireloomClient, AireloomSession  # noqa: F401
-            from aireloom.auth import (  # noqa: F401
+            from bibliofabric.auth import (  # noqa: F401
                 ClientCredentialsAuth,
                 NoAuth,
                 StaticTokenAuth,
             )
-            from aireloom.endpoints import ResearchProductsFilters  # noqa: F401
-            from aireloom.exceptions import (  # noqa: F401
-                AireloomError,
+            from bibliofabric.exceptions import (  # noqa: F401
                 APIError,
+                BibliofabricError,
                 NotFoundError,
             )
+
+            from aireloom import AireloomClient, AireloomSession  # noqa: F401
+            from aireloom.endpoints import ResearchProductsFilters  # noqa: F401
             from aireloom.models import (  # noqa: F401
                 Organization,
                 Project,

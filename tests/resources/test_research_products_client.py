@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock, call  # Import call
 
 import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.constants import DEFAULT_PAGE_SIZE
 from aireloom.endpoints import RESEARCH_PRODUCTS, ResearchProductsFilters
-from aireloom.exceptions import AireloomError, ValidationError
 from aireloom.models import (
     Header,
     ResearchProduct,  # Added for type hinting if needed
@@ -18,7 +18,21 @@ from aireloom.resources import ResearchProductsClient
 @pytest.fixture
 def mock_api_client_fixture():  # Renamed to avoid conflict with argument name
     """Fixture to create a mock AireloomClient."""
-    mock_client = AsyncMock()
+
+    # Create a simple class that acts like our API client but isn't a Mock
+    class MockApiClient:
+        def __init__(self):
+            from aireloom.unwrapper import OpenAireUnwrapper
+
+            # Use the same attribute name as BaseApiClient
+            self._response_unwrapper = OpenAireUnwrapper()
+            self._mock_response: AsyncMock | None = None
+
+        async def request(self, method, path, params=None, data=None, json_data=None):
+            return self._mock_response
+
+    mock_client = MockApiClient()
+
     # Default behavior: return a successful mock response with empty data
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
@@ -32,8 +46,7 @@ def mock_api_client_fixture():  # Renamed to avoid conflict with argument name
         },
         "results": [],
     }
-    # Make request return the response object directly, not as a coroutine
-    mock_client.request = AsyncMock(return_value=mock_http_response)
+    mock_client._mock_response = mock_http_response
     return mock_client
 
 
@@ -72,8 +85,6 @@ async def test_get_research_product(
             "id": product_id,
             "pageSize": 1,
         },  # get by id now uses search with params
-        data=None,
-        json_data=None,
     )
     assert product == expected_product
 
@@ -103,7 +114,7 @@ async def test_get_research_product_not_found(
         response=mock_response,
     )
 
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         await research_products_client.get(product_id)
 
     assert f"API error fetching ResearchProduct {product_id}: Status 404" in str(
@@ -426,7 +437,7 @@ async def test_iterate_api_error_during_iteration(
     )
 
     iterated_products = []
-    with pytest.raises(AireloomError) as exc_info:
+    with pytest.raises(BibliofabricError) as exc_info:
         async for product in research_products_client.iterate(
             filters=filters_model, page_size=page_size
         ):

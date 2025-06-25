@@ -2,14 +2,15 @@
 import urllib.parse
 
 import pytest
+from bibliofabric.auth import (
+    NoAuth,
+    StaticTokenAuth,
+)
+from bibliofabric.exceptions import BibliofabricError
 from dotenv import load_dotenv
 from pytest_httpx import HTTPXMock
 
 from aireloom import AireloomSession
-from aireloom.auth import (
-    NoAuth,
-    StaticTokenAuth,
-)
 from aireloom.constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
@@ -22,7 +23,6 @@ from aireloom.endpoints import (
     ResearchProductsFilters,
     ScholixFilters,
 )
-from aireloom.exceptions import AireloomError
 from aireloom.models import (
     DataSource,
     Organization,
@@ -1019,7 +1019,9 @@ async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
         json={"message": "Not Found"},
     )
     async with AireloomSession() as session:
-        with pytest.raises(AireloomError, match="API request failed with status 404"):
+        with pytest.raises(
+            BibliofabricError, match="API request failed with status 404"
+        ):
             await session.research_products.get(product_id)
 
 
