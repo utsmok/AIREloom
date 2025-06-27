@@ -1,4 +1,3 @@
-
 site_name: AIREloom Docs
 site_url: https://utsmok.github.io/aireloom/
 repo_url: https://github.com/utsmok/aireloom/
@@ -24,16 +23,34 @@ plugins:
 
 nav:
   - Home: index.md
+  - Getting Started: getting_started.md
+  - Installation: installation.md
+  - Usage:
+      - Data Sources: usage/data_sources.md
+      - Organizations: usage/organizations.md
+      - Projects: usage/projects.md
+      - Research Products: usage/research_products.md
+      - Scholix: usage/scholix.md
+  - Filtering: filter_options.md
+  - OpenAIRE endpoints:
+      - Data Sources: endpoints/data_sources.md
+      - Organizations: endpoints/organizations.md
+      - Projects: endpoints/projects.md
+      - Research Products: endpoints/research_products.md
+      - Scholix: endpoints/scholix.md
+  - Advanced:
+      - Caching: advanced/caching.md
+      - Configuration: advanced/configuration.md
+      - Error Handling: advanced/error_handling.md
+      - Hooks: advanced/hooks.md
+      - Rate Limiting: advanced/rate_limiting.md
   - API Reference:
-    - Client: client.md
-    - Session: session.md
-    - Configuration: config.md
-    - Resources:
-      - Research Products: resources/research_products.md
-      - Projects: resources/projects.md
-      - Organizations: resources/organizations.md
-      - Data Sources: resources/data_sources.md
-      - Scholix: resources/scholix.md
-    - Models: models.md
+      - Client: client.md
+      - Session: session.md
+      - Configuration: config.md
+      - Models: models.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md
+  - Authentication: authentication.md
 watch:
   - src/aireloom
