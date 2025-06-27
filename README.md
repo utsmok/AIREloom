@@ -1,4 +1,6 @@
 # AIREloom: Asynchronous python client for the OpenAIRE API
+<p align="center"><img src="https://github.com/user-attachments/assets/54a7de2e-9469-4d81-ba33-788a5a0aa753" alt="AIREloom logo" height="393" width="500" /></p>
+
 *Samuel Mok // s.mok@utwente.nl // 2025*
 
 AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE Graph API and Scholexplorer API. It is built upon the `bibliofabric` generic client framework, leveraging `httpx` and `pydantic` for robust and efficient data retrieval.
@@ -27,7 +29,7 @@ AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE
 
 ## API Docs
 
-Detailed API docs can be found on the docs page: [utsmok.github.io/aireloom](https://utsmok.github.io/aireloom/).
+Detailed API docs can be found on the docs page: [utsmok.github.io/AIREloom](https://utsmok.github.io/AIREloom/).
 
 
 ## Installation
@@ -544,7 +546,7 @@ if __name__ == "__main__":
 
 ```
 
-*   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the AIREloom API docs: [utsmok.github.io/aireloom/api/hooks](https://utsmok.github.io/aireloom/advanced/hooks).
+*   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the AIREloom API docs: [utsmok.github.io/AIREloom/api/hooks](https://utsmok.github.io/AIREloom/advanced/hooks).
 
 ## Development
 run tests with `uv pytest`, format / lint with `uvx ruff format .` and `uvx ruff check --fix .`.
