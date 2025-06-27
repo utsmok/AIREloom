@@ -1,22 +1,7 @@
-import json
-from datetime import UTC, datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
-from bibliofabric.auth import (
-    AuthStrategy,
-    ClientCredentialsAuth,
-    NoAuth,
-    StaticTokenAuth,
-)
-from bibliofabric.client import BaseApiClient
-from bibliofabric.exceptions import (
-    APIError,
-    BibliofabricError,
-    RateLimitError,
-    TimeoutError,
-)
 
 from aireloom.client import AireloomClient
 from aireloom.config import ApiSettings
@@ -51,4 +36,3 @@ def mock_api_client_fixture():
     }
     mock_client.request.return_value = mock_http_response
     return mock_client
-

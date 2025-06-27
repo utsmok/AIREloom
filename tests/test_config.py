@@ -1,7 +1,7 @@
-import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-import httpx
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
+import pytest
 from bibliofabric.auth import StaticTokenAuth
 
 from aireloom import AireloomSession
@@ -9,8 +9,6 @@ from aireloom import AireloomSession
 
 @pytest.mark.asyncio
 async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
-
-
     # Ensure env vars are not set for these, or set to different values
     monkeypatch.delenv("AIRELOOM_OPENAIRE_API_TOKEN", raising=False)
     monkeypatch.delenv("AIRELOOM_REQUEST_TIMEOUT", raising=False)
@@ -33,10 +31,16 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
         # For simplicity, we trust AireloomSession's logic to copy and update.
 
         # Make a call to ensure it works with these settings
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             # Ensure the mock returns a 3-tuple (response, parsed_model, attempts)
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
-            mock_response.json.return_value = {"results": [{"id": "progcfg123", "title": "Prog Config Test"}], "header": {"numFound": 1, "pageSize": 1}}
+            mock_response.json.return_value = {
+                "results": [{"id": "progcfg123", "title": "Prog Config Test"}],
+                "header": {"numFound": 1, "pageSize": 1},
+            }
             mock_request_with_retry.return_value = (mock_response, None, 1)
             await session.research_products.get("progcfg123")
 
@@ -101,11 +105,14 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
         )
 
         # Example call to ensure it works with StaticTokenAuth
-        
+
         httpx_mock.add_response(
             url="https://api.openaire.eu/graph/v1/researchProducts?id=envcfg456&pageSize=1",
             method="GET",
-            json={"results": [{"id": "envcfg456", "title": "Env Config Test"}], "header": {"numFound": 1, "pageSize": 1}},
+            json={
+                "results": [{"id": "envcfg456", "title": "Env Config Test"}],
+                "header": {"numFound": 1, "pageSize": 1},
+            },
             match_headers={"Authorization": "Bearer env_token_67890"},
         )
         await session_env.research_products.get("envcfg456")

@@ -45,9 +45,7 @@ class ScholixClient(BaseResourceClient):
         _endpoint_def (dict): Configuration for this endpoint from `ENDPOINT_DEFINITIONS`.
     """
 
-    _entity_path: str = (
-        SCHOLIX  # This is the endpoint path, typically "Links"
-    )
+    _entity_path: str = SCHOLIX  # This is the endpoint path, typically "Links"
 
     def __init__(
         self, api_client: "AireloomClient", scholix_base_url: str | None = None

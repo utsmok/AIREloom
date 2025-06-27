@@ -6,6 +6,7 @@ including nested models for controlled vocabulary fields and type literals
 for restricted string values based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/data-source
 """
+
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field

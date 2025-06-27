@@ -8,6 +8,7 @@ persistent identifiers (PIDs), access rights, citation impacts, instances, etc.,
 based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/research-product
 """
+
 import logging
 from typing import Any, Literal
 
@@ -49,6 +50,7 @@ class Pid(BaseModel):
         scheme: The scheme of the PID (e.g., "doi", "orcid", "handle").
         value: The actual value of the PID.
     """
+
     scheme: str | None = None
     value: str | None = None
 
@@ -65,6 +67,7 @@ class Author(BaseModel):
         surname: The surname or family name of the author.
         pid: A `Pid` object representing a persistent identifier for the author (e.g., ORCID).
     """
+
     fullName: str | None = None
     rank: int | None = None
     name: str | None = None
@@ -82,6 +85,7 @@ class BestAccessRight(BaseModel):
         label: A human-readable label for the access right (e.g., "Open Access").
         scheme: The scheme or vocabulary defining the access right code.
     """
+
     code: str | None = None
     label: str | None = None
     scheme: str | None = None
@@ -96,6 +100,7 @@ class ResultCountry(BaseModel):
         code: The ISO 3166-1 alpha-2 country code.
         label: The human-readable name of the country.
     """
+
     code: str | None = None
     label: str | None = None
 
@@ -115,6 +120,7 @@ class CitationImpact(BaseModel):
         impulse: A numerical score representing research impulse or momentum.
         impulseClass: A categorical classification of impulse.
     """
+
     influence: float | None = None
     influenceClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
     citationCount: int | None = None
@@ -136,6 +142,7 @@ class UsageCounts(BaseModel):
         downloads: The number of times the research product has been downloaded.
         views: The number of times the research product has been viewed.
     """
+
     downloads: int | None = None
     views: int | None = None
 
@@ -173,6 +180,7 @@ class Indicator(BaseModel):
         citationImpact: A `CitationImpact` object detailing citation metrics.
         usageCounts: A `UsageCounts` object detailing view and download counts.
     """
+
     citationImpact: CitationImpact | None = None
     usageCounts: UsageCounts | None = None
 
@@ -188,6 +196,7 @@ class AccessRight(BaseModel):
         openAccessRoute: The Open Access route, if applicable (e.g., "gold", "green").
         scheme: The scheme defining the access right codes.
     """
+
     code: str | None = None
     label: str | None = None
     openAccessRoute: OpenAccessRouteType | None = None
@@ -203,13 +212,14 @@ class ArticleProcessingCharge(BaseModel):
         amount: The amount of the APC, typically as a string to accommodate various formats.
         currency: The currency code for the APC amount (e.g., "EUR", "USD").
     """
+
     amount: str | None = None
     currency: str | None = None
 
     model_config = ConfigDict(extra="allow")
 
 
-class ResultPid(BaseModel): 
+class ResultPid(BaseModel):
     """Represents a Persistent Identifier (PID) within a result context.
 
     Note: This model appears functionally identical to the top-level `Pid` model.
@@ -219,13 +229,14 @@ class ResultPid(BaseModel):
         scheme: The scheme of the PID.
         value: The value of the PID.
     """
+
     scheme: str | None = None
     value: str | None = None
 
     model_config = ConfigDict(extra="allow")
 
 
-class License(BaseModel): 
+class License(BaseModel):
     """Represents license information.
 
     Note: This model was marked as potentially unused in the original API response
@@ -266,12 +277,11 @@ class Instance(BaseModel):
         type: The type of this instance (e.g., "fulltext", "abstract").
         urls: A list of URLs associated with this instance.
     """
+
     accessRight: AccessRight | None = None
     alternateIdentifier: list[dict[str, str]] = Field(default_factory=list)
     articleProcessingCharge: ArticleProcessingCharge | None = None
-    license: str | None = (
-        None
-    )
+    license: str | None = None
     collectedFrom: dict[str, str] | None = None
     hostedBy: dict[str, str] | None = None
     distributionLocation: str | None = None
@@ -311,6 +321,7 @@ class Language(BaseModel):
         code: The language code (e.g., "en", "fr").
         label: The human-readable name of the language (e.g., "English").
     """
+
     code: str | None = None
     label: str | None = None
 
@@ -328,6 +339,7 @@ class Subject(BaseModel):
         subject: A dictionary where keys are subject schemes and values are subject terms/codes.
                  Example: `{"fos": "Field of Science", "mesh": "D000001"}`
     """
+
     subject: dict[str, str] | None = None
 
     model_config = ConfigDict(extra="allow")
@@ -348,8 +360,9 @@ class Container(BaseModel):
         ep: End page of the item within the container.
         vol: Volume number of the container.
     """
+
     edition: str | None = None
-    iss: str | None = None 
+    iss: str | None = None
     issnLinking: str | None = None
     issnOnline: str | None = None
     issnPrinted: str | None = None
@@ -370,6 +383,7 @@ class GeoLocation(BaseModel):
              of coordinates (e.g., "minLon,minLat,maxLon,maxLat").
         place: A human-readable name for the geographical location.
     """
+
     box: str | None = None
     place: str | None = None
 
@@ -471,9 +485,11 @@ class ResearchProduct(BaseEntity):
             The (potentially modified) input data dictionary.
         """
         if isinstance(data, dict) and "mainTitle" in data:
-            if "title" not in data or data["title"] is None: # Ensure we don't overwrite an existing title
+            if (
+                "title" not in data or data["title"] is None
+            ):  # Ensure we don't overwrite an existing title
                 data["title"] = data.pop("mainTitle")
-            else: # title exists, no need to pop mainTitle if it's just a duplicate
+            else:  # title exists, no need to pop mainTitle if it's just a duplicate
                 data.pop("mainTitle", None)
         return data
 

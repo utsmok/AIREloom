@@ -1,4 +1,9 @@
+
 site_name: AIREloom Docs
+site_url: https://utsmok.github.io/aireloom/
+repo_url: https://github.com/utsmok/aireloom/
+site_author: S. Mok
+
 theme:
   name: material
   palette:
@@ -15,11 +20,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.insert(0, 'C:/dev/bibliofabric/src')
-          options:
-            show_root_heading: true
+          paths: [src]
+
 nav:
   - Home: index.md
   - API Reference:
@@ -34,4 +36,4 @@ nav:
       - Scholix: resources/scholix.md
     - Models: models.md
 watch:
-  - ../aireloom
+  - src/aireloom

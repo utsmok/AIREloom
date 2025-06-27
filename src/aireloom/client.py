@@ -42,8 +42,12 @@ class AireloomClient(BaseApiClient):
     Typical usage:
     ```python
     async with AireloomClient() as client:
-        product = await client.research_products.get("some_product_id")
-        async for project in client.projects.iterate(filters=ProjectFilters(...)):
+        product = await client.research_products.get(
+            "some_product_id"
+        )
+        async for project in client.projects.iterate(
+            filters=ProjectFilters(...)
+        ):
             print(project.title)
     ```
 

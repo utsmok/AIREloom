@@ -1,70 +1,79 @@
-# AIREloom: An Asynchronous Python Client for OpenAIRE APIs
+# AIREloom: Asynchronous python client for the OpenAIRE API
+*Samuel Mok // s.mok@utwente.nl // 2025*
 
 AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE Graph API and Scholexplorer API. It is built upon the `bibliofabric` generic client framework, leveraging `httpx` and `pydantic` for robust and efficient data retrieval.
 
+
 ## Features
 
-*   **Built on `bibliofabric`**: Inherits a generic, robust client foundation.
-*   **Asynchronous by Design**: Utilizes `asyncio` and `httpx` for non-blocking API interactions.
-*   **Comprehensive OpenAIRE Coverage**:
-    *   OpenAIRE Graph API: Access to Research Products, Projects, Organizations, and Data Sources.
-    *   Scholexplorer API: For discovering links (relationships) between scholarly entities.
-*   **Robust Error Handling**: Built-in retry logic for transient network errors and common API error statuses.
-*   **Flexible Authentication**:
-    *   Automatic detection based on environment variables (`.env` file support).
-    *   Supports No Authentication, Static API Token, and OAuth2 Client Credentials.
-    *   Strategies provided by `bibliofabric.auth`.
-*   **Data Validation & Modeling**: Uses Pydantic models for request parameters (filters) and for parsing API responses, ensuring data integrity and ease of use.
-*   **Efficient Data Retrieval**:
-    *   `get()`: Fetch single entities by ID.
-    *   `search()`: Paginated search with filtering and sorting capabilities.
-    *   `iterate()`: Efficiently iterate over large result sets using cursor-based pagination for Graph API endpoints and page-based for Scholix.
-*   **Configurable Behavior**:
+*   Built on `bibliofabric`
+*   Asynchronous by design
+*   Comprehensive OpenAIRE API coverage:
+    *   OpenAIRE Graph API: Access to all endpoints: Research Products, Projects, Organizations, and Data Sources.
+    *   Scholexplorer API: Full support for all Scholix v3 parameters.
+*   Flexible authentication:
+    *   Automatic detection based on environment variables or `.env` files.
+    *   Supports all OpenAIRE auth methods, including using no auth at all.
+*   Pydantic models validate all input and output, and provide clear type hints for constructing filters/requests and accessing response data.
+*   Efficient data retrieval by using specific functions depending on the use case:
+    *   `get()` for single entity retrieval
+    *   `search()` for paginated retrieval
+    *   `iterate()` for cursor-based retrieval (if available)
+*   The `bibliofabric` framework also provides:
     *   Timeouts, retries, backoff factors through `bibliofabric.config.BaseApiSettings` and `aireloom.config.ApiSettings`.
     *   Optional client-side caching for GET requests.
     *   Rate limiting awareness and handling (parsing `Retry-After` headers).
-*   **Extensible**: Basic hook system (pre/post-request) via `bibliofabric` for custom logic.
+    *   Basic hook system (pre/post-request) via for custom logic.
+
+## API Docs
+
+Detailed API docs can be found on the docs page: [utsmok.github.io/aireloom](https://utsmok.github.io/aireloom/).
+
 
 ## Installation
 
-AIREloom is designed to work with its companion library, `bibliofabric`. In a typical development setup for this project, both are local packages.
-
-**1. `bibliofabric` (Generic Framework):**
-   Ensure `bibliofabric` is available. If developing locally, it's usually a sibling directory.
-
-**2. `aireloom` (This Library):**
-   `aireloom` depends on the local `bibliofabric`. Its `pyproject.toml` should specify this:
-   ```toml
-   [project]
-   # ...
-   dependencies = [
-       "bibliofabric @ {root:uri}/../bibliofabric",
-       # other aireloom dependencies like pydantic, httpx, loguru...
-   ]
-   ```
-   Install `aireloom` (and its local `bibliofabric` dependency) into your environment, preferably using `uv`:
-
+AIREloom is built on top of the `bibliofabric` framework, which contains most dependencies. Use `uv` to install the package from PyPI:
 ```bash
-# From the root of the monorepo or where both package dirs are visible
-uv pip install -e src/bibliofabric -e src/AIREloom
-# Or, if your project is set up with uv.workspace.json:
-# uv sync
+> uv install aireloom
 ```
 
-For end-users (if `aireloom` were published to PyPI), installation would be simpler:
-```bash
-# uv pip install aireloom
-# (This would also pull bibliofabric if it were a PyPI dependency)
+If you do not have `uv` installed, check out the [uv documentation](https://docs.astral.sh/uv/getting-started/installation/) for installation instructions, or just paste one of the following oneliners into your terminal to install uv:
 
-uv add aireloom
-# or
-> uv pip install aireloom
+*for Linux/macOS:*
+```bash
+> curl -LsSf https://astral.sh/uv/install.sh | sh
+or
+> wget -qO- https://astral.sh/uv/install.sh | sh
+```
+*for Windows:*
+```powershell
+> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
+followed by:
+```bash
+> uv init
+> uv add aireloom //or aireloom[analysis] if you want to run the example scripts
+> uv run your_script.py
+```
 
-## Authentication
+## Example scripts
 
-AIREloom automatically detects the authentication method based on your configuration (environment variables or `.env` file) unless you explicitly provide an `auth_strategy`.
+This repository includes two example scripts that demonstrate how to use this library to retrieve and analyze data from OpenAIRE:
+*   `aireloom_comprehensive_analysis.py`: A comprehensive analysis script that retrieves and analyzes research products, projects, organizations, and data sources from OpenAIRE.Data is processed using `polars` and stored in a `DuckDB` database on disk. This is used to generate a report and a set of visualizations.
+*   `simple_example.py`: A simple example script that demonstrates the three main retrieval methods (get/search/iterate), applied to research products.
+
+Make sure to install the extra dependencies to properly execute them:
+
+```bash
+> uv install aireloom[analysis]
+> uv run simple_example.py
+> uv run aireloom_comprehensive_analysis.py
+```
+
+## OpenAIRE Authentication
+
+AIREloom automatically detects the authentication method based on your configuration (environment variables or `.env` file) unless you explicitly provide an `auth_strategy` during init. For more information on authentication, see the OpenAIRE docs [on authentication](https://graph.openaire.eu/docs/apis/authentication).
 
 **Environment Variables / `.env` file:**
 
@@ -164,16 +173,6 @@ async def run_example():
 if __name__ == "__main__":
     asyncio.run(run_example())
 ```
-
-## Detailed Usage Examples
-
-For more detailed examples and explanations for each client (Research Products, Projects, Organizations, Data Sources, Scholix), please refer to the documentation in the `docs/usage/` directory:
-
-*   [Research Products Usage](docs/usage/research_products.md)
-*   [Projects Usage](docs/usage/projects.md)
-*   [Organizations Usage](docs/usage/organizations.md)
-*   [Data Sources Usage](docs/usage/data_sources.md)
-*   [Scholix Links Usage](docs/usage/scholix.md)
 
 ## Retrieving Single Entities
 
@@ -545,19 +544,9 @@ if __name__ == "__main__":
 
 ```
 
-*   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the [Hook System Documentation](docs/advanced/hooks.md).
+*   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the AIREloom API docs: [utsmok.github.io/aireloom/api/hooks](https://utsmok.github.io/aireloom/advanced/hooks).
 
-## Dev
-
-This project uses `uv` for environment and dependency management.
-
-```bash
-> git clone github.com/utsmok/aireloom.git
-> cd aireloom
-> uv init
-> uv sync --all-extras
-```
-
+## Development
 run tests with `uv pytest`, format / lint with `uvx ruff format .` and `uvx ruff check --fix .`.
 
 

@@ -6,6 +6,7 @@ including nested models for funding details, grants, and H2020 programme informa
 based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/project
 """
+
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator

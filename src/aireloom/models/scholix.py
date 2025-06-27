@@ -7,6 +7,7 @@ models for entities, relationships, identifiers, and the overall response struct
 Reference: https://graph.openaire.eu/docs/apis/scholexplorer/v3/response_schema
 and DDI-CDI Codi Model: https://ddi-alliance.github.io/DDI-CDI/current/Model/
 """
+
 from datetime import datetime
 from typing import Literal
 
@@ -32,6 +33,7 @@ class ScholixIdentifier(BaseModel):
         id_scheme: The scheme of the identifier (aliased from "IDScheme", e.g., "doi", "url").
         id_url: An optional resolvable URL for the identifier (aliased from "IDURL").
     """
+
     id_val: str = Field(alias="ID")
     id_scheme: str = Field(alias="IDScheme")
     id_url: HttpUrl | None = Field(alias="IDURL", default=None)
@@ -46,6 +48,7 @@ class ScholixCreator(BaseModel):
         name: The name of the creator (aliased from "Name").
         identifier: An optional list of `ScholixIdentifier` objects for the creator.
     """
+
     name: str | None = Field(alias="Name", default=None)
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
@@ -59,6 +62,7 @@ class ScholixPublisher(BaseModel):
         name: The name of the publisher (aliased from "Name").
         identifier: An optional list of `ScholixIdentifier` objects for the publisher.
     """
+
     name: str = Field(alias="Name")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
@@ -77,6 +81,7 @@ class ScholixEntity(BaseModel):
         publication_date: The publication date of the entity (string format).
         publisher: A list of `ScholixPublisher` objects.
     """
+
     identifier: list[ScholixIdentifier] = Field(alias="Identifier")
     type: ScholixEntityTypeName = Field(alias="Type")
     sub_type: str | None = Field(alias="SubType", default=None)
@@ -97,6 +102,7 @@ class ScholixRelationshipType(BaseModel):
         sub_type: An optional subtype for more specific relationship classification.
         sub_type_schema: An optional URL pointing to the schema defining the subtype.
     """
+
     name: ScholixRelationshipNameValue = Field(alias="Name")
     sub_type: str | None = Field(alias="SubType", default=None)
     sub_type_schema: HttpUrl | None = Field(alias="SubTypeSchema", default=None)
@@ -111,6 +117,7 @@ class ScholixLinkProvider(BaseModel):
         name: The name of the link provider (aliased from "Name").
         identifier: An optional list of `ScholixIdentifier` objects for the provider.
     """
+
     name: str = Field(alias="Name")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
@@ -132,6 +139,7 @@ class ScholixRelationship(BaseModel):
         license_url: An optional URL pointing to the license governing the use of this link information.
         harvest_date: The date when this link information was last harvested or updated.
     """
+
     link_provider: list[ScholixLinkProvider] | None = Field(
         alias="LinkProvider", default=None
     )

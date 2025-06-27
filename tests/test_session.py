@@ -1,9 +1,8 @@
 # tests/test_session.py
-import json
-import httpx
 import urllib.parse
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 from bibliofabric.auth import (
     ClientCredentialsAuth,
@@ -185,7 +184,10 @@ async def test_session_get_research_product_integration():
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             # Mocking the return value to include a third element for attempts
@@ -271,7 +273,6 @@ async def test_session_get_organization_integration():
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "results": [
@@ -289,7 +290,10 @@ async def test_session_get_organization_integration():
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -305,7 +309,6 @@ async def test_session_search_organizations_integration():
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "header": {
@@ -333,7 +336,10 @@ async def test_session_search_organizations_integration():
         filters = OrganizationsFilters(
             countryCode="GR"
         )  # Using countryCode directly for instantiation
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -353,7 +359,6 @@ async def test_session_iterate_organizations_integration():
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_response_page1 = {
         "header": {
@@ -397,7 +402,10 @@ async def test_session_iterate_organizations_integration():
         filters = OrganizationsFilters(
             countryCode="EU"
         )  # Using countryCode directly for instantiation
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response_page1_obj = MagicMock(spec=httpx.Response, status_code=200)
             mock_response_page1_obj.json.return_value = mock_response_page1
             mock_response_page2_obj = MagicMock(spec=httpx.Response, status_code=200)
@@ -407,7 +415,9 @@ async def test_session_iterate_organizations_integration():
                 (mock_response_page1_obj, None, 1),
                 (mock_response_page2_obj, None, 1),
             ]
-            async for org in session.organizations.iterate(filters=filters, page_size=1):
+            async for org in session.organizations.iterate(
+                filters=filters, page_size=1
+            ):
                 orgs_iterated.append(org)
     assert len(orgs_iterated) == 2
     if len(orgs_iterated) == 2:
@@ -425,7 +435,6 @@ async def test_session_get_project_integration():
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "results": [
@@ -447,7 +456,10 @@ async def test_session_get_project_integration():
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -463,7 +475,6 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "header": {
@@ -493,11 +504,16 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = ProjectsFilters(grantID="H2020")
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
-            response = await session.projects.search(filters=filters, page=1, page_size=1)
+            response = await session.projects.search(
+                filters=filters, page=1, page_size=1
+            )
     assert isinstance(response, ApiResponse)
     assert response.results is not None and len(response.results) > 0
     assert isinstance(response.results[0], Project)
@@ -511,7 +527,6 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
 
     # Mock for the token acquisition
-    
 
     mock_response_page1 = {
         "header": {
@@ -561,7 +576,10 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = ProjectsFilters(fundingStreamId="EC")
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response_page1_obj = MagicMock(spec=httpx.Response, status_code=200)
             mock_response_page1_obj.json.return_value = mock_response_page1
             mock_response_page2_obj = MagicMock(spec=httpx.Response, status_code=200)
@@ -589,7 +607,6 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "results": [
@@ -609,7 +626,10 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -625,7 +645,6 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
     expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "header": {
@@ -657,7 +676,10 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = DataSourcesFilters(openaireCompatibility="UNKNOWN")
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -677,7 +699,6 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
     base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
 
     # Mock for the token acquisition
-    
 
     mock_response_page1 = {
         "header": {
@@ -723,7 +744,10 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = DataSourcesFilters()  # No countryCode
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response_page1_obj = MagicMock(spec=httpx.Response, status_code=200)
             mock_response_page1_obj.json.return_value = mock_response_page1
             mock_response_page2_obj = MagicMock(spec=httpx.Response, status_code=200)
@@ -751,7 +775,6 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
     expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
 
     # Mock for the token acquisition
-    
 
     mock_api_response_json = {
         "currentPage": 0,
@@ -781,7 +804,10 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = ScholixFilters(sourcePid=source_pid)
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response = MagicMock(spec=httpx.Response, status_code=200)
             mock_response.json.return_value = mock_api_response_json
             mock_request_with_retry.return_value = (mock_response, None, 1)
@@ -802,7 +828,6 @@ async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
     base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
 
     # Mock for the token acquisition
-    
 
     mock_response_page0 = {
         "currentPage": 0,
@@ -852,7 +877,10 @@ async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
         filters = ScholixFilters(sourcePid=source_pid)
-        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+        with patch(
+            "bibliofabric.client.BaseApiClient._request_with_retry",
+            new_callable=AsyncMock,
+        ) as mock_request_with_retry:
             mock_response_page0_obj = MagicMock(spec=httpx.Response, status_code=200)
             mock_response_page0_obj.json.return_value = mock_response_page0
             mock_response_page1_obj = MagicMock(spec=httpx.Response, status_code=200)

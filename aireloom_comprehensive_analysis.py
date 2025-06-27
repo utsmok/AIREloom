@@ -1,13 +1,23 @@
 #!/usr/bin/env python3
+
 """
-AIREloom Comprehensive Analysis Script
+AIREloom demo Analysis Script
 
 This script demonstrates advanced data retrieval, storage, and analysis capabilities
 using the AIREloom library for OpenAIRE data. It performs an integrated workflow
 including data collection, local storage with DuckDB, and comprehensive analytics.
 
-Author: AIREloom Project
-Requirements: Run with 'uv run aireloom_comprehensive_analysis.py'
+It requires additional dependencies that are stored in the `analysis` dependency group
+of the `pyproject.toml` file. Install them with:
+```bash
+uv sync --group analysis
+uv run aireloom_comprehensive_analysis.py
+```
+
+or install them by using the --group flag with `uv run`:
+```bash
+uv run --group analysis aireloom_comprehensive_analysis.py
+```
 """
 
 import asyncio

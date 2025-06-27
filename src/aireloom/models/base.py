@@ -7,7 +7,7 @@ These models provide data validation and a clear structure for API data.
 """
 
 import logging
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator  # Added Field
 from pydantic.config import ConfigDict  # Added ConfigDict
@@ -84,7 +84,7 @@ class BaseEntity(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class ApiResponse(BaseModel, Generic[EntityType]):
+class ApiResponse[EntityType: "BaseEntity"](BaseModel):
     """Generic Pydantic model for standard OpenAIRE API list responses.
 
     This model represents the common envelope structure for API responses that

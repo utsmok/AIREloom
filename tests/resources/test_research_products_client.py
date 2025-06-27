@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, call  # Import call
 
 import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.client import AireloomClient
 from aireloom.constants import DEFAULT_PAGE_SIZE
@@ -13,7 +14,6 @@ from aireloom.models import (
     ResearchProduct,  # Added for type hinting if needed
 )
 from aireloom.resources import ResearchProductsClient
-from bibliofabric.exceptions import BibliofabricError, ValidationError
 from aireloom.unwrapper import OpenAireUnwrapper
 
 
@@ -72,7 +72,6 @@ async def test_get_research_product(
         params={"id": product_id, "pageSize": 1},
     )
     assert product == expected_product
-
 
 
 @pytest.mark.asyncio
