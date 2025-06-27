@@ -1,0 +1,1466 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/usage/data_sources/">
+      
+      
+        <link rel="prev" href="../../installation/">
+      
+      
+        <link rel="next" href="../organizations/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>Data Sources - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#working-with-data-sources" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Data Sources
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Client
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetching-a-single-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetching a Single Data Source
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Searching Data Sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Searching Data Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filters-datasourcesfilters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters (DataSourcesFilters)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sorting-sort_by" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sorting (sort_by)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-datasourceresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response (DataSourceResponse)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-all-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Iterating Over All Data Sources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-datasource-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The DataSource Model
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../filter_options/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Filtering
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../client/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Client
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../session/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Session
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Client
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fetching-a-single-data-source" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fetching a Single Data Source
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#searching-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Searching Data Sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Searching Data Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filters-datasourcesfilters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filters (DataSourcesFilters)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sorting-sort_by" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sorting (sort_by)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-datasourceresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      Response (DataSourceResponse)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iterating-over-all-data-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Iterating Over All Data Sources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-datasource-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The DataSource Model
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="working-with-data-sources">Working with Data Sources</h1>
+<p>This guide explains how to use the <code>DataSourcesClient</code> to interact with OpenAIRE's data source information (e.g., repositories, journals, aggregators). You'll learn how to fetch individual data sources, search for them using various filters, and iterate over large result sets.</p>
+<h2 id="accessing-the-client">Accessing the Client</h2>
+<p>The <code>DataSourcesClient</code> is accessed via an <code>AireloomSession</code> instance:</p>
+<pre><code class="language-python">import asyncio
+from aireloom import AireloomSession
+from bibliofabric.auth import NoAuth # Or your preferred auth strategy
+
+async def main():
+    async with AireloomSession(auth_strategy=NoAuth()) as session:
+        # You can now access the data sources client
+        ds_client = session.data_sources
+        # ... use ds_client to make calls ...
+        print(&quot;DataSourcesClient is ready.&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(main())
+</code></pre>
+<h2 id="fetching-a-single-data-source">Fetching a Single Data Source</h2>
+<p>To retrieve a specific data source by its OpenAIRE ID, use the <code>get()</code> method.</p>
+<pre><code class="language-python">import asyncio
+from aireloom import AireloomSession
+from bibliofabric.auth import NoAuth
+from bibliofabric.exceptions import NotFoundError, BibliofabricError
+
+# Example OpenAIRE ID for a data source
+# These IDs are often prefixed like 'openaire____::datasourceId:'
+DS_ID = &quot;openaire____::datasourceId:doaj&quot; # Directory of Open Access Journals
+# DS_ID = &quot;openaire____::datasourceId:zenodo&quot; # Zenodo Repository
+
+async def fetch_single_data_source():
+    async with AireloomSession(auth_strategy=NoAuth()) as session:
+        try:
+            print(f&quot;Attempting to fetch data source with ID: {DS_ID}&quot;)
+            data_source = await session.data_sources.get(DS_ID)
+
+            print(f&quot;\nSuccessfully fetched data source:&quot;)
+            print(f&quot;  ID: {data_source.id}&quot;)
+            print(f&quot;  Official Name: {data_source.officialName}&quot;)
+            print(f&quot;  English Name: {data_source.englishName if data_source.englishName else 'N/A'}&quot;)
+
+            if data_source.type:
+                print(f&quot;  Type: {data_source.type.value} (Scheme: {data_source.type.scheme})&quot;)
+
+            print(f&quot;  Website URL: {data_source.websiteUrl if data_source.websiteUrl else 'N/A'}&quot;)
+            print(f&quot;  OpenAIRE Compatibility: {data_source.openaireCompatibility if data_source.openaireCompatibility else 'N/A'}&quot;)
+
+            if data_source.contentTypes:
+                print(f&quot;  Content Types: {', '.join(data_source.contentTypes)}&quot;)
+
+        except NotFoundError:
+            print(f&quot;Error: Data source with ID '{DS_ID}' not found.&quot;)
+        except BibliofabricError as e:
+            print(f&quot;An Aireloom error occurred: {e}&quot;)
+        except Exception as e:
+            print(f&quot;An unexpected error occurred: {e}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(fetch_single_data_source())
+</code></pre>
+<p>The <code>data_source</code> object returned is an instance of the <code>DataSource</code> Pydantic model.</p>
+<h2 id="searching-data-sources">Searching Data Sources</h2>
+<p>To search for data sources based on various criteria, use the <code>search()</code> method. This method supports pagination, sorting, and filtering.</p>
+<pre><code class="language-python">import asyncio
+from math import ceil
+from aireloom import AireloomSession
+from bibliofabric.auth import NoAuth
+from aireloom.endpoints import DataSourcesFilters # Import the filter model
+from bibliofabric.exceptions import ValidationError, BibliofabricError
+
+async def search_data_sources_example():
+    async with AireloomSession(auth_strategy=NoAuth()) as session:
+        try:
+            print(&quot;Searching for data sources that are 'Journal' type and compatible with OpenAIRE...&quot;)
+
+            # Define filters using the DataSourcesFilters model
+            filters = DataSourcesFilters(
+                dataSourceTypeName=&quot;Journal&quot;,       # Filter by data source type name
+                openaireCompatibility=&quot;openaire_guidelines_3.0_literature_repositories&quot; # Example compatibility level
+                # officialName=&quot;Zenodo&quot;             # Example: filter by official name
+                # subjects=[&quot;biology&quot;]              # Example: filter by subject
+            )
+
+            # Perform the search
+            search_response = await session.data_sources.search(
+                filters=filters,
+                page=1,                     # Page number (1-indexed)
+                page_size=5,                # Number of results per page
+                sort_by=&quot;relevance desc&quot;    # Sort by relevance (currently the only sort option for data sources)
+            )
+
+            header = search_response.header
+            results = search_response.results
+
+            total_results = header.numFound if header.numFound is not None else 0
+            page_size = header.pageSize if header.pageSize is not None else 5
+            total_pages = ceil(total_results / page_size) if page_size &gt; 0 else 0
+
+            print(f&quot;\nFound {total_results} data sources matching criteria.&quot;)
+            if total_results &gt; 0:
+                 print(f&quot;Displaying page 1 of {total_pages} (approx.):&quot;)
+
+            if results:
+                for i, ds in enumerate(results):
+                    print(f&quot;  Result {i+1}:&quot;)
+                    print(f&quot;    Official Name: {ds.officialName}&quot;)
+                    ds_type = ds.type.value if ds.type and ds.type.value else &quot;N/A&quot;
+                    print(f&quot;    Type: {ds_type}&quot;)
+                    print(f&quot;    ID: {ds.id}&quot;)
+            else:
+                print(&quot;  No data sources found for this page/filter combination.&quot;)
+
+        except ValidationError as e:
+            print(f&quot;Validation error during search: {e}&quot;)
+        except BibliofabricError as e:
+            print(f&quot;An Aireloom error occurred during search: {e}&quot;)
+        except Exception as e:
+            print(f&quot;An unexpected error occurred during search: {e}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(search_data_sources_example())
+</code></pre>
+<h3 id="filters-datasourcesfilters">Filters (<code>DataSourcesFilters</code>)</h3>
+<p>The <code>filters</code> parameter takes an instance of <code>DataSourcesFilters</code> from <code>aireloom.endpoints</code>. Key filter fields include:
+*   <code>search</code>: General keyword search.
+*   <code>officialName</code>: Filter by official name.
+*   <code>englishName</code>: Filter by English name.
+*   <code>legalShortName</code>: Filter by legal short name (often of the owning organization).
+*   <code>id</code>: Filter by OpenAIRE data source ID.
+*   <code>pid</code>: Filter by a persistent identifier value.
+*   <code>subjects</code>: List of subject keywords.
+*   <code>dataSourceTypeName</code>: Filter by the type of data source (e.g., "Journal", "Repository", "Aggregator").
+*   <code>contentTypes</code>: List of content types hosted (e.g., "publication", "dataset").
+*   <code>openaireCompatibility</code>: Filter by OpenAIRE compatibility level string.
+*   <code>relOrganizationId</code>: Filter by related organization ID.
+*   <code>relCommunityId</code>: Filter by related community ID.
+*   <code>relCollectedFromDatasourceId</code>: Filter by the data source ID from which this data source was collected (for metadata aggregations).</p>
+<p>Refer to the <code>DataSourcesFilters</code> model definition in <code>aireloom.endpoints</code> for a complete list.</p>
+<h3 id="sorting-sort_by">Sorting (<code>sort_by</code>)</h3>
+<p>Currently, the primary valid sort field for data sources is:
+*   <code>relevance</code></p>
+<p>Format: <code>"relevance asc"</code> or <code>"relevance desc"</code>.</p>
+<h3 id="response-datasourceresponse">Response (<code>DataSourceResponse</code>)</h3>
+<p>The <code>search()</code> method returns a <code>DataSourceResponse</code> object (<code>ApiResponse[DataSource]</code>), containing:
+*   <code>header</code>: A <code>Header</code> object with pagination info.
+*   <code>results</code>: A list of <code>DataSource</code> model instances.</p>
+<h2 id="iterating-over-all-data-sources">Iterating Over All Data Sources</h2>
+<p>To process all data sources matching criteria without manual pagination, use the <code>iterate()</code> method.</p>
+<pre><code class="language-python">import asyncio
+from aireloom import AireloomSession
+from bibliofabric.auth import NoAuth
+from aireloom.endpoints import DataSourcesFilters
+from bibliofabric.exceptions import ValidationError, BibliofabricError
+
+async def iterate_all_data_sources():
+    async with AireloomSession(auth_strategy=NoAuth()) as session:
+        print(&quot;Iterating through 'Repository' type data sources...&quot;)
+        count = 0
+        max_results_to_show = 10  # Limit for example display
+
+        try:
+            filters = DataSourcesFilters(
+                dataSourceTypeName=&quot;Repository&quot;
+            )
+
+            async for ds in session.data_sources.iterate(
+                filters=filters,
+                page_size=20,  # How many to fetch per underlying API call
+                # sort_by=&quot;relevance desc&quot; # Optional: sorting by relevance
+            ):
+                count += 1
+                print(f&quot;  #{count}: {ds.officialName} (ID: {ds.id})&quot;)
+
+                if count &gt;= max_results_to_show:
+                    print(f&quot;\nStopping iteration early after fetching {max_results_to_show} results for this example.&quot;)
+                    break
+
+            print(f&quot;\nFinished iterating. Total data sources processed in this run (up to limit): {count}&quot;)
+
+        except ValidationError as e:
+            print(f&quot;Validation error during iteration: {e}&quot;)
+        except BibliofabricError as e:
+            print(f&quot;An Aireloom error occurred during iteration: {e}&quot;)
+        except Exception as e:
+            print(f&quot;An unexpected error occurred during iteration: {e}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(iterate_all_data_sources())
+</code></pre>
+<h2 id="the-datasource-model">The <code>DataSource</code> Model</h2>
+<p>The <code>DataSource</code> Pydantic model (defined in <code>aireloom.models.data_source</code>) provides structured access to data source information. Key attributes include:</p>
+<ul>
+<li><code>id</code> (str): The OpenAIRE ID of the data source.</li>
+<li><code>originalIds</code> (Optional[list[str]]): List of original IDs from other systems.</li>
+<li><code>pids</code> (Optional[list[ControlledField]]): List of persistent identifiers (e.g., OAI-PMH base URL). <code>ControlledField</code> has <code>scheme</code> and <code>value</code>.</li>
+<li><code>type</code> (Optional[ControlledField]): The type of data source (e.g., repository, journal). <code>ControlledField</code> has <code>scheme</code> and <code>value</code>.</li>
+<li><code>openaireCompatibility</code> (Optional[str]): OpenAIRE compatibility level.</li>
+<li><code>officialName</code> (Optional[str]): The official name.</li>
+<li><code>englishName</code> (Optional[str]): The English name, if different.</li>
+<li><code>websiteUrl</code> (Optional[str]): URL of the data source's website.</li>
+<li><code>logoUrl</code> (Optional[str]): URL of the data source's logo.</li>
+<li><code>dateOfValidation</code> (Optional[str]): Date of last validation by OpenAIRE.</li>
+<li><code>description</code> (Optional[str]): Description of the data source.</li>
+<li><code>subjects</code> (Optional[list[str]]): List of main subjects covered.</li>
+<li><code>languages</code> (Optional[list[str]]): List of languages of content.</li>
+<li><code>contentTypes</code> (Optional[list[str]]): List of content types (e.g., "publication", "dataset", "software").</li>
+<li><code>accessRights</code> (Optional[Literal["open", "restricted", "closed"]]): Default access rights.</li>
+<li><code>policies</code> (Optional[list[str]]): Links to policies.</li>
+<li><code>journal</code> (Optional[Container]): If the data source is a journal, this field (from <code>aireloom.models.research_product.Container</code>) may contain journal-specific metadata like ISSNs.</li>
+</ul>
+<p>Refer to the <code>aireloom.models.data_source.DataSource</code> model definition for all available fields.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
