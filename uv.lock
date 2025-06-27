@@ -29,16 +29,11 @@ dependencies = [
     { name = "tenacity" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-httpx" },
-]
+[package.optional-dependencies]
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "mkdocstrings", extra = ["python"] },
 ]
 lint = [
     { name = "ruff" },
@@ -46,6 +41,14 @@ lint = [
 test = [
     { name = "pytest" },
     { name = "pytest-randomly" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-httpx" },
 ]
 
 [package.metadata]
@@ -57,6 +60,9 @@ requires-dist = [
     { name = "httpx" },
     { name = "loguru" },
     { name = "matplotlib", specifier = ">=3.10.3" },
+    { name = "mkdocs", marker = "extra == 'docs'", specifier = "~=1.6.0" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = "~=9.5.0" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'", specifier = "~=0.25.0" },
     { name = "networkx", specifier = ">=3.5" },
     { name = "numpy", specifier = ">=2.3.0" },
     { name = "pandas", specifier = ">=2.3.0" },
@@ -65,12 +71,16 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=20.0.0" },
     { name = "pydantic" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
+    { name = "pytest", marker = "extra == 'test'" },
+    { name = "pytest-randomly", marker = "extra == 'test'" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "rich", specifier = ">=14.0.0" },
+    { name = "ruff", marker = "extra == 'lint'" },
     { name = "seaborn", specifier = ">=0.13.2" },
     { name = "tenacity", specifier = ">=9.1.2" },
 ]
+provides-extras = ["docs", "lint", "test"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -78,15 +88,6 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.26.0" },
     { name = "pytest-cov", specifier = ">=6.1.1" },
     { name = "pytest-httpx", specifier = ">=0.35.0" },
-]
-docs = [
-    { name = "mkdocs", specifier = "~=1.6.0" },
-    { name = "mkdocs-material", specifier = "~=9.5.0" },
-]
-lint = [{ name = "ruff" }]
-test = [
-    { name = "pytest" },
-    { name = "pytest-randomly" },
 ]
 
 [[package]]
@@ -140,11 +141,18 @@ requires-dist = [
     { name = "cachetools", specifier = ">=5.3.0" },
     { name = "httpx", specifier = ">=0.25.0" },
     { name = "loguru", specifier = ">=0.7.0" },
+    { name = "mkdocs", marker = "extra == 'dev'" },
+    { name = "mkdocs-material", marker = "extra == 'dev'" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'dev'" },
     { name = "pydantic", specifier = ">=2.5.0" },
     { name = "pydantic-settings", specifier = ">=2.1.0" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "respx", marker = "extra == 'dev'" },
     { name = "tenacity", specifier = ">=8.2.0" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "cachetools"
@@ -369,6 +377,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d9/29/d40217cbe2f6b1359e00c6c307bb3fc876ba74068cbab3dde77f03ca0dc4/ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343", size = 10943 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f7/ec/67fbef5d497f86283db54c22eec6f6140243aae73265799baaaa19cd17fb/ghp_import-2.1.0-py3-none-any.whl", hash = "sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619", size = 11034 },
+]
+
+[[package]]
+name = "griffe"
+version = "1.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a9/3e/5aa9a61f7c3c47b0b52a1d930302992229d191bf4bc76447b324b731510a/griffe-1.7.3.tar.gz", hash = "sha256:52ee893c6a3a968b639ace8015bec9d36594961e156e23315c8e8e51401fa50b", size = 395137 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/58/c6/5c20af38c2a57c15d87f7f38bee77d63c1d2a3689f74fefaf35915dd12b2/griffe-1.7.3-py3-none-any.whl", hash = "sha256:c6b3ee30c2f0f17f30bcdef5068d6ab7a2a4f1b8bf1a3e74b56fffd21e1c5f75", size = 129303 },
 ]
 
 [[package]]
@@ -641,6 +661,20 @@ wheels = [
 ]
 
 [[package]]
+name = "mkdocs-autorefs"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown" },
+    { name = "markupsafe" },
+    { name = "mkdocs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/47/0c/c9826f35b99c67fa3a7cddfa094c1a6c43fafde558c309c6e4403e5b37dc/mkdocs_autorefs-1.4.2.tar.gz", hash = "sha256:e2ebe1abd2b67d597ed19378c0fff84d73d1dbce411fce7a7cc6f161888b6749", size = 54961 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/dc/fc063b78f4b769d1956319351704e23ebeba1e9e1d6a41b4b602325fd7e4/mkdocs_autorefs-1.4.2-py3-none-any.whl", hash = "sha256:83d6d777b66ec3c372a1aad4ae0cf77c243ba5bcda5bf0c6b8a2c5e7a3d89f13", size = 24969 },
+]
+
+[[package]]
 name = "mkdocs-get-deps"
 version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -683,6 +717,44 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/79/9b/9b4c96d6593b2a541e1cb8b34899a6d021d208bb357042823d4d2cabdbe7/mkdocs_material_extensions-1.3.1.tar.gz", hash = "sha256:10c9511cea88f568257f960358a467d12b970e1f7b2c0e5fb2bb48cab1928443", size = 11847 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5b/54/662a4743aa81d9582ee9339d4ffa3c8fd40a4965e033d77b9da9774d3960/mkdocs_material_extensions-1.3.1-py3-none-any.whl", hash = "sha256:adff8b62700b25cb77b53358dad940f3ef973dd6db797907c49e3c2ef3ab4e31", size = 8728 },
+]
+
+[[package]]
+name = "mkdocstrings"
+version = "0.25.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "jinja2" },
+    { name = "markdown" },
+    { name = "markupsafe" },
+    { name = "mkdocs" },
+    { name = "mkdocs-autorefs" },
+    { name = "platformdirs" },
+    { name = "pymdown-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/24/a6/d544fae9749b19e23fb590f6344f9eae3a312323065070b4874236bb0e04/mkdocstrings-0.25.2.tar.gz", hash = "sha256:5cf57ad7f61e8be3111a2458b4e49c2029c9cb35525393b179f9c916ca8042dc", size = 91796 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2b/86/ee2aef075cc9a62a4f087c3c3f4e3e8a8318afe05a92f8f8415f1bf1af64/mkdocstrings-0.25.2-py3-none-any.whl", hash = "sha256:9e2cda5e2e12db8bb98d21e3410f3f27f8faab685a24b03b06ba7daa5b92abfc", size = 29289 },
+]
+
+[package.optional-dependencies]
+python = [
+    { name = "mkdocstrings-python" },
+]
+
+[[package]]
+name = "mkdocstrings-python"
+version = "1.10.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "griffe" },
+    { name = "mkdocs-autorefs" },
+    { name = "mkdocstrings" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d8/df/c0c09bf79f1329da2422b5d1d2d4d84070aee7cf7f99df98d7b78be066a9/mkdocstrings_python-1.10.9.tar.gz", hash = "sha256:f344aaa47e727d8a2dc911e063025e58e2b7fb31a41110ccc3902aa6be7ca196", size = 162070 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/45/35c2ade06b6dfd383795008260405a47e10aba74e2c9594741a1a1f034b0/mkdocstrings_python-1.10.9-py3-none-any.whl", hash = "sha256:cbe98710a6757dfd4dff79bf36cb9731908fb4c69dd2736b15270ae7a488243d", size = 108360 },
 ]
 
 [[package]]

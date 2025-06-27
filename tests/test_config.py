@@ -1,4 +1,7 @@
 import pytest
+from unittest.mock import patch, AsyncMock, MagicMock
+import httpx
+
 from bibliofabric.auth import StaticTokenAuth
 
 from aireloom import AireloomSession
@@ -6,16 +9,7 @@ from aireloom import AireloomSession
 
 @pytest.mark.asyncio
 async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
-    # Mock an API call that would depend on a setting
-    httpx_mock.add_response(
-        url="https://api.openaire.eu/graph/v1/researchProducts?id=progcfg123&pageSize=1",
-        method="GET",
-        json={
-            "results": [{"id": "progcfg123", "title": "Prog Config Test"}],
-            "header": {"numFound": 1, "pageSize": 1},
-        },
-        match_headers={"Authorization": "Bearer override_token_12345"},
-    )
+
 
     # Ensure env vars are not set for these, or set to different values
     monkeypatch.delenv("AIRELOOM_OPENAIRE_API_TOKEN", raising=False)
@@ -39,7 +33,12 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
         # For simplicity, we trust AireloomSession's logic to copy and update.
 
         # Make a call to ensure it works with these settings
-        await session.research_products.get("progcfg123")
+        with patch("bibliofabric.client.BaseApiClient._request_with_retry", new_callable=AsyncMock) as mock_request_with_retry:
+            # Ensure the mock returns a 3-tuple (response, parsed_model, attempts)
+            mock_response = MagicMock(spec=httpx.Response, status_code=200)
+            mock_response.json.return_value = {"results": [{"id": "progcfg123", "title": "Prog Config Test"}], "header": {"numFound": 1, "pageSize": 1}}
+            mock_request_with_retry.return_value = (mock_response, None, 1)
+            await session.research_products.get("progcfg123")
 
     # Test that default init still picks up env vars for settings.
     # We want StaticTokenAuth to be chosen.
@@ -102,10 +101,11 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
         )
 
         # Example call to ensure it works with StaticTokenAuth
+        
         httpx_mock.add_response(
-            url="https://api.openaire.eu/graph/v1/researchProducts/envcfg456",
+            url="https://api.openaire.eu/graph/v1/researchProducts?id=envcfg456&pageSize=1",
             method="GET",
-            json={"id": "envcfg456", "title": "Env Config Test"},
+            json={"results": [{"id": "envcfg456", "title": "Env Config Test"}], "header": {"numFound": 1, "pageSize": 1}},
             match_headers={"Authorization": "Bearer env_token_67890"},
         )
         await session_env.research_products.get("envcfg456")
