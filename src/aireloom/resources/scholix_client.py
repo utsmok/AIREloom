@@ -69,8 +69,6 @@ class ScholixClient(BaseResourceClient):
             f"ScholixClient initialized for base URL: {self._scholix_base_url}"
         )
 
-    # _validate_filters and _validate_and_convert_filter_value are removed as Pydantic handles this.
-    # Scholix API has specific PID requirements handled in search_links.
 
     def _build_scholix_params(
         self,
@@ -130,7 +128,6 @@ class ScholixClient(BaseResourceClient):
             )
 
         # Pydantic model validation happens at instantiation or via .model_validate()
-        # No need for self._validate_filters(filter_dict) here.
 
         params = self._build_scholix_params(
             page=page, page_size=page_size, filters=filter_dict
