@@ -6,13 +6,12 @@
 AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE Graph API and Scholexplorer API. It is built upon the `bibliofabric` generic client framework, leveraging `httpx` and `pydantic` for robust and efficient data retrieval.
 
 
-## Features
-
 *   Built on `bibliofabric`
 *   Asynchronous by design
 *   Comprehensive OpenAIRE API coverage:
-    *   OpenAIRE Graph API: Access to all endpoints: Research Products, Projects, Organizations, and Data Sources.
-    *   Scholexplorer API: Full support for all Scholix v3 parameters.
+    *   **OpenAIRE Graph API**: All six endpoints — Research Products (v2), Projects, Organizations, Data Sources, Persons, and Research Product Links (v1).
+    *   **Scholexplorer API**: Full support for Scholix v3 parameters.
+*   Per-entity API version routing: Research Products automatically use the v2 endpoint for enriched responses (includes related projects, organizations, communities), while other entities use v1.
 *   Flexible authentication:
     *   Automatic detection based on environment variables or `.env` files.
     *   Supports all OpenAIRE auth methods, including using no auth at all.
@@ -20,13 +19,13 @@ AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE
 *   Efficient data retrieval by using specific functions depending on the use case:
     *   `get()` for single entity retrieval
     *   `search()` for paginated retrieval
-    *   `iterate()` for cursor-based retrieval (if available)
+    *   `iterate()` for cursor-based retrieval (Graph API) or page-based auto-pagination (Scholix/Links)
+    *   `search_links()` / `iterate_links()` for relation discovery between research products
 *   The `bibliofabric` framework also provides:
     *   Timeouts, retries, backoff factors through `bibliofabric.config.BaseApiSettings` and `aireloom.config.ApiSettings`.
     *   Optional client-side caching for GET requests.
     *   Rate limiting awareness and handling (parsing `Retry-After` headers).
-    *   Basic hook system (pre/post-request) via for custom logic.
-
+    *   Basic hook system (pre/post-request) for custom logic.
 ## API Docs
 
 Detailed API docs can be found on the docs page: [utsmok.github.io/AIREloom](https://utsmok.github.io/AIREloom/).
@@ -61,16 +60,21 @@ followed by:
 
 ## Example scripts
 
-This repository includes two example scripts that demonstrate how to use this library to retrieve and analyze data from OpenAIRE:
-*   `aireloom_comprehensive_analysis.py`: A comprehensive analysis script that retrieves and analyzes research products, projects, organizations, and data sources from OpenAIRE.Data is processed using `polars` and stored in a `DuckDB` database on disk. This is used to generate a report and a set of visualizations.
-*   `simple_example.py`: A simple example script that demonstrates the three main retrieval methods (get/search/iterate), applied to research products.
+This repository includes several example scripts in the `examples/` directory:
+
+*   `examples/simple_example.py`: Demonstrates the three main retrieval methods (get/search/iterate) for research products.
+*   `examples/02_scholix_link_discovery.py`: Discover relationships between research products via Scholexplorer.
+*   `examples/03_research_product_analysis.py`: Detailed research product retrieval with filtering and analysis.
+*   `examples/04_organization_projects.py`: Explore organizations and their related projects.
+*   `examples/05_advanced_filtering.py`: Advanced filter combinations with `logicalOperator`.
+*   `examples/06_persons_discovery.py`: Search and browse persons in the OpenAIRE Graph.
+*   `examples/comprehensive_analysis.py`: Full analysis pipeline — retrieves data from multiple endpoints, processes with `polars`, stores in `DuckDB`, and generates a report with visualizations.
 
 Make sure to install the extra dependencies to properly execute them:
 
 ```bash
 > uv install aireloom[analysis]
-> uv run simple_example.py
-> uv run aireloom_comprehensive_analysis.py
+> uv run examples/simple_example.py
 ```
 
 ## OpenAIRE Authentication
@@ -390,7 +394,7 @@ async def search_scholix():
             scholix_response = await session.scholix.search_links(
                 filters=s_filters_source,
                 page=0, # Scholexplorer uses 0-based pagination for 'page'
-                page_size=10 # Corresponds to 'rows' parameter in Scholexplorer
+                page_size=10 # Corresponds to 'size' parameter in Scholexplorer v3
             )
 
             print(f"Found {scholix_response.total_links} links originating from PID: doi:{source_doi_val} (showing page {scholix_response.current_page + 1} of {scholix_response.total_pages}).")
@@ -547,6 +551,32 @@ if __name__ == "__main__":
 ```
 
 *   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the AIREloom API docs: [utsmok.github.io/AIREloom/api/hooks](https://utsmok.github.io/AIREloom/advanced/hooks).
+
+
+## Known OpenAIRE API Issues
+
+The upstream OpenAIRE APIs have several documented bugs and inconsistencies discovered during testing. AIREloom works around these where possible. The full bug report with reproduction steps is in [`OPENAIRE_BUG_REPORT.md`](OPENAIRE_BUG_REPORT.md).
+
+### Server errors (500s from documented parameters)
+
+- **Persons `givenName` / `lastName` filters** cause HTTP 500 despite being in the OpenAPI spec. AIREloom includes them in `PersonsFilters` for forward compatibility, but they are marked with a `CAUTION` note in the docstring. Use `search` or `id` instead.
+
+### Silent failures
+
+- **`pageSize=100`** on the links endpoint and Scholix silently falls back to 10 results. Use `pageSize=99` or lower to avoid this.
+
+### Documentation gaps
+
+- The **Persons** endpoint has no filtering documentation page (404) on the OpenAIRE docs site.
+- The **Links** endpoint (`/v1/researchProducts/links`) is entirely undocumented on the OpenAIRE docs site.
+- `logicalOperator` and `rorId` parameters work but are absent from the docs website.
+- The API version numbering is confusing: OpenAPI specs are at `/graph/v3/api-docs/`, endpoints use `/v1/` and `/v2/`, and V2 only covers research products.
+
+### Sort field discrepancies
+
+- **Persons** `sortBy` accepts only `relevance` in practice; `startDate`/`endDate` are in the spec but rejected by the server. AIREloom defines valid sort fields per endpoint in `ENDPOINT_DEFINITIONS` to document what should work, and the API will return a clear error for unsupported fields.
+- **Data sources** error messages incorrectly say "organizations" (copy-paste bug in the API).
+- **Research products** error messages omit `popularity` as a valid sort field.
 
 ## Development
 run tests with `uv pytest`, format / lint with `uvx ruff format .` and `uvx ruff check --fix .`.
