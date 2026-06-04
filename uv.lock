@@ -56,7 +56,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bibliofabric", directory = "../bibliofabric" },
+    { name = "bibliofabric", specifier = ">=0.1.0,<0.3.0" },
     { name = "duckdb", marker = "extra == 'analysis'", specifier = ">=1.3.0" },
     { name = "matplotlib", marker = "extra == 'analysis'", specifier = ">=3.8.0" },
     { name = "networkx", marker = "extra == 'analysis'", specifier = ">=3.2" },
@@ -124,43 +124,19 @@ wheels = [
 [[package]]
 name = "bibliofabric"
 version = "0.1.0"
-source = { directory = "../bibliofabric" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachetools" },
     { name = "httpx" },
     { name = "loguru" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
+    { name = "python-dotenv" },
     { name = "tenacity" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "cachetools", specifier = ">=5.3.0" },
-    { name = "httpx", specifier = ">=0.27.0" },
-    { name = "loguru", specifier = ">=0.7.0" },
-    { name = "pydantic", specifier = ">=2.9.0" },
-    { name = "pydantic-settings", specifier = ">=2.9.1" },
-    { name = "tenacity", specifier = ">=9.1.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.3.4" },
-    { name = "pytest-asyncio", specifier = ">=0.26.0" },
-    { name = "pytest-cov", specifier = ">=6.1.1" },
-    { name = "pytest-httpx", specifier = ">=0.35.0" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-]
-docs = [
-    { name = "mkdocs", specifier = "~=1.6.0" },
-    { name = "mkdocs-material", specifier = "~=9.5.0" },
-    { name = "mkdocstrings", extras = ["python"] },
-]
-lint = [{ name = "ruff", specifier = ">=0.8.0" }]
-test = [
-    { name = "pytest" },
-    { name = "pytest-randomly" },
+sdist = { url = "https://files.pythonhosted.org/packages/0a/77/568541416bb635388cef8e8697309a60819f41c163fea2bd2555f9ceebda/bibliofabric-0.1.0.tar.gz", hash = "sha256:9fc142c1edcbaf927557cc3d1312e758469e104bc93d6ec8bb93593a31c7be3d", size = 66732, upload-time = "2025-06-27T14:35:26.839Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/3f/474867908d7371cbfff9703a6339684f837040e8c4c2adf940f5ecc39e6e/bibliofabric-0.1.0-py3-none-any.whl", hash = "sha256:cbc127554a4f942db10d28a861d15a0bcd623a3bc179dd99c58fd42d5e975cbb", size = 25837, upload-time = "2025-06-27T14:35:25.918Z" },
 ]
 
 [[package]]
