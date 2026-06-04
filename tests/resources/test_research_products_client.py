@@ -70,6 +70,7 @@ async def test_get_research_product(
         "GET",
         RESEARCH_PRODUCTS,
         params={"id": product_id, "pageSize": 1},
+        base_url_override=None,
     )
     assert product == expected_product
 
@@ -107,6 +108,7 @@ async def test_get_research_product_not_found(
         "GET",
         RESEARCH_PRODUCTS,
         params={"id": product_id, "pageSize": 1},
+        base_url_override=None,
     )
 
 
@@ -141,6 +143,7 @@ async def test_search_research_products_no_filters(
         "GET",
         RESEARCH_PRODUCTS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         ResearchProduct.model_validate(item) for item in expected_results_data
@@ -203,6 +206,7 @@ async def test_search_research_products_with_filters_and_sort(
         "GET",
         RESEARCH_PRODUCTS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         ResearchProduct.model_validate(item) for item in expected_results_data
@@ -326,6 +330,7 @@ async def test_iterate_research_products_no_results(
         "GET",
         RESEARCH_PRODUCTS,
         params=expected_params,
+        base_url_override=None,
     )
 
 
@@ -370,6 +375,7 @@ async def test_iterate_single_page_no_next_cursor(
         "GET",
         RESEARCH_PRODUCTS,
         params=expected_params,
+        base_url_override=None,
     )
 
 
@@ -438,5 +444,6 @@ async def test_iterate_api_error_during_iteration(
             "cursor": "cursor_for_page2",
             "type": "software",
         },
+        base_url_override=None,
     )
     assert expected_second_call in mock_api_client_fixture.request.mock_calls

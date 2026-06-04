@@ -64,6 +64,7 @@ async def test_get_organization(
         "GET",
         ORGANIZATIONS,
         params={"id": org_id, "pageSize": 1},
+        base_url_override=None,
     )
     assert organization == expected_organization
 
@@ -94,6 +95,7 @@ async def test_get_organization_not_found(
         "GET",
         ORGANIZATIONS,
         params={"id": org_id, "pageSize": 1},
+        base_url_override=None,
     )
 
 
@@ -126,6 +128,7 @@ async def test_search_organizations_no_filters(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         Organization.model_validate(item) for item in expected_results_data
@@ -184,6 +187,7 @@ async def test_search_organizations_with_filters_and_sort(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         Organization.model_validate(item) for item in expected_results_data
@@ -306,6 +310,7 @@ async def test_iterate_organizations_no_results(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
+        base_url_override=None,
     )
 
 

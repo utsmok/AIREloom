@@ -68,6 +68,7 @@ async def test_get_project(
         "GET",
         PROJECTS,
         params={"id": project_id, "pageSize": 1},
+        base_url_override=None,
     )
     assert project == expected_project
     assert project.code == "PROJ_CODE_XYZ"
@@ -99,6 +100,7 @@ async def test_get_project_not_found(
         "GET",
         PROJECTS,
         params={"id": project_id, "pageSize": 1},
+        base_url_override=None,
     )
 
 
@@ -131,6 +133,7 @@ async def test_search_projects_no_filters(
         "GET",
         PROJECTS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         Project.model_validate(item) for item in expected_results_data
@@ -194,6 +197,7 @@ async def test_search_projects_with_filters_and_sort(
         "GET",
         PROJECTS,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         Project.model_validate(item) for item in expected_results_data
@@ -325,6 +329,7 @@ async def test_iterate_projects_no_results(
         "GET",
         PROJECTS,
         params=expected_params,
+        base_url_override=None,
     )
 
 

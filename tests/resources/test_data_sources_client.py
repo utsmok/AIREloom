@@ -72,6 +72,7 @@ async def test_get_data_source(
         "GET",
         DATA_SOURCES,
         params={"id": ds_id, "pageSize": 1},
+        base_url_override=None,
     )
     assert data_source == expected_data_source
     assert (
@@ -107,6 +108,7 @@ async def test_get_data_source_not_found(
         "GET",
         DATA_SOURCES,
         params={"id": ds_id, "pageSize": 1},
+        base_url_override=None,
     )
 
 
@@ -139,6 +141,7 @@ async def test_search_data_sources_no_filters(
         "GET",
         DATA_SOURCES,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         DataSource.model_validate(item) for item in expected_results_data
@@ -200,6 +203,7 @@ async def test_search_data_sources_with_filters_and_sort(
         "GET",
         DATA_SOURCES,
         params=expected_params,
+        base_url_override=None,
     )
     assert response.results == [
         DataSource.model_validate(item) for item in expected_results_data
@@ -334,6 +338,7 @@ async def test_iterate_data_sources_no_results(
         "GET",
         DATA_SOURCES,
         params=expected_params,
+        base_url_override=None,
     )
 
 
