@@ -211,19 +211,24 @@ async def test_search_research_products_with_filters_and_sort(
 
 
 @pytest.mark.asyncio
-async def test_search_invalid_sort_field(
+async def test_search_sort_field_passed_through(
     research_products_client: ResearchProductsClient,
+    mock_api_client_fixture: AsyncMock,
 ):
-    """Test search with an invalid sort field."""
-    with pytest.raises(ValidationError) as exc_info:
-        await research_products_client.search(sort_by="invalidField asc")
-    assert "Invalid sort field" in str(exc_info.value)
-    # Add more specific checks if ResearchProductsClient has defined sort fields
-    # For now, this generic check is based on the prompt's example client structure.
-    # The actual ResearchProductsClient has _valid_sort_fields based on ENDPOINT_DEFINITIONS.
-    # To make this test more robust, we'd need to know those valid fields or mock ENDPOINT_DEFINITIONS.
-    # Assuming 'relevance' is valid and 'invalidField' is not.
-    # If ENDPOINT_DEFINITIONS for researchProducts is empty for sort, this test might behave differently.
+    """Test that sort fields are passed through to the API without client-side validation.
+
+    Since _valid_sort_fields was removed from ResearchProductsClient, client-side
+    sort validation is no longer performed. The API itself rejects invalid sort fields.
+    """
+    mock_http_response = AsyncMock(spec=httpx.Response)
+    mock_http_response.status_code = 200
+    mock_http_response.json.return_value = {"results": [], "header": {"numFound": 0}}
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
+
+    # Even a non-standard sort field is accepted client-side and passed to the API
+    await research_products_client.search(sort_by="customField asc")
+    call_args = mock_api_client_fixture.request.call_args
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField asc"
 
 
 @pytest.mark.asyncio

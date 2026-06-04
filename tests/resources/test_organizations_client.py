@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
-from bibliofabric.exceptions import BibliofabricError, ValidationError
+from bibliofabric.exceptions import BibliofabricError
 
 from aireloom.client import AireloomClient
 from aireloom.constants import DEFAULT_PAGE_SIZE
@@ -64,8 +64,6 @@ async def test_get_organization(
         "GET",
         ORGANIZATIONS,
         params={"id": org_id, "pageSize": 1},
-        data=None,
-        json_data=None,
     )
     assert organization == expected_organization
 
@@ -91,15 +89,11 @@ async def test_get_organization_not_found(
     with pytest.raises(BibliofabricError) as exc_info:
         await organizations_client.get(org_id)
 
-    assert f"API error fetching Organization {org_id}: Status 404" in str(
-        exc_info.value
-    )
+    assert f"Unexpected error fetching entity {org_id}" in str(exc_info.value)
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
         ORGANIZATIONS,
         params={"id": org_id, "pageSize": 1},
-        data=None,
-        json_data=None,
     )
 
 
@@ -123,7 +117,7 @@ async def test_search_organizations_no_filters(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await organizations_client.search(page=1, page_size=DEFAULT_PAGE_SIZE)
 
@@ -132,8 +126,6 @@ async def test_search_organizations_no_filters(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
     assert response.results == [
         Organization.model_validate(item) for item in expected_results_data
@@ -149,7 +141,7 @@ async def test_search_organizations_with_filters_and_sort(
     filters_model = OrganizationsFilters(
         legalName="Specific University", countryCode="DE"
     )
-    sort_by = "legalname asc"  # Assuming 'legalname' is a valid sort field
+    sort_by = "relevance asc"
     page = 1
     page_size = 5
 
@@ -174,7 +166,7 @@ async def test_search_organizations_with_filters_and_sort(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     response = await organizations_client.search(
         filters=filters_model, sort_by=sort_by, page=page, page_size=page_size
@@ -182,7 +174,7 @@ async def test_search_organizations_with_filters_and_sort(
 
     expected_params = {
         "legalName": "Specific University",
-        "countryCode": "DE",  # Direct parameter name without alias
+        "countryCode": "DE",
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,
@@ -192,8 +184,6 @@ async def test_search_organizations_with_filters_and_sort(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
     assert response.results == [
         Organization.model_validate(item) for item in expected_results_data
@@ -202,14 +192,24 @@ async def test_search_organizations_with_filters_and_sort(
 
 
 @pytest.mark.asyncio
-async def test_search_organizations_invalid_sort_field(
+async def test_search_sort_field_passed_through(
     organizations_client: OrganizationsClient,
+    mock_api_client_fixture: AsyncMock,
 ):
-    """Test search with an invalid sort field for organizations."""
-    with pytest.raises(ValidationError) as exc_info:
-        await organizations_client.search(sort_by="nonExistentField desc")
-    assert "Invalid sort field" in str(exc_info.value)
-    # This relies on OrganizationsClient._valid_sort_fields being populated from ENDPOINT_DEFINITIONS
+    """Test that sort fields are passed through to the API without client-side validation.
+
+    Since client-side sort validation was removed in the mixin migration,
+    sort fields are passed directly to the API for server-side validation.
+    """
+    mock_http_response = AsyncMock(spec=httpx.Response)
+    mock_http_response.status_code = 200
+    mock_http_response.json.return_value = {"results": [], "header": {"numFound": 0}}
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
+
+    # Even a non-standard sort field is accepted client-side and passed to the API
+    await organizations_client.search(sort_by="customField asc")
+    call_args = mock_api_client_fixture.request.call_args
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField asc"
 
 
 @pytest.mark.asyncio
@@ -219,7 +219,7 @@ async def test_iterate_organizations(
     """Test iterating through organizations using cursor pagination."""
     filters_model = OrganizationsFilters(countryCode="FR")
     page_size = 1
-    sort_by = "id asc"  # Assuming 'id' is a valid sort field
+    sort_by = "relevance asc"
 
     # Page 1
     page1_results_data = [
@@ -253,10 +253,12 @@ async def test_iterate_organizations(
     mock_http_response_page2.status_code = 200
     mock_http_response_page2.json = lambda: mock_response_page2_json
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        mock_http_response_page2,
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            mock_http_response_page2,
+        ]
+    )
 
     iterated_orgs = []
     async for org in organizations_client.iterate(
@@ -270,10 +272,6 @@ async def test_iterate_organizations(
 
     # Verify the mock was called the expected number of times
     assert mock_api_client_fixture.request.call_count == 2
-
-    # Since mock call tracking can be unreliable with side_effect lists,
-    # just verify we got the expected results and the iteration worked correctly
-    # The fact that we got 2 organizations confirms both calls were made successfully
 
 
 @pytest.mark.asyncio
@@ -290,7 +288,7 @@ async def test_iterate_organizations_no_results(
     mock_http_response = AsyncMock(spec=httpx.Response)
     mock_http_response.status_code = 200
     mock_http_response.json.return_value = mock_response_json
-    mock_api_client_fixture.request.return_value = mock_http_response
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     count = 0
     async for _ in organizations_client.iterate(
@@ -308,8 +306,6 @@ async def test_iterate_organizations_no_results(
         "GET",
         ORGANIZATIONS,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
 
 
@@ -345,14 +341,16 @@ async def test_iterate_organizations_api_error(
     error_response_mock.request = httpx.Request("GET", f"/{ORGANIZATIONS}")
     error_response_mock.json.return_value = {"error": "server broke"}
 
-    mock_api_client_fixture.request.side_effect = [
-        mock_http_response_page1,
-        httpx.HTTPStatusError(
-            message="Server error '500'",
-            request=error_response_mock.request,
-            response=error_response_mock,
-        ),
-    ]
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[
+            mock_http_response_page1,
+            httpx.HTTPStatusError(
+                message="Server error '500'",
+                request=error_response_mock.request,
+                response=error_response_mock,
+            ),
+        ]
+    )
 
     iterated_orgs = []
     with pytest.raises(BibliofabricError) as exc_info:
@@ -367,7 +365,3 @@ async def test_iterate_organizations_api_error(
 
     # Verify the mock was called the expected number of times
     assert mock_api_client_fixture.request.call_count == 2
-
-    # Since mock call tracking can be unreliable when exceptions occur,
-    # just verify we got the expected results and the iteration worked correctly
-    # The fact that we got 1 organization and then an error confirms the flow worked

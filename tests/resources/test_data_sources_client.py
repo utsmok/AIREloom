@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
-from bibliofabric.exceptions import BibliofabricError, ValidationError
+from bibliofabric.exceptions import BibliofabricError
 
 from aireloom.client import AireloomClient
 from aireloom.constants import DEFAULT_PAGE_SIZE
@@ -72,13 +72,11 @@ async def test_get_data_source(
         "GET",
         DATA_SOURCES,
         params={"id": ds_id, "pageSize": 1},
-        data=None,
-        json_data=None,
     )
     assert data_source == expected_data_source
     assert (
         data_source.type and data_source.type.value == "repository"
-    )  # Corrected assertion
+    )
 
 
 @pytest.mark.asyncio
@@ -93,22 +91,22 @@ async def test_get_data_source_not_found(
     mock_response.request = httpx.Request("GET", f"/{DATA_SOURCES}/{ds_id}")
     mock_response.json.return_value = {"error": "data source not found"}
 
-    mock_api_client_fixture.request.side_effect = httpx.HTTPStatusError(
-        message=f"Client error '404 Not Found' for url /{DATA_SOURCES}/{ds_id}",
-        request=mock_response.request,
-        response=mock_response,
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=httpx.HTTPStatusError(
+            message=f"Client error '404 Not Found' for url /{DATA_SOURCES}/{ds_id}",
+            request=mock_response.request,
+            response=mock_response,
+        )
     )
 
     with pytest.raises(BibliofabricError) as exc_info:
         await data_sources_client.get(ds_id)
 
-    assert f"API error fetching DataSource {ds_id}: Status 404" in str(exc_info.value)
+    assert f"Unexpected error fetching entity {ds_id}" in str(exc_info.value)
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
         DATA_SOURCES,
         params={"id": ds_id, "pageSize": 1},
-        data=None,
-        json_data=None,
     )
 
 
@@ -141,8 +139,6 @@ async def test_search_data_sources_no_filters(
         "GET",
         DATA_SOURCES,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
     assert response.results == [
         DataSource.model_validate(item) for item in expected_results_data
@@ -160,8 +156,7 @@ async def test_search_data_sources_with_filters_and_sort(
         dataSourceTypeName="aggregator",
         contentTypes=["publications"],
     )
-    # Assuming 'officialName' is a valid sort field for data sources from ENDPOINT_DEFINITIONS
-    sort_by = "officialName desc"
+    sort_by = "relevance desc"
     page = 1
     page_size = 5
 
@@ -195,19 +190,16 @@ async def test_search_data_sources_with_filters_and_sort(
     expected_params = {
         "officialName": "OpenAIRE Nexus",
         "dataSourceTypeName": "aggregator",
-        "contentTypes": ["publications"],  # Serialized as is by Pydantic's model_dump
+        "contentTypes": ["publications"],
         "sortBy": sort_by,
         "page": page,
         "pageSize": page_size,
     }
-    # Ensure DataSourcesFilters.model_dump(by_alias=True) produces these keys
 
     mock_api_client_fixture.request.assert_called_once_with(
         "GET",
         DATA_SOURCES,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
     assert response.results == [
         DataSource.model_validate(item) for item in expected_results_data
@@ -216,13 +208,24 @@ async def test_search_data_sources_with_filters_and_sort(
 
 
 @pytest.mark.asyncio
-async def test_search_data_sources_invalid_sort_field(
+async def test_search_sort_field_passed_through(
     data_sources_client: DataSourcesClient,
+    mock_api_client_fixture: AsyncMock,
 ):
-    """Test search with an invalid sort field for data sources."""
-    with pytest.raises(ValidationError) as exc_info:
-        await data_sources_client.search(sort_by="madeUpField asc")
-    assert "Invalid sort field" in str(exc_info.value)
+    """Test that sort fields are passed through to the API without client-side validation.
+
+    Since client-side sort validation was removed in the mixin migration,
+    sort fields are passed directly to the API for server-side validation.
+    """
+    mock_http_response = AsyncMock(spec=httpx.Response)
+    mock_http_response.status_code = 200
+    mock_http_response.json.return_value = {"results": [], "header": {"numFound": 0}}
+    mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
+
+    # Even a non-standard sort field is accepted client-side and passed to the API
+    await data_sources_client.search(sort_by="customField asc")
+    call_args = mock_api_client_fixture.request.call_args
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField asc"
 
 
 @pytest.mark.asyncio
@@ -232,7 +235,7 @@ async def test_iterate_data_sources(
     """Test iterating through data sources using cursor pagination."""
     filters_model = DataSourcesFilters(dataSourceTypeName="journal")
     page_size = 1
-    sort_by = "id asc"  # Assuming 'id' is a valid sort field
+    sort_by = "relevance desc"
 
     # Page 1
     page1_results_data = [
@@ -298,10 +301,6 @@ async def test_iterate_data_sources(
     # Verify the mock was called the expected number of times
     assert mock_api_client_fixture.request.call_count == 2
 
-    # Since mock call tracking can be unreliable with side_effect lists,
-    # just verify we got the expected results and the iteration worked correctly
-    # The fact that we got 2 data sources confirms both calls were made successfully
-
 
 @pytest.mark.asyncio
 async def test_iterate_data_sources_no_results(
@@ -335,8 +334,6 @@ async def test_iterate_data_sources_no_results(
         "GET",
         DATA_SOURCES,
         params=expected_params,
-        data=None,
-        json_data=None,
     )
 
 
@@ -399,13 +396,7 @@ async def test_iterate_data_sources_api_error(
 
     assert len(iterated_ds) == 1  # Only first page
     assert iterated_ds[0] == DataSource.model_validate(page1_results_data[0])
-    assert "Unexpected error during iteration" in str(
-        exc_info.value
-    )  # Or more specific if client handles 401 differently
+    assert "Unexpected error during iteration" in str(exc_info.value)
 
     # Verify the mock was called the expected number of times
     assert mock_api_client_fixture.request.call_count == 2
-
-    # Since mock call tracking can be unreliable when exceptions occur,
-    # just verify we got the expected results and the iteration worked correctly
-    # The fact that we got 1 data source and then an error confirms the flow worked

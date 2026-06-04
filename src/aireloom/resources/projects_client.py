@@ -38,22 +38,11 @@ class ProjectsClient(
         _entity_model (type[Project]): Pydantic model for a single project.
         _search_response_model (type[ProjectResponse]): Pydantic model for the
                                                         search response envelope.
-        _valid_sort_fields (set[str]): Valid sort fields for this endpoint.
     """
 
     _entity_path: str = PROJECTS
     _entity_model: type[Project] = Project
     _search_response_model: type[ProjectResponse] = ProjectResponse
-    _valid_sort_fields = {
-        "acronym",
-        "code",
-        "enddate",
-        "fundinglevel",
-        "fundingtree",
-        "id",
-        "startdate",
-        "title",
-    }
 
     def __init__(self, api_client: "AireloomClient"):
         """Initializes the ProjectsClient.

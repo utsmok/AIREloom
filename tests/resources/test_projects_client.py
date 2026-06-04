@@ -148,8 +148,8 @@ async def test_search_projects_with_filters_and_sort(
         fundingStreamId="EU",  # Changed from fundingShortName to fundingStreamId
         code="CCR_EU",
     )
-    # Assuming 'title' is a valid sort field for projects from ENDPOINT_DEFINITIONS
-    sort_by = "title asc"
+    # 'startDate' is a valid sort field for projects per API docs
+    sort_by = "startDate asc"
     page = 1
     page_size = 10
 
@@ -202,11 +202,23 @@ async def test_search_projects_with_filters_and_sort(
 
 
 @pytest.mark.asyncio
-async def test_search_projects_invalid_sort_field(projects_client: ProjectsClient):
-    """Test search with an invalid sort field for projects."""
-    with pytest.raises(ValidationError) as exc_info:
-        await projects_client.search(sort_by="imaginaryField asc")
-    assert "Invalid sort field" in str(exc_info.value)
+async def test_search_projects_sort_field_passed_through(
+    projects_client: ProjectsClient, mock_api_client_fixture: AsyncMock
+):
+    """Test that sort fields are passed through to the API without client-side validation.
+
+    Since _valid_sort_fields was removed from ProjectsClient, client-side
+    sort validation is no longer performed. The API itself rejects invalid sort fields.
+    """
+    mock_http_response = AsyncMock(spec=httpx.Response)
+    mock_http_response.status_code = 200
+    mock_http_response.json.return_value = {"results": [], "header": {"numFound": 0}}
+    mock_api_client_fixture.request.return_value = mock_http_response
+
+    # Even a non-standard sort field is accepted client-side and passed to the API
+    await projects_client.search(sort_by="imaginaryField asc")
+    call_args = mock_api_client_fixture.request.call_args
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "imaginaryField asc"
 
 
 @pytest.mark.asyncio
@@ -216,7 +228,7 @@ async def test_iterate_projects(
     """Test iterating through projects using cursor pagination."""
     filters_model = ProjectsFilters(fundingStreamId="H2020")  # Corrected field name
     page_size = 1
-    sort_by = "acronym desc"  # Assuming 'acronym' is a valid sort field
+    sort_by = "startDate desc"  # Valid sort field per API docs
 
     # Page 1
     page1_results_data = [

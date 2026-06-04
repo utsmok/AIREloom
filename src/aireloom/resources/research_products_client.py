@@ -39,19 +39,11 @@ class ResearchProductsClient(
         _entity_model (type[ResearchProduct]): Pydantic model for a single research product.
         _search_response_model (type[ResearchProductResponse]): Pydantic model for the
                                                                 search response envelope.
-        _valid_sort_fields (set[str]): A set of field names that are valid for sorting
-                                       results from this endpoint.
     """
 
     _entity_path: str = RESEARCH_PRODUCTS
     _entity_model: type[ResearchProduct] = ResearchProduct
     _search_response_model: type[ResearchProductResponse] = ResearchProductResponse
-    _valid_sort_fields = {
-        "bestaccessright",
-        "publicationdate",
-        "relevance",
-        "title",
-    }
 
     def __init__(self, api_client: "AireloomClient"):
         """Initializes the ResearchProductsClient.
