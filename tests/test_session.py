@@ -17,9 +17,13 @@ from aireloom import AireloomSession
 from aireloom.constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
-    EndpointName,
 )
 from aireloom.endpoints import (
+    DATA_SOURCES,
+    ORGANIZATIONS,
+    PROJECTS,
+    RESEARCH_PRODUCTS,
+    SCHOLIX,
     DataSourcesFilters,
     OrganizationsFilters,
     ProjectsFilters,
@@ -164,7 +168,7 @@ async def test_session_get_research_product_integration():
     product_id = "rp123"
     token_url = "https://aai.openaire.eu/oidc/token"  # Standard token URL
     expected_url = (
-        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{RESEARCH_PRODUCTS}"
     )
 
     mock_api_response_json = {
@@ -202,7 +206,7 @@ async def test_session_get_research_product_integration():
 async def test_session_search_research_products_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
     expected_url = (
-        f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+        f"{OPENAIRE_GRAPH_API_BASE_URL}/{RESEARCH_PRODUCTS}"
     )
 
     mock_api_response_json = {
@@ -227,7 +231,7 @@ async def test_session_search_research_products_integration():
 @pytest.mark.asyncio
 async def test_session_iterate_research_products_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.RESEARCH_PRODUCTS.value}"
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{RESEARCH_PRODUCTS}"
 
     mock_response_page1 = {
         "header": {
@@ -270,7 +274,7 @@ async def test_session_iterate_research_products_integration():
 async def test_session_get_organization_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
     org_id = "org123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -306,7 +310,7 @@ async def test_session_get_organization_integration():
 @pytest.mark.asyncio
 async def test_session_search_organizations_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -356,7 +360,7 @@ async def test_session_search_organizations_integration():
 @pytest.mark.asyncio
 async def test_session_iterate_organizations_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.ORGANIZATIONS.value}"
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -432,7 +436,7 @@ async def test_session_iterate_organizations_integration():
 async def test_session_get_project_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
     project_id = "proj123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -472,7 +476,7 @@ async def test_session_get_project_integration():
 @pytest.mark.asyncio
 async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -524,7 +528,7 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.PROJECTS.value}"
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -604,7 +608,7 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
 async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     ds_id = "ds123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -642,7 +646,7 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -696,7 +700,7 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{EndpointName.DATA_SOURCES.value}"
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -772,7 +776,7 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
 async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.1234/source"
-    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}"
 
     # Mock for the token acquisition
 
@@ -825,7 +829,7 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
 async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.9876/iter_source"
-    base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}"
+    base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}"
 
     # Mock for the token acquisition
 
@@ -1257,7 +1261,7 @@ from pydantic import ValidationError
 async def test_search_scholix_ignored_invalid_filter_key(httpx_mock: HTTPXMock):
     """Test that providing an invalid filter key to ScholixFilters raises a ValidationError."""
     source_pid = KNOWN_DOI_WITH_LINKS
-    # expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{EndpointName.SCHOLIX.value}" # Not needed as API call won't happen
+    # expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}" # Not needed as API call won't happen
 
     # mocked_api_response_for_test = MOCK_SCHOLIX_RESPONSE.copy() # Not needed
 

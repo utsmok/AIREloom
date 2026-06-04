@@ -14,8 +14,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-GRAPH_API_BASE_URL = "https://api.graph.openaire.eu/v1/"
-SCHOLIX_API_BASE_URL = "https://api-beta.scholexplorer.openaire.eu/v3/"
 
 RESEARCH_PRODUCTS = "researchProducts"
 ORGANIZATIONS = "organizations"
@@ -183,6 +181,7 @@ class ProjectsFilters(BaseModel):
         grantID (str | None): Grant ID associated with the project.
         acronym (str | None): Acronym of the project.
         callIdentifier (str | None): Call identifier of the project.
+        fundingShortName (str | None): Short name of the funder.
         fundingStreamId (str | None): Funding stream ID associated with the project.
         fromStartDate (date | None): Start date of the project (inclusive).
         toStartDate (date | None): End date of the project (inclusive).
@@ -205,6 +204,7 @@ class ProjectsFilters(BaseModel):
     grantID: str | None = None
     acronym: str | None = None
     callIdentifier: str | None = None
+    fundingShortName: str | None = None
     fundingStreamId: str | None = None
     fromStartDate: date | None = None
     toStartDate: date | None = None
@@ -263,11 +263,11 @@ ENDPOINT_DEFINITIONS = {
     },
     ORGANIZATIONS: {
         "filters_model": OrganizationsFilters,
-        "sort": {"relevance": {}, "legalname": {}, "id": {}},
+        "sort": {"relevance": {}},
     },
     DATA_SOURCES: {
         "filters_model": DataSourcesFilters,
-        "sort": {"relevance": {}, "officialName": {}, "id": {}},
+        "sort": {"relevance": {}},
     },
     PROJECTS: {
         "filters_model": ProjectsFilters,
@@ -275,8 +275,6 @@ ENDPOINT_DEFINITIONS = {
             "relevance": {},
             "startDate": {},
             "endDate": {},
-            "title": {},
-            "acronym": {},
         },
     },
     SCHOLIX: {

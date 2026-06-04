@@ -45,7 +45,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          uv run pytest --cov=myproj tests/
+          uv run pytest --cov=aireloom tests/
 
       - name: Build package
         run: |
@@ -83,7 +83,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     environment:
       name: pypi
-      url: https://pypi.org/p/bibliofabric
+      url: https://pypi.org/p/aireloom
     permissions:
       id-token: write
 
