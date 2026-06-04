@@ -16,8 +16,11 @@ from typing import Any
 
 import httpx
 import pytest
+
+
 from bibliofabric.log_config import configure_logging, logger
-from rich import print
+
+pytestmark = pytest.mark.live_api
 
 from aireloom import AireloomSession
 from aireloom.endpoints import (

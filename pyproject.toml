@@ -18,6 +18,7 @@ dev = [
     "pytest-asyncio>=0.26.0",
     "pytest-cov>=6.1.1",
     "pytest-httpx>=0.35.0",
+    "python-dotenv>=1.0.0",
 ]
 docs = [
     "mkdocs~=1.6.0",
@@ -111,3 +112,7 @@ python_files = "test_*.py"
 python_functions = "test_*"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "live_api: marks tests that hit the live OpenAIRE API (requires credentials, skipped in CI)",
+]
+addopts = "-m 'not live_api'"
