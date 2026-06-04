@@ -130,7 +130,7 @@ class OpenAireUnwrapper(ResponseUnwrapper):
         # Handle potential URL objects or other types by converting to string
         try:
             cursor_str = str(next_cursor).strip()
-            return cursor_str if cursor_str else None
+            return cursor_str or None
         except Exception:
             return None
 
