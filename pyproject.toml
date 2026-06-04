@@ -9,7 +9,7 @@ readme = "README.md"
 license = {text= "MIT"}
 requires-python = ">=3.12"
 dependencies = [
-    "bibliofabric",
+    "bibliofabric @ file:///home/sam/dev/bibliofabric",
     "certifi",
 ]
 [dependency-groups]
