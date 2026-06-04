@@ -59,10 +59,19 @@ AUTH_STRATEGY = NoAuth()
 EXAMPLE_PRODUCT_ID = "openaire____::doi:10.5281/zenodo.7664304"
 
 
+def get_pid_value(product, scheme: str) -> str | None:
+    """Extract the value of the first PID matching the given scheme (e.g. 'doi')."""
+    if product.pids:
+        for pid in product.pids:
+            if pid.scheme and pid.scheme.lower() == scheme.lower():
+                return pid.value
+    return None
+
+
 async def main():
     # Initialize AireloomSession using an async context manager
     async with AireloomSession(auth_strategy=AUTH_STRATEGY) as session:
-        print(f"AIREloom session initialized with: {type(session._client._auth_strategy).__name__}")
+        print(f"AIREloom session initialized with: {type(session._api_client._auth_strategy).__name__}")
 
         # --- 1. Fetching a Single Entity ---
         print(f"\nAttempting to fetch research product with ID: {EXAMPLE_PRODUCT_ID}")
@@ -70,11 +79,10 @@ async def main():
             product = await session.research_products.get(EXAMPLE_PRODUCT_ID)
             print(f"Successfully fetched product!")
             print(f"  Title: {product.title}")
-            doi = product.get_pid_value('doi')
+            doi = get_pid_value(product, "doi")
             print(f"  DOI: {doi if doi else 'N/A'}")
-            # Accessing type and publication date (attributes might vary based on actual model structure)
-            print(f"  Type: {product.originaltype.attrs.get('classname') if product.originaltype and product.originaltype.attrs else 'N/A'}")
-            print(f"  Publication Date: {product.dateofacceptance.value if product.dateofacceptance else 'N/A'}")
+            print(f"  Type: {product.type if product.type else 'N/A'}")
+            print(f"  Publication Date: {product.publicationDate if product.publicationDate else 'N/A'}")
 
         except APIError as e:
             if e.response and e.response.status_code == 404:
@@ -88,16 +96,18 @@ async def main():
 
 
         # --- 2. Searching for Entities ---
-        print("\nAttempting to search for research products (e.g., articles about 'climate change')...")
+        print("\nAttempting to search for research products (e.g., publications about 'climate change')...")
         try:
             # Define search filters
             # Note: Available filter fields depend on the endpoint and are defined in Pydantic models
-            # in aireloom.endpoints. For ResearchProducts, 'title' can be used for keyword search in title.
-            # 'type' can be 'article', 'dataset', etc.
+            # in aireloom.endpoints. For ResearchProducts, 'search' performs a full-text search,
+            # 'mainTitle' searches by title, and 'type' accepts: "publication", "dataset", "software", "other".
+            # Use fromPublicationDate/toPublicationDate for date range filtering (format: YYYY-MM-DD).
             rp_filters = ResearchProductsFilters(
-                title="climate change",
-                type="article",
-                publicationYear="2023" # Example: filter by year
+                search="climate change",
+                type="publication",
+                fromPublicationDate="2023-01-01",
+                toPublicationDate="2023-12-31"
             )
 
             # Perform the search
@@ -107,16 +117,15 @@ async def main():
                 page_size=3  # Number of results per page
             )
 
-            print(f"Search successful. Found {search_response.header.total} total matching products.")
-            print(f"Displaying page {search_response.header.page} of {search_response.header.totalPages}:")
+            print(f"Search successful. Found {search_response.header.numFound} total matching products.")
 
             if search_response.results:
                 for i, item in enumerate(search_response.results):
                     print(f"  Result {i+1}:")
                     print(f"    Title: {item.title}")
-                    item_doi = item.get_pid_value('doi')
+                    item_doi = get_pid_value(item, "doi")
                     print(f"    DOI: {item_doi if item_doi else 'N/A'}")
-                    print(f"    Publication Date: {item.dateofacceptance.value if item.dateofacceptance else 'N/A'}")
+                    print(f"    Publication Date: {item.publicationDate if item.publicationDate else 'N/A'}")
             else:
                 print("  No products found for this page/filter combination.")
 
@@ -132,7 +141,7 @@ async def main():
         # print("\nIterating through some results (example)...")
         # count = 0
         # try:
-        #     async for item in session.research_products.iterate(filters=rp_filters, page_size=5, sortBy="dateofacceptance,desc"):
+        #     async for item in session.research_products.iterate(filters=rp_filters, page_size=5, sort_by="publicationDate,desc"):
         #         count += 1
         #         print(f"  Iterated item #{count}: {item.title}")
         #         if count >= 5: # Limit for this example

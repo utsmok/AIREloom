@@ -130,7 +130,7 @@ from aireloom import AireloomSession
 async def main():
     async with AireloomSession() as session: # No explicit auth_strategy
         # The session will be configured with the auto-detected strategy.
-        print(f"Session initialized with auth strategy: {type(session._client._auth_strategy).__name__}")
+        print(f"Session initialized with auth strategy: {type(session._api_client._auth_strategy).__name__}")
         # Example: try to fetch a protected or public resource
         try:
             # Replace with an actual API call relevant to your auth level
