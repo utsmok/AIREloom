@@ -1,6 +1,5 @@
 """Pydantic models for OpenAIRE API entities and responses."""
 
-# Combined & Sorted Imports
 from .base import ApiResponse, BaseEntity, Header
 from .data_source import ControlledField, DataSource, DataSourceResponse
 from .organization import Country, Organization, OrganizationPid, OrganizationResponse
@@ -12,6 +11,14 @@ from .project import (
     H2020Programme,
     Project,
     ProjectResponse,
+)
+from .relation import (
+    EntityRef,
+    Identifier,
+    LinksResponse,
+    Node,
+    Relation,
+    RelType,
 )
 from .research_product import ResearchProduct, ResearchProductResponse
 from .scholix import (
@@ -31,11 +38,15 @@ __all__ = [
     "Country",
     "DataSource",
     "DataSourceResponse",
+    "EntityRef",
     "Funding",
     "FundingStream",
     "Grant",
     "H2020Programme",
     "Header",
+    "Identifier",
+    "LinksResponse",
+    "Node",
     "Organization",
     "OrganizationPid",
     "OrganizationResponse",
@@ -43,6 +54,8 @@ __all__ = [
     "PersonResponse",
     "Project",
     "ProjectResponse",
+    "Relation",
+    "RelType",
     "ResearchProduct",
     "ResearchProductResponse",
     "ScholixCreator",

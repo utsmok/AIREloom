@@ -20,6 +20,7 @@ DATA_SOURCES = "dataSources"
 PROJECTS = "projects"
 PERSONS = "persons"
 SCHOLIX = "Links"
+LINKS = "researchProducts/links"
 
 
 class ResearchProductsFilters(BaseModel):
@@ -255,6 +256,28 @@ class ScholixFilters(BaseModel):
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
+
+class LinksFilters(BaseModel):
+    """Filter model for Graph API /researchProducts/links endpoint.
+
+    These filters are for the Graph API's built-in link retrieval endpoint,
+    which is separate from the Scholix API. Parameters accept singular string values
+    (unlike other Graph API filters which accept arrays).
+
+    Reference: https://api.openaire.eu/graph/v1/researchProducts/links
+    """
+
+    sourcePid: str | None = Field(default=None, description="Filter by source persistent identifier (e.g. DOI)")
+    targetPid: str | None = Field(default=None, description="Filter by target persistent identifier")
+    sourcePublisher: str | None = Field(default=None, description="Filter by source publisher name")
+    targetPublisher: str | None = Field(default=None, description="Filter by target publisher name")
+    sourceType: str | None = Field(default=None, description="Filter by source type: publication, dataset, software, other")
+    targetType: str | None = Field(default=None, description="Filter by target type: publication, dataset, software, other")
+    relation: str | None = Field(default=None, description="Filter by specific relationship type")
+    fromDate: str | None = Field(default=None, description="From date (YYYY or YYYY-MM-DD)")
+    toDate: str | None = Field(default=None, description="To date (YYYY or YYYY-MM-DD)")
+
+    model_config = ConfigDict(extra="forbid")
 
 
 class PersonsFilters(BaseModel):

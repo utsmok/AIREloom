@@ -35,6 +35,8 @@ class Header(BaseModel):
         pageSize: The number of results included in the current page.
         page: The current page number.
         maxScore: The maximum score among all matching results.
+        totalPages: Total number of pages of results.
+        totalLinks: Total number of links (used by /researchProducts/links endpoint).
     """
 
     # Note: status, code, message are typically expected, but optional for robustness.
@@ -48,6 +50,8 @@ class Header(BaseModel):
     pageSize: int | None = None
     page: int | None = None
     maxScore: float | None = None
+    totalPages: int | None = None
+    totalLinks: int | None = None
 
     @field_validator("queryTime", "numFound", "pageSize", mode="before")
     @classmethod

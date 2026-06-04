@@ -69,18 +69,19 @@ src/aireloom/
   session.py            # AireloomSession (user-facing async context manager)
   config.py             # ApiSettings (pydantic-settings)
   constants.py          # URLs (v1 + v2), defaults, version detection
-  endpoints.py          # Filter models + ENDPOINT_DEFINITIONS (6 entity types)
+  endpoints.py          # Filter models + ENDPOINT_DEFINITIONS (6 entity types + LinksFilters)
   unwrapper.py          # OpenAireUnwrapper (ResponseUnwrapper protocol)
   models/
-    base.py             # Header (numFound, page, maxScore, nextCursor), BaseEntity, ApiResponse[T]
+    base.py             # Header (numFound, page, maxScore, nextCursor, totalPages, totalLinks), BaseEntity, ApiResponse[T]
     research_product.py # ResearchProduct — 40+ typed fields including v2 relationship fields
     project.py          # Project + nested funding/grant models
     organization.py     # Organization
     data_source.py      # DataSource
     person.py           # Person (givenName, familyName, biography, etc.)
+    relation.py         # Relation, Node, RelType, Identifier, EntityRef, LinksResponse
     scholix.py          # ScholixRelationship + nested types
   resources/
-    research_products_client.py  # v2, mixin-based, _base_url_override
+    research_products_client.py  # v2, mixin-based, _base_url_override + links methods (v1)
     projects_client.py           # v1, mixin-based
     organizations_client.py      # v1, mixin-based
     data_sources_client.py       # v1, mixin-based
