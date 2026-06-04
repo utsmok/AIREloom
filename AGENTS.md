@@ -15,9 +15,9 @@ AireloomSession          # User-facing async context manager (session.py)
  └─ AireloomClient       # Core HTTP client, auth resolution, resource orchestration (client.py)
      ├─ ResearchProductsClient   # Mixin-based (bibliofabric)
      ├─ ProjectsClient           # Mixin-based (bibliofabric)
-     ├─ OrganizationsClient      # Custom implementation
-     ├─ DataSourcesClient        # Custom implementation
-     └─ ScholixClient            # Custom implementation (different base URL)
+     ├─ OrganizationsClient      # Mixin-based (bibliofabric)
+     ├─ DataSourcesClient        # Mixin-based (bibliofabric)
+     └─ ScholixClient            # Custom (different base URL, page-based pagination)
 ```
 
 ### Key Layers
@@ -26,15 +26,15 @@ AireloomSession          # User-facing async context manager (session.py)
 |-------|---------|------|
 | **Session** | `session.py` | Thin async context manager wrapper around `AireloomClient`. Entry point for users. |
 | **Client** | `client.py` | Extends `bibliofabric.BaseApiClient`. Resolves auth strategy, initializes resource clients. ~230 lines. |
-| **Resources** | `resources/*.py` | Per-endpoint clients. `ResearchProductsClient` and `ProjectsClient` use bibliofabric mixins (`GettableMixin`, `SearchableMixin`, `CursorIterableMixin`). `OrganizationsClient`, `DataSourcesClient`, `ScholixClient` have custom implementations (manual HTTP, pagination, error handling). |
+| **Resources** | `resources/*.py` | Per-endpoint clients. All Graph API clients (`ResearchProductsClient`, `ProjectsClient`, `OrganizationsClient`, `DataSourcesClient`) use bibliofabric mixins (`GettableMixin`, `SearchableMixin`, `CursorIterableMixin`). `ScholixClient` has a custom implementation (different base URL, page-based pagination via `PageIterableMixin`). |
 | **Models** | `models/*.py` | Pydantic v2 models for each entity type. All inherit `BaseEntity` (has `id` field). `ApiResponse[T]` is the generic list-response envelope with `Header` + `results`. All models use `extra="allow"` for forward compatibility. |
 | **Endpoints** | `endpoints.py` | Pydantic filter models per endpoint (`ResearchProductsFilters`, etc.) with `extra="forbid"`. `ENDPOINT_DEFINITIONS` maps endpoint paths to filter models and valid sort fields. |
 | **Unwrapper** | `unwrapper.py` | Implements `bibliofabric.ResponseUnwrapper` protocol. Extracts `results`, `header.nextCursor`, `header.numFound` from OpenAIRE's JSON envelope. |
 | **Config** | `config.py` | `ApiSettings(BaseApiSettings)` via pydantic-settings. Env prefix `AIRELOOM_`. Reads `.env`/`secrets.env`. Cached via `@lru_cache`. |
 | **Constants** | `constants.py` | Base URLs, defaults, enums (`EndpointName`, `SortOrder`), HTTP headers. |
 
-### Two API Surfaces
 
+### Two API Surfaces
 - **Graph API** (`api.openaire.eu/graph/v1`): research products, organizations, projects, data sources. Cursor-based pagination.
 - **Scholix API** (`api.scholexplorer.openaire.eu/v3`): scholarly link relationships between entities. Page-based pagination. Requires either `sourcePid` or `targetPid` filter. `ScholixClient` uses its own base URL.
 
@@ -112,23 +112,25 @@ uv run mkdocs serve                  # Local docs
 
 - **All I/O is async.** Every resource method is `async`. Use `async with AireloomSession() as session:` or `async with AireloomClient() as client:`.
 - **Pydantic filter models** are passed to `search()` and `iterate()`. They serialize to query params. `extra="forbid"` on filters prevents typos.
-- **Sort validation** happens in resource clients by checking against `ENDPOINT_DEFINITIONS[endpoint]["sort"]` keys.
+- **Sort validation** happens via overridable `_validate_sort_field()` in `bibliofabric.BaseResourceClient`. Default is no-op; AIREloom consumers can override to check against `ENDPOINT_DEFINITIONS`.
 - **Models use `extra="allow"`** everywhere to tolerate API field additions without breaking.
-- **Resource client split:** Two clients use bibliofabric mixins (clean, ~70 lines each). Three clients have custom implementations (~300 lines each) doing their own HTTP calls, pagination, and error handling. This is a known inconsistency — the custom ones should eventually migrate to mixins.
-- **Type aliases** for response envelopes: `ResearchProductResponse = ApiResponse[ResearchProduct]`, etc.
+- **Resource clients:** All four Graph API clients use bibliofabric mixins (clean, ~58 lines each). `ScholixClient` has a custom implementation due to different base URL and page-based pagination.
 
 ## Known Issues & Gaps
 
-- **Inconsistent resource clients.** `OrganizationsClient`, `DataSourcesClient`, `ScholixClient` reimplement what bibliofabric mixins already provide. Should converge.
-- **CI `--cov=myproj`** should be `--cov=aireloom`.
-- **`__init__.py` exports `__version__ = "1.0.0"`** but `pyproject.toml` says `version = "0.1.0"`. Also `constants.py` has `AIRELOOM_VERSION = "1.0.0"`. Three sources of truth for the version.
-- **`EndpointName` enum** in `constants.py` is defined but never used by resource clients (they use string constants from `endpoints.py` directly).
-- **Duplicate base URL definitions.** `constants.py` has `OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v1"` and `endpoints.py` has `GRAPH_API_BASE_URL = "https://api.graph.openaire.eu/v1/"`. Different hosts, different paths. The one in `constants.py` is what's actually used.
-- **`test_actual_data.py`** hits the live API and requires a real token. Not guarded by markers.
-- **`verification_script.py`** in `tests/` is a standalone script, not a pytest test.
-- **`simple_example.py`** and `aireloom_comprehensive_analysis.py` at root are standalone scripts, not part of the package.
+- **`verification_script.py`** at project root is a standalone script, not a pytest test.
+- **`simple_example.py`** and `aireloom_comprehensive_analysis.py`** at root are standalone scripts, not part of the package.
 - **Docs content files** like `filter_options.md` (41 bytes), `models.md` (30 bytes), `session.md` (32 bytes) are stubs.
-- **`conftest.py`** imports `dotenv` which isn't declared as a test dependency (it's a transitive dep via another package).
-- **`ResearchProductsClient._valid_sort_fields`** is a hardcoded set that duplicates (and partially contradicts) what's in `ENDPOINT_DEFINITIONS["researchProducts"]["sort"]`. Same for `ProjectsClient`.
 - **`constants.py` TODO** comment lists unfinished enumerations (sortable fields, filter keys, open access routes, funder IDs, country codes).
-- **`publish-pypi` job** URLs `pypi.org/p/bibliofabric` instead of `aireloom`.
+
+## Resolved Issues
+
+- ~~Inconsistent resource clients~~ — OrganizationsClient and DataSourcesClient now use bibliofabric mixins. ScholixClient stays custom (different base URL, page-based pagination).
+- ~~CI `--cov=myproj`~~ — Fixed to `--cov=aireloom`.
+- ~~Version triple source of truth~~ — Single source in `pyproject.toml`, dynamic via `importlib.metadata`.
+- ~~`EndpointName` enum~~ — Removed (unused).
+- ~~Duplicate base URL definitions~~ — Removed from `endpoints.py`.
+- ~~`test_actual_data.py` live API~~ — Guarded with `pytest.mark.live_api` marker, skipped by default.
+- ~~`ResearchProductsClient._valid_sort_fields`~~ — Removed. Sort validation now via overridable `_validate_sort_field()` in bibliofabric.
+- ~~`publish-pypi` job URLs~~ — Fixed to `aireloom`.
+- ~~`conftest.py` dotenv dependency~~ — `python-dotenv` added to dev dependencies.
