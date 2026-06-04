@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, call
 
 import httpx
 import pytest
-from bibliofabric.exceptions import BibliofabricError
+from bibliofabric.exceptions import BibliofabricError, ValidationError
 
 from aireloom.client import AireloomClient
 from aireloom.constants import DEFAULT_PAGE_SIZE, OPENAIRE_SCHOLIX_API_BASE_URL
@@ -233,6 +233,107 @@ async def test_iterate_scholix_links_no_results(
         data=None,
         json_data=None,
     )
+
+
+
+
+@pytest.mark.asyncio
+async def test_iterate_scholix_links_zero_total_pages_with_results(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    """Test iteration when API returns results but total_pages=0 (lines 214-218)."""
+    source_pid_val = "10.1234/zero.pages"
+    page_size = 5
+
+    link_data = create_mock_scholix_link_data("10.src/a", "10.tgt/b")
+    mock_api_response_dict = {
+        "currentPage": 0,
+        "totalPages": 0,
+        "totalLinks": 0,
+        "result": [link_data],  # Non-empty result, but total_pages=0
+    }
+    mock_http_response = AsyncMock(spec=httpx.Response)
+    mock_http_response.status_code = 200
+    mock_http_response.json.return_value = mock_api_response_dict
+    mock_api_client_fixture.request.return_value = mock_http_response
+
+    collected = []
+    filters = ScholixFilters(sourcePid=source_pid_val)
+    async for link in scholix_client.iterate_links(filters=filters, page_size=page_size):
+        collected.append(link)
+
+    # Should yield the one result from the page, then break due to total_pages==0
+    assert len(collected) == 1
+
+
+@pytest.mark.asyncio
+async def test_iterate_scholix_links_bibliofabric_reraise(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    """BibliofabricError from search_links is re-raised by iterate (lines 227-228)."""
+    source_pid_val = "10.1234/biblio.iter.err"
+    page_size = 5
+
+    # search_links wraps RuntimeError into BibliofabricError, which iterate re-raises
+    mock_api_client_fixture.request.side_effect = RuntimeError("boom")
+
+    filters = ScholixFilters(sourcePid=source_pid_val)
+    with pytest.raises(BibliofabricError):
+        async for _ in scholix_client.iterate_links(
+            filters=filters, page_size=page_size
+        ):
+            pass
+
+
+@pytest.mark.asyncio
+async def test_search_scholix_links_bibliofabric_error_reraise(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    """BibliofabricError during search_links is re-raised directly (line 152)."""
+    source_pid_val = "10.1234/biblio.err"
+    page_size = 5
+
+    mock_api_client_fixture.request.side_effect = BibliofabricError("direct error")
+
+    filters = ScholixFilters(sourcePid=source_pid_val)
+    with pytest.raises(BibliofabricError, match="direct error"):
+        await scholix_client.search_links(
+            filters=filters, page=0, page_size=page_size
+        )
+
+
+@pytest.mark.asyncio
+async def test_search_scholix_links_validation_error_reraise(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    """ValidationError during search_links is re-raised directly (line 152)."""
+    source_pid_val = "10.1234/val.err"
+    page_size = 5
+
+    mock_api_client_fixture.request.side_effect = ValidationError("validation failed")
+
+    filters = ScholixFilters(sourcePid=source_pid_val)
+    with pytest.raises(ValidationError, match="validation failed"):
+        await scholix_client.search_links(
+            filters=filters, page=0, page_size=page_size
+        )
+
+
+@pytest.mark.asyncio
+async def test_search_scholix_links_unexpected_error(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    """Non-library error during search_links is wrapped in BibliofabricError."""
+    source_pid_val = "10.1234/unexpected.err"
+    page_size = 5
+
+    mock_api_client_fixture.request.side_effect = RuntimeError("unexpected")
+
+    filters = ScholixFilters(sourcePid=source_pid_val)
+    with pytest.raises(BibliofabricError, match="Unexpected error searching"):
+        await scholix_client.search_links(
+            filters=filters, page=0, page_size=page_size
+        )
 
 
 @pytest.mark.asyncio
