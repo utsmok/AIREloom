@@ -17,6 +17,7 @@ from bibliofabric.log_config import logger
 if TYPE_CHECKING:
     from ..client import AireloomClient
 from bibliofabric.exceptions import BibliofabricError, ValidationError
+from bibliofabric.resources import BaseResourceClient
 
 from ..constants import (  # SCHOLIX is now in endpoints
     DEFAULT_PAGE_SIZE,
@@ -27,7 +28,6 @@ from ..models import (
     ScholixRelationship,
     ScholixResponse,
 )
-from .base_client import BaseResourceClient
 
 
 class ScholixClient(BaseResourceClient):
@@ -35,16 +35,19 @@ class ScholixClient(BaseResourceClient):
 
     This client handles requests to the Scholix API, which provides data on
     relationships between research artifacts (e.g., citations, supplements).
-    It uses a specific base URL (`_scholix_base_url`) and custom methods
-    (`search_links`, `iterate_links`) tailored to the Scholix API's structure,
+    It uses a specific base URL (``_base_url_override``) and custom methods
+    (``search_links``, ``iterate_links``) tailored to the Scholix API's structure,
     including its 0-indexed pagination and specific request parameters.
 
     Attributes:
         _entity_path (str): The API path for Scholix links (typically "Links").
-        _scholix_base_url (str): The base URL for the Scholexplorer API.
-        _endpoint_def (dict): Configuration for this endpoint from `ENDPOINT_DEFINITIONS`.
+        _base_url_override (str): The base URL for the Scholexplorer API.
+        _endpoint_def (dict): Configuration for this endpoint from ``ENDPOINT_DEFINITIONS``.
     """
 
+    _base_url_override: str | None = None
+    _entity_model = None
+    _search_response_model = ScholixResponse
     _entity_path: str = SCHOLIX  # This is the endpoint path, typically "Links"
 
     def __init__(
@@ -58,7 +61,7 @@ class ScholixClient(BaseResourceClient):
                 the default from `aireloom.constants` is used.
         """
         super().__init__(api_client)
-        self._scholix_base_url: str = scholix_base_url or OPENAIRE_SCHOLIX_API_BASE_URL
+        self._base_url_override = scholix_base_url or OPENAIRE_SCHOLIX_API_BASE_URL
         if self._entity_path not in ENDPOINT_DEFINITIONS:
             raise ValueError(
                 f"Missing endpoint definition for Scholix path: {self._entity_path}"
@@ -66,7 +69,7 @@ class ScholixClient(BaseResourceClient):
         self._endpoint_def = ENDPOINT_DEFINITIONS[self._entity_path]
         # Scholix does not have sort fields defined in ENDPOINT_DEFINITIONS
         logger.debug(
-            f"ScholixClient initialized for base URL: {self._scholix_base_url}"
+            f"ScholixClient initialized for base URL: {self._base_url_override}"
         )
 
     def _build_scholix_params(
@@ -137,7 +140,7 @@ class ScholixClient(BaseResourceClient):
                 method="GET",
                 path=self._entity_path,  # SCHOLIX constant
                 params=params,
-                base_url_override=self._scholix_base_url,
+                base_url_override=self._base_url_override,
                 data=None,
                 json_data=None,
             )
@@ -148,7 +151,7 @@ class ScholixClient(BaseResourceClient):
             ):  # ValidationError can come from Pydantic
                 raise
             logger.exception(
-                f"Failed to search {self._entity_path} with params {params} at {self._scholix_base_url}"
+                f"Failed to search {self._entity_path} with params {params} at {self._base_url_override}"
             )
             raise BibliofabricError(
                 f"Unexpected error searching {self._entity_path}: {e}"
