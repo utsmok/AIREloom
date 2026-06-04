@@ -1380,7 +1380,7 @@ if __name__ == "__main__":
     # Ensure we're running with the correct Python environment
     if "uv" not in sys.executable and "UV_PROJECT_ROOT" not in os.environ:
         console.print(
-            "[yellow]⚠️  This script should be run with 'uv run aireloom_comprehensive_analysis.py'[/yellow]"
+            "[yellow]⚠️  This script should be run with 'uv run examples/comprehensive_analysis.py'[/yellow]"
         )
 
     # Run the analysis

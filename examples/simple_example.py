@@ -5,7 +5,7 @@ Simple AIREloom Usage Example
 This script demonstrates basic usage of the AIREloom library
 for retrieving and analyzing OpenAIRE research data.
 
-Run with: uv run simple_example.py
+Run with: uv run examples/simple_example.py
 """
 
 import asyncio
@@ -27,12 +27,12 @@ async def main():
     console.print("[bold blue]🚀 AIREloom Simple Example[/bold blue]")
 
     # Load credentials
-    load_dotenv("secrets.env")
+    load_dotenv(".env")
     client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
     client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
 
     if not client_id or not client_secret:
-        console.print("[red]❌ Missing credentials in secrets.env[/red]")
+        console.print("[red]❌ Missing credentials in .env[/red]")
         return
 
     # Initialize client

@@ -1,13 +1,5 @@
 """AIREloom: A Python client for the OpenAIRE Graph API."""
 
-from importlib.metadata import PackageNotFoundError, version as _get_version
-
-try:
-    __version__ = _get_version("aireloom")
-except PackageNotFoundError:
-    __version__ = "0.0.0"
-
-# Import Exceptions from bibliofabric
 from bibliofabric.exceptions import (
     APIError,
     AuthError,
@@ -20,10 +12,8 @@ from bibliofabric.exceptions import (
     ValidationError,
 )
 
-# Import main client class
 from .client import AireloomClient
-
-# Re-export key models from the models subpackage
+from .constants import __version__
 from .models import (
     ApiResponse,
     BaseEntity,
@@ -34,8 +24,6 @@ from .models import (
     ResearchProduct,
     ScholixRelationship,
 )
-
-# Import main session class
 from .session import AireloomSession
 
 __all__ = [

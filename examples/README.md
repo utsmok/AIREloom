@@ -1,7 +1,26 @@
-# AIREloom example analysis script
+# AIREloom Example Scripts
 
+This directory contains example scripts demonstrating how to use the AIREloom library.
 
-`aireloom_comprehensive_analysis.py` demonstrates the `AIREloom` package by executing a data analysis pipeline using the AIREloom library to retrieve, analyze, and visualize OpenAIRE research data. The script performs an integrated workflow including:
+- **`simple_example.py`** — Basic usage: searching research products, iterating results, and querying projects. Run with `uv run examples/simple_example.py`.
+- **`comprehensive_analysis.py`** — Full data analysis pipeline: retrieves OpenAIRE research data, stores it in DuckDB, and generates visualizations and reports. Run with `uv run examples/comprehensive_analysis.py`.
+
+### Credentials
+
+Both scripts optionally read OpenAIRE API credentials from a `.env` file in the project root:
+
+```
+AIRELOOM_OPENAIRE_CLIENT_ID=your_client_id_here
+AIRELOOM_OPENAIRE_CLIENT_SECRET=your_client_secret_here
+```
+
+Without credentials, the scripts use unauthenticated access with lower rate limits.
+
+---
+
+## Comprehensive Analysis Details
+
+`comprehensive_analysis.py` demonstrates the `AIREloom` package by executing a data analysis pipeline to retrieve, analyze, and visualize OpenAIRE research data. The script performs an integrated workflow including:
 
 - Data collection: Retrieves research outputs published 2024 and later by University of Twente authors
 - Local storage: Stores data in an optimized DuckDB database
@@ -9,7 +28,7 @@
 - Reporting: Produces summary reports with actionable insights
 
 
-## 🛠️ Technical Implementation
+## Technical Implementation
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
@@ -39,33 +58,6 @@ Projects:
 Scholix Relationships:
 - Cross-references between research entities
 - Relationship types and metadata
-
-## Usage
-
-### Prerequisites
-
-1. `uv` installed to manage python
-2. [optional] `OpenAIRE` credentials: Client ID and Secret from OpenAIRE stored in a `secrets.env` file for higher rate limits
-
-### Setup & run
-
-1. Clone and setup:
-   ```bash
-   git clone <repository>
-   cd AIREloom
-   ```
-
-2. [OPTIONAL] Create environment file:
-   ```bash
-   # secrets.env
-   AIRELOOM_OPENAIRE_CLIENT_ID=your_client_id_here
-   AIRELOOM_OPENAIRE_CLIENT_SECRET=your_client_secret_here
-   ```
-
-3. Run analysis:
-   ```bash
-   uv run aireloom_comprehensive_analysis.py
-   ```
 
 ## Results
 
@@ -104,4 +96,3 @@ And includes these considerations for performance:
 - Memory-efficient data retrieval using cursor indexing
 - Optimized query performance w/ indexed sql db
 - Async, non-blocking I/O for API calls
-

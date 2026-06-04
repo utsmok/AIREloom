@@ -18,12 +18,12 @@ ITERATE_PAGE_SIZE: int = (
     100  # Default number of results per page for iteration (using cursor)
 )
 
-
 try:
-    AIRELOOM_VERSION: str = _get_version("aireloom")
+    __version__: str = _get_version("aireloom")
 except PackageNotFoundError:
-    AIRELOOM_VERSION: str = "0.0.0"
-DEFAULT_USER_AGENT: str = f"aireloom/{AIRELOOM_VERSION}"
+    __version__: str = "0.0.0"
+
+DEFAULT_USER_AGENT: str = f"aireloom/{__version__}"
 CLIENT_HEADERS: dict[str, str] = {
     "accept": "application/json",
     "User-Agent": DEFAULT_USER_AGENT,
