@@ -1131,7 +1131,7 @@ async def test_search_scholix_links_success(httpx_mock: HTTPXMock):
     )
 
     httpx_mock.add_response(
-        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&rows=10",
+        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&size=10",
         method="GET",
         json=MOCK_SCHOLIX_RESPONSE,
         status_code=200,
@@ -1195,7 +1195,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         mock_response_page1["result"].append(link)
 
     httpx_mock.add_response(
-        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&rows=5",
+        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=0&size=5",
         method="GET",
         json=mock_response_page1,
         status_code=200,
@@ -1227,7 +1227,7 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         mock_response_page2["result"].append(link)
 
     httpx_mock.add_response(
-        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=1&rows=5",
+        url=f"{OPENAIRE_SCHOLIX_API_BASE_URL}/Links?sourcePid={KNOWN_DOI_WITH_LINKS}&page=1&size=5",
         method="GET",
         json=mock_response_page2,
         status_code=200,

@@ -91,7 +91,7 @@ async def test_search_scholix_links(
     expected_params = {
         "sourcePid": source_pid_val,
         "page": page_number,
-        "rows": page_size,
+        "size": page_size,
     }
     mock_api_client_fixture.request.assert_called_once_with(
         method="GET",
@@ -181,7 +181,7 @@ async def test_iterate_scholix_links(
         call(
             method="GET",
             path=SCHOLIX,
-            params={"targetPid": target_pid_val, "rows": page_size, "page": 0},
+            params={"targetPid": target_pid_val, "size": page_size, "page": 0},
             base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL,
             data=None,
             json_data=None,
@@ -189,7 +189,7 @@ async def test_iterate_scholix_links(
         call(
             method="GET",
             path=SCHOLIX,
-            params={"targetPid": target_pid_val, "rows": page_size, "page": 1},
+            params={"targetPid": target_pid_val, "size": page_size, "page": 1},
             base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL,
             data=None,
             json_data=None,
@@ -224,7 +224,7 @@ async def test_iterate_scholix_links_no_results(
         count += 1
 
     assert count == 0
-    expected_params = {"sourcePid": source_pid_val, "page": 0, "rows": page_size}
+    expected_params = {"sourcePid": source_pid_val, "page": 0, "size": page_size}
     mock_api_client_fixture.request.assert_called_once_with(
         method="GET",
         path=SCHOLIX,
@@ -389,7 +389,7 @@ async def test_iterate_scholix_links_api_error(
         call(
             method="GET",
             path=SCHOLIX,
-            params={"targetPid": target_pid_val, "rows": page_size, "page": 0},
+            params={"targetPid": target_pid_val, "size": page_size, "page": 0},
             base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL,
             data=None,
             json_data=None,
@@ -397,7 +397,7 @@ async def test_iterate_scholix_links_api_error(
         call(
             method="GET",
             path=SCHOLIX,
-            params={"targetPid": target_pid_val, "rows": page_size, "page": 1},
+            params={"targetPid": target_pid_val, "size": page_size, "page": 1},
             base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL,
             data=None,
             json_data=None,

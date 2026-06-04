@@ -80,18 +80,18 @@ class ScholixClient(BaseResourceClient):
     ) -> dict[str, Any]:
         """Builds the query parameter dictionary specifically for the Scholix API.
 
-        The Scholix API uses 'rows' for page size and expects 'page' to be 0-indexed.
+        The Scholix v3 API uses 'size' for page size and expects 'page' to be 0-indexed.
 
         Args:
             page: The 0-indexed page number.
-            page_size: The number of results per page (maps to 'rows' parameter).
+            page_size: The number of results per page (maps to 'size' parameter).
             filters: A dictionary of filter criteria to include in the parameters.
 
         Returns:
             A dictionary of query parameters suitable for the Scholix API.
         """
-        # Scholix uses 'rows' for page_size and 0-indexed 'page'
-        params: dict[str, Any] = {"page": page, "rows": page_size}
+        # Scholix v3 uses 'size' for page_size and 0-indexed 'page'
+        params: dict[str, Any] = {"page": page, "size": page_size}
         if filters:
             params.update(filters)
         return {k: v for k, v in params.items() if v is not None}
