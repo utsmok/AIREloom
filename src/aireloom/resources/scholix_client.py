@@ -69,7 +69,6 @@ class ScholixClient(BaseResourceClient):
             f"ScholixClient initialized for base URL: {self._scholix_base_url}"
         )
 
-
     def _build_scholix_params(
         self,
         page: int,

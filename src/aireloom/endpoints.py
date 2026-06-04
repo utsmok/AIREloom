@@ -281,5 +281,3 @@ ENDPOINT_DEFINITIONS = {
         "sort": {},
     },
 }
-
-

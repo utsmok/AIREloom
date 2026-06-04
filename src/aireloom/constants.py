@@ -3,6 +3,7 @@
 This module defines constants for API base URLs, default client settings,
 and various literals or enumerations used for API parameters.
 """
+
 from importlib.metadata import PackageNotFoundError, version as _get_version
 
 OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v1"
@@ -16,7 +17,6 @@ DEFAULT_PAGE_SIZE: int = 20  # Default number of results per page for standard s
 ITERATE_PAGE_SIZE: int = (
     100  # Default number of results per page for iteration (using cursor)
 )
-
 
 
 try:

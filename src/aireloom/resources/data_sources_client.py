@@ -51,8 +51,6 @@ class DataSourcesClient(
             api_client: An instance of AireloomClient.
         """
         super().__init__(api_client)
-        logger.debug(
-            f"DataSourcesClient initialized for path: {self._entity_path}"
-        )
+        logger.debug(f"DataSourcesClient initialized for path: {self._entity_path}")
 
     # All get, search, and iterate methods are now provided by the mixins

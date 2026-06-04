@@ -110,7 +110,9 @@ class AireloomClient(BaseApiClient):
         self._scholix_base_url: str = scholix_base_url.rstrip("/")
 
         _cid = self._settings.openaire_client_id
-        _cid_display = f"***{_cid[-4:]}" if _cid and len(_cid) > 4 else ("***" if _cid else "None")  # noqa: PLR2004
+        _cid_display = (
+            f"***{_cid[-4:]}" if _cid and len(_cid) > 4 else ("***" if _cid else "None")
+        )  # noqa: PLR2004
         logger.debug(
             f"AireloomClient.__init__ settings: id={id(self._settings)}, "
             f"client_id={_cid_display}, "

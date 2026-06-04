@@ -248,7 +248,6 @@ class License(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-
 class CollectedFrom(BaseModel):
     """Represents the data source from which an instance was collected."""
 

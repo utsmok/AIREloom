@@ -125,5 +125,3 @@ class ApiResponse[EntityType: "BaseEntity"](BaseModel):
         return []
 
     model_config = ConfigDict(extra="allow")
-
-
