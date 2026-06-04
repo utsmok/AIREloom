@@ -18,6 +18,7 @@ RESEARCH_PRODUCTS = "researchProducts"
 ORGANIZATIONS = "organizations"
 DATA_SOURCES = "dataSources"
 PROJECTS = "projects"
+PERSONS = "persons"
 SCHOLIX = "Links"
 
 
@@ -246,6 +247,27 @@ class ScholixFilters(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
 
+
+class PersonsFilters(BaseModel):
+    """Filter model for Persons API endpoint.
+
+    Attributes:
+        search (str | None): Keyword search for the person.
+        id (str | None): OpenAIRE identifier.
+        originalId (str | None): Original identifier.
+        givenName (str | None): Person's given (first) name.
+        lastName (str | None): Person's family (last) name.
+    """
+
+    search: str | None = None
+    id: str | None = None
+    originalId: str | None = None
+    givenName: str | None = None
+    lastName: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+
 # Basic definition structure: {path: {'filters_model': PydanticModel, 'sort': dict()}}
 ENDPOINT_DEFINITIONS = {
     RESEARCH_PRODUCTS: {
@@ -275,6 +297,10 @@ ENDPOINT_DEFINITIONS = {
             "startDate": {},
             "endDate": {},
         },
+    },
+    PERSONS: {
+        "filters_model": PersonsFilters,
+        "sort": {"relevance": {}},
     },
     SCHOLIX: {
         "filters_model": ScholixFilters,

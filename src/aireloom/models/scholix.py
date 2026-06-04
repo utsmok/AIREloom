@@ -11,7 +11,7 @@ and DDI-CDI Codi Model: https://ddi-alliance.github.io/DDI-CDI/current/Model/
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field
 
 ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
 """Defines the allowed types for a Scholix entity (e.g., publication, dataset)."""
@@ -31,12 +31,12 @@ class ScholixIdentifier(BaseModel):
     Attributes:
         id_val: The value of the identifier (aliased from "ID").
         id_scheme: The scheme of the identifier (aliased from "IDScheme", e.g., "doi", "url").
-        id_url: An optional resolvable URL for the identifier (aliased from "IDURL").
+        id_url: An optional URL or string for the identifier (aliased from "IDURL").
     """
 
     id_val: str = Field(alias="ID")
     id_scheme: str = Field(alias="IDScheme")
-    id_url: HttpUrl | None = Field(alias="IDURL", default=None)
+    id_url: str | None = Field(alias="IDURL", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -100,12 +100,12 @@ class ScholixRelationshipType(BaseModel):
         name: The primary name of the relationship type (e.g., "References", "IsSupplementTo").
               Uses `ScholixRelationshipNameValue` literal type.
         sub_type: An optional subtype for more specific relationship classification.
-        sub_type_schema: An optional URL pointing to the schema defining the subtype.
+        sub_type_schema: An optional schema identifier (may be a URL or a short string like 'datacite').
     """
 
     name: ScholixRelationshipNameValue = Field(alias="Name")
     sub_type: str | None = Field(alias="SubType", default=None)
-    sub_type_schema: HttpUrl | None = Field(alias="SubTypeSchema", default=None)
+    sub_type_schema: str | None = Field(alias="SubTypeSchema", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -151,7 +151,7 @@ class ScholixRelationship(BaseModel):
         default=None,
         description="Date the link was published.",
     )
-    license_url: HttpUrl | None = Field(alias="LicenseURL", default=None)
+    license_url: str | None = Field(alias="LicenseURL", default=None)
     harvest_date: str | None = Field(alias="HarvestDate", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")

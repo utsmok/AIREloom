@@ -3,6 +3,7 @@
 
 from .data_sources_client import DataSourcesClient
 from .organizations_client import OrganizationsClient
+from .persons_client import PersonsClient
 from .projects_client import ProjectsClient
 from .research_products_client import ResearchProductsClient
 from .scholix_client import ScholixClient
@@ -10,6 +11,7 @@ from .scholix_client import ScholixClient
 __all__ = [
     "DataSourcesClient",
     "OrganizationsClient",
+    "PersonsClient",
     "ProjectsClient",
     "ResearchProductsClient",
     "ScholixClient",

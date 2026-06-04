@@ -4,6 +4,7 @@
 from .base import ApiResponse, BaseEntity, Header
 from .data_source import ControlledField, DataSource, DataSourceResponse
 from .organization import Country, Organization, OrganizationPid, OrganizationResponse
+from .person import Person, PersonResponse
 from .project import (
     Funding,
     FundingStream,
@@ -38,6 +39,8 @@ __all__ = [
     "Organization",
     "OrganizationPid",
     "OrganizationResponse",
+    "Person",
+    "PersonResponse",
     "Project",
     "ProjectResponse",
     "ResearchProduct",

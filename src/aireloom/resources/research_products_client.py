@@ -20,6 +20,7 @@ from bibliofabric.resources import (
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
+from ..constants import OPENAIRE_GRAPH_API_V2_BASE_URL
 from ..endpoints import RESEARCH_PRODUCTS
 from ..models import ResearchProduct, ResearchProductResponse
 
@@ -35,12 +36,15 @@ class ResearchProductsClient(
     to OpenAIRE research products.
 
     Attributes:
+        _base_url_override (str | None): Overrides the base URL to use the v2 Graph API,
+            since researchProducts is only available on v2.
         _entity_path (str): The API path for research products.
         _entity_model (type[ResearchProduct]): Pydantic model for a single research product.
         _search_response_model (type[ResearchProductResponse]): Pydantic model for the
                                                                 search response envelope.
     """
 
+    _base_url_override: str | None = OPENAIRE_GRAPH_API_V2_BASE_URL
     _entity_path: str = RESEARCH_PRODUCTS
     _entity_model: type[ResearchProduct] = ResearchProduct
     _search_response_model: type[ResearchProductResponse] = ResearchProductResponse

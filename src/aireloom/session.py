@@ -12,6 +12,7 @@ from .constants import (
 from .resources import (
     DataSourcesClient,
     OrganizationsClient,
+    PersonsClient,
     ProjectsClient,
     ResearchProductsClient,
     ScholixClient,
@@ -118,6 +119,11 @@ class AireloomSession:
         """Access the ProjectsClient."""
         return self._api_client.projects
 
+
+    @property
+    def persons(self) -> PersonsClient:
+        """Access the PersonsClient."""
+        return self._api_client.persons
     @property
     def data_sources(self) -> DataSourcesClient:
         """Access the DataSourcesClient."""

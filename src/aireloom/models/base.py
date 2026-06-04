@@ -30,10 +30,11 @@ class Header(BaseModel):
         code: Optional status code from the API.
         message: Optional descriptive message from the API.
         queryTime: Time taken by the API to process the query, in milliseconds.
-        numFound: Total number of results found matching the query criteria.
         nextCursor: The cursor string to use for fetching the next page of results.
                     Can be a string or an HttpUrl.
         pageSize: The number of results included in the current page.
+        page: The current page number.
+        maxScore: The maximum score among all matching results.
     """
 
     # Note: status, code, message are typically expected, but optional for robustness.
@@ -45,6 +46,8 @@ class Header(BaseModel):
     numFound: int | None = None  # next/prev can be full URLs or just the cursor string
     nextCursor: str | HttpUrl | None = Field(default=None)  # API returns "nextCursor"
     pageSize: int | None = None
+    page: int | None = None
+    maxScore: float | None = None
 
     @field_validator("queryTime", "numFound", "pageSize", mode="before")
     @classmethod

@@ -17,6 +17,7 @@ from .constants import (
 from .resources import (
     DataSourcesClient,
     OrganizationsClient,
+    PersonsClient,
     ProjectsClient,
     ResearchProductsClient,
     ScholixClient,
@@ -180,6 +181,7 @@ class AireloomClient(BaseApiClient):
         self._research_products = ResearchProductsClient(api_client=self)
         self._organizations = OrganizationsClient(api_client=self)
         self._projects = ProjectsClient(api_client=self)
+        self._persons = PersonsClient(api_client=self)
         self._data_sources = DataSourcesClient(api_client=self)
         self._scholix = ScholixClient(
             api_client=self, scholix_base_url=self._scholix_base_url
@@ -202,6 +204,11 @@ class AireloomClient(BaseApiClient):
         """Provides access to the ProjectsClient for OpenAIRE project APIs."""
         return self._projects
 
+
+    @property
+    def persons(self) -> PersonsClient:
+        """Provides access to the PersonsClient for OpenAIRE person APIs."""
+        return self._persons
     @property
     def data_sources(self) -> DataSourcesClient:
         """Provides access to the DataSourcesClient for OpenAIRE data source APIs."""

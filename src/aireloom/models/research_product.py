@@ -395,13 +395,24 @@ class ResearchProduct(BaseEntity):
         originalIds: A list of original identifiers for the research product.
         pids: A list of `Pid` objects representing persistent identifiers.
         type: The `ResearchProductType` (e.g., "publication", "dataset").
-        title: The main title of the research product.
+        mainTitle: The primary title of the research product.
+        title: The display title (populated from mainTitle if missing).
+        subTitle: An optional subtitle.
         authors: A list of `Author` objects.
         bestAccessRight: A `BestAccessRight` object indicating the determined access status.
         country: A `ResultCountry` object indicating the country associated with the product.
+        countries: A list of country objects.
         description: A textual description or abstract of the research product.
+        descriptions: Multiple descriptions for the research product.
         publicationDate: The publication date of the research product (YYYY-MM-DD string).
         publisher: The name of the publisher.
+        embargoEndDate: The embargo end date.
+        contributors: A list of contributor strings.
+        sources: A list of source reference strings.
+        formats: A list of file format strings.
+        coverages: A list of coverage information strings.
+        dateOfCollection: The collection timestamp.
+        lastUpdateTimeStamp: The last update timestamp (Unix epoch milliseconds).
         indicators: An `Indicator` object containing citation and usage metrics.
         instances: A list of `Instance` objects representing different manifestations
                    or versions of the research product.
@@ -409,28 +420,82 @@ class ResearchProduct(BaseEntity):
         subjects: A list of `Subject` objects.
         container: A `Container` object if the product is part of a larger collection
                    (e.g., a journal for an article).
-        geoLocation: A `GeoLocation` object, typically for datasets.
         keywords: A list of keywords. A validator attempts to parse comma-separated strings.
+        geoLocation: A `GeoLocation` object, typically for datasets.
+        geoLocations: A list of geolocation objects, typically for datasets.
+        isGreen: Whether the product is green Open Access.
+        openAccessColor: The Open Access color (e.g., "bronze", "gold", "hybrid").
+        isInDiamondJournal: Whether the product is in a diamond journal.
+        publiclyFunded: Whether the product was publicly funded.
+        codeRepositoryUrl: URL to the code repository (software products).
+        documentationUrls: URLs to documentation (software products).
+        programmingLanguage: The programming language (software products).
+        size: The size of the dataset.
+        version: The version of the dataset.
+        contactPeople: Contact persons (other products).
+        contactGroups: Contact groups (other products).
+        tools: Tools used (other products).
+        collectedFrom: Data sources from which this product was collected.
+        projects: Related project relationships.
+        organizations: Related organization relationships.
+        communities: Related community relationships.
     """
-
     # id is inherited from BaseEntity
     originalIds: list[str] | None = Field(default_factory=list)
     pids: list[Pid] | None = Field(default_factory=list)
     type: ResearchProductType | None = None
+    mainTitle: str | None = None
     title: str | None = None
+    subTitle: str | None = None
     authors: list[Author] | None = Field(default_factory=list)
     bestAccessRight: BestAccessRight | None = None
     country: ResultCountry | None = None
+    countries: list | None = None
     description: str | None = None
+    descriptions: list[str] | None = None
     publicationDate: str | None = None
     publisher: str | None = None
+    embargoEndDate: str | None = None
+    contributors: list[str] | None = None
+    sources: list[str] | None = None
+    formats: list[str] | None = None
+    coverages: list[str] | None = None
+    dateOfCollection: str | None = None
+    lastUpdateTimeStamp: int | None = None
     indicators: Indicator | None = None
     instances: list[Instance] | None = Field(default_factory=list)
     language: Language | None = None
     subjects: list[Subject] | None = Field(default_factory=list)
     container: Container | None = None
-    geoLocation: GeoLocation | None = None
     keywords: list[str] | None = Field(default_factory=list)
+    geoLocation: GeoLocation | None = None
+    geoLocations: list | None = None
+
+    # Open Access fields
+    isGreen: bool | None = None
+    openAccessColor: str | None = None
+    isInDiamondJournal: bool | None = None
+    publiclyFunded: bool | None = None
+
+    # Subtype-specific fields (Software)
+    codeRepositoryUrl: str | None = None
+    documentationUrls: list[str] | None = None
+    programmingLanguage: str | None = None
+
+    # Subtype-specific fields (Dataset)
+    size: str | None = None
+    version: str | None = None
+
+    # Subtype-specific fields (Other)
+    contactPeople: list | None = None
+    contactGroups: list | None = None
+    tools: list | None = None
+
+    # Relationship fields
+    collectedFrom: list[CollectedFrom] | None = None
+    projects: list | None = None
+    organizations: list | None = None
+    communities: list | None = None
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 
@@ -474,15 +539,10 @@ class ResearchProduct(BaseEntity):
         Returns:
             The (potentially modified) input data dictionary.
         """
-        if isinstance(data, dict) and "mainTitle" in data:
-            if (
-                "title" not in data or data["title"] is None
-            ):  # Ensure we don't overwrite an existing title
-                data["title"] = data.pop("mainTitle")
-            else:  # title exists, no need to pop mainTitle if it's just a duplicate
-                data.pop("mainTitle", None)
+        if isinstance(data, dict) and "mainTitle" in data and ("title" not in data or data["title"] is None):
+            data["title"] = data["mainTitle"]
+            # Keep mainTitle in data so it populates the explicit field
         return data
-
 
 # Define the specific response type for ResearchProduct results
 ResearchProductResponse = ApiResponse[ResearchProduct]
