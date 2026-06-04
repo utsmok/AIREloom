@@ -6,7 +6,7 @@ and various literals or enumerations used for API parameters.
 
 from importlib.metadata import PackageNotFoundError, version as _get_version
 
-OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v1"
+OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v2"
 OPENAIRE_SCHOLIX_API_BASE_URL = "https://api.scholexplorer.openaire.eu/v3"
 REGISTERED_SERVICE_API_TOKEN_URL = "https://aai.openaire.eu/oidc/token"
 

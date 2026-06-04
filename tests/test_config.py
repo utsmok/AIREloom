@@ -107,7 +107,7 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
         # Example call to ensure it works with StaticTokenAuth
 
         httpx_mock.add_response(
-            url="https://api.openaire.eu/graph/v1/researchProducts?id=envcfg456&pageSize=1",
+        url="https://api.openaire.eu/graph/v2/researchProducts?id=envcfg456&pageSize=1",
             method="GET",
             json={
                 "results": [{"id": "envcfg456", "title": "Env Config Test"}],

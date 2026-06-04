@@ -43,7 +43,7 @@ async def main():
         console.print("\n[yellow]📄 Example 1: Get single research product[/yellow]")
         try:
             product = await client.research_products.get(
-                "doi_dedup__::0123456789abcdef"
+                "doi_dedup___::2b3cb7130c506d1c3a05e9160b2c4108"
             )
             console.print(f"Found: {product.title}")
         except Exception as e:
@@ -59,7 +59,7 @@ async def main():
             page=1, page_size=5, filters=filters
         )
 
-        total_results = getattr(response.header, "total", len(response.results or []))
+        total_results = response.header.numFound if response.header else len(response.results or [])
         console.print(f"Found {total_results} total results")
 
         # Display results in a table
