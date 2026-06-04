@@ -12,6 +12,7 @@ from bibliofabric.auth import (
 from bibliofabric.exceptions import BibliofabricError
 from dotenv import load_dotenv
 from pytest_httpx import HTTPXMock
+from pydantic import ValidationError
 
 from aireloom import AireloomSession
 from aireloom.constants import (
@@ -1254,39 +1255,16 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
         assert count == max_items_to_iterate
 
 
-from pydantic import ValidationError
+
 
 
 @pytest.mark.asyncio
 async def test_search_scholix_ignored_invalid_filter_key(httpx_mock: HTTPXMock):
     """Test that providing an invalid filter key to ScholixFilters raises a ValidationError."""
     source_pid = KNOWN_DOI_WITH_LINKS
-    # expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}" # Not needed as API call won't happen
 
-    # mocked_api_response_for_test = MOCK_SCHOLIX_RESPONSE.copy() # Not needed
-
-    # httpx_mock.add_response( # Not needed as API call won't happen
-    #     url=expected_url,
-    #     method="GET",
-    #     json=mocked_api_response_for_test,
-    #     params={"sourcePid": source_pid, "page": "0", "rows": "10"},
-    # )
-
-    # async with AireloomSession() as session: # Session not needed for this check
     with pytest.raises(ValidationError) as excinfo:
         ScholixFilters(sourcePid=source_pid, someMadeUpFilterKey="someValue")  # type: ignore[call-arg]
 
     assert "someMadeUpFilterKey" in str(excinfo.value)
-    assert "Extra inputs are not permitted" in str(
-        excinfo.value
-    )  # Pydantic v2 error message for extra fields
-
-    # The following lines are not reachable if ValidationError is raised as expected.
-    # response: ScholixResponse = await session.scholix.search_links(
-    #     filters=filters_with_extra, page_size=10, page=0
-    # )
-
-    # assert response is not None
-    # assert response.total_links == mocked_api_response_for_test["totalLinks"]
-    # if response.result:
-    #     assert len(response.result) == len(mocked_api_response_for_test["result"])
+    assert "Extra inputs are not permitted" in str(excinfo.value)

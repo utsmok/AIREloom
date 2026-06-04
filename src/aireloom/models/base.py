@@ -127,6 +127,3 @@ class ApiResponse[EntityType: "BaseEntity"](BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-# Example of a specific response type (for illustration)
-# class ResearchProductResponse(ApiResponse[ResearchProduct]):
-#     pass

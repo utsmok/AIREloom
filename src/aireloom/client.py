@@ -109,10 +109,12 @@ class AireloomClient(BaseApiClient):
         self._settings: ApiSettings = settings or get_settings()
         self._scholix_base_url: str = scholix_base_url.rstrip("/")
 
+        _cid = self._settings.openaire_client_id
+        _cid_display = f"***{_cid[-4:]}" if _cid and len(_cid) > 4 else ("***" if _cid else "None")  # noqa: PLR2004
         logger.debug(
             f"AireloomClient.__init__ settings: id={id(self._settings)}, "
-            f"client_id={self._settings.openaire_client_id}, "
-            f"token={self._settings.openaire_api_token}, "
+            f"client_id={_cid_display}, "
+            f"token={'***' if self._settings.openaire_api_token else 'None'}, "
             f"timeout={self._settings.request_timeout}"
         )
 
@@ -133,10 +135,10 @@ class AireloomClient(BaseApiClient):
             _token_url = self._settings.openaire_token_url
 
             logger.debug(
-                f"Auth decision: client_id_param={client_id}, "
-                f"settings_client_id={self._settings.openaire_client_id}, "
-                f"api_token_param={api_token}, "
-                f"settings_api_token={self._settings.openaire_api_token}"
+                f"Auth decision: client_id_param={'***' if client_id else None}, "
+                f"settings_client_id={_cid_display}, "
+                f"api_token_param={'***' if api_token else None}, "
+                f"settings_api_token={'***' if self._settings.openaire_api_token else None}"
             )
 
             if _client_id and _client_secret:

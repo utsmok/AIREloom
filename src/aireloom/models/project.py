@@ -88,7 +88,7 @@ class Project(BaseEntity):
         fundings: A list of `Funding` objects detailing the project's funding sources.
         granted: A `Grant` object with information about the awarded grant amounts.
         h2020Programmes: A list of `H2020Programme` objects if the project is part of H2020.
-        keywords: A list of keywords or a single string of keywords describing the project.
+        keywords: A list of keywords describing the project.
                   A validator attempts to parse comma or semicolon-separated strings.
         openAccessMandateForDataset: Boolean indicating if there's an open access
                                      mandate for datasets produced by the project.
@@ -110,7 +110,7 @@ class Project(BaseEntity):
     granted: Grant | None = None
     h2020Programmes: list[H2020Programme] | None = Field(default_factory=list)
     # Keywords might be a single string or a delimited string. Attempt parsing.
-    keywords: list[str] | str | None = None
+    keywords: list[str] | None = None
     openAccessMandateForDataset: bool | None = None
     openAccessMandateForPublications: bool | None = None
     # Dates are kept as string for safety due to potential missing parts or nulls.
@@ -125,32 +125,28 @@ class Project(BaseEntity):
 
     @field_validator("keywords", mode="before")
     @classmethod
-    def parse_keywords_string(cls, v: Any) -> list[str] | str | None:
+    def parse_keywords_string(cls, v: Any) -> list[str] | None:
         """Attempts to parse a keyword string into a list of strings.
 
         If the input `v` is a string, this validator tries to split it by common
-        delimiters (comma, then semicolon). If splitting results in more than one
-        part, a list of stripped parts is returned. Otherwise, the original string
-        (or None if empty) is returned. If `v` is not a string (e.g., already a
-        list or None), it's returned as is.
+        delimiters (comma, then semicolon). If splitting produces any parts,
+        a list of stripped parts is returned. Otherwise None is returned.
+        If `v` is not a string (e.g., already a list or None), it's returned as is.
 
         Args:
             v: The value to parse, expected to be a string, list, or None.
 
         Returns:
-            A list of strings if parsing was successful and yielded multiple keywords,
-            the original string if no parsing occurred or yielded a single part,
-            or None if the input string was empty.
+            A list of strings, or None if input was None or empty.
         """
         if isinstance(v, str):
             # Prioritize comma, then semicolon
             delimiters = [",", ";"]
             for delimiter in delimiters:
                 parts = [part.strip() for part in v.split(delimiter) if part.strip()]
-                if len(parts) > 1:
+                if parts:
                     return parts
-            # If no split produced multiple parts, return the original string (or None if it was empty)
-            return v if v else None
+            return None
         # If not a string (e.g., already a list or None), return as is
         return v
 

@@ -14,7 +14,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 RESEARCH_PRODUCTS = "researchProducts"
 ORGANIZATIONS = "organizations"
 DATA_SOURCES = "dataSources"
@@ -134,7 +133,7 @@ class OrganizationsFilters(BaseModel):
 
 class DataSourcesFilters(BaseModel):
     """Filter model for Data Sources API endpoint.
-    Represents an author of a research product.
+
 
     Attributes:
         search (str | None): Search term for the data source.
@@ -244,7 +243,7 @@ class ScholixFilters(BaseModel):
     from_date: date | None = Field(default=None, alias="from")  # API uses "from"
     to_date: date | None = Field(default=None, alias="to")  # API uses "to"
 
-    model_config = {"extra": "forbid", "populate_by_name": True}
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
 
 # Basic definition structure: {path: {'filters_model': PydanticModel, 'sort': dict()}}
@@ -284,8 +283,3 @@ ENDPOINT_DEFINITIONS = {
 }
 
 
-def get_valid_sort_fields(endpoint_path: str) -> set[str]:
-    """Returns the set of valid sort fields for a given endpoint path."""
-    definitions = ENDPOINT_DEFINITIONS.get(endpoint_path, {})
-    sort_definitions = definitions.get("sort", {})
-    return set(sort_definitions.keys())

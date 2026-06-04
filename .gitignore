@@ -10,7 +10,6 @@ reference/
 aireloom_analysis.db
 DEMO_SUMMARY.md
 *.png
-*.json
 
 # C extensions
 *.so

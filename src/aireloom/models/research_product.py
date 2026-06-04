@@ -22,12 +22,6 @@ from pydantic import (
 
 from .base import ApiResponse, BaseEntity
 
-"""
-This module contains the Pydantic models for parsing & validation OpenAIRE API responses.
-The models are designed to be used with the OpenAIRE Graph API and are structured to match
-the expected JSON response format for Research Products.
-"""
-
 OpenAccessRouteType = Literal["gold", "green", "hybrid", "bronze"]
 """Type alias for allowed Open Access routes (e.g., gold, green)."""
 
@@ -254,6 +248,25 @@ class License(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+
+class CollectedFrom(BaseModel):
+    """Represents the data source from which an instance was collected."""
+
+    name: str | None = None
+    id: str | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
+class HostedBy(BaseModel):
+    """Represents the data source hosting an instance."""
+
+    name: str | None = None
+    id: str | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
 class Instance(BaseModel):
     """Represents a specific instance or manifestation of a research product.
 
@@ -282,8 +295,8 @@ class Instance(BaseModel):
     alternateIdentifier: list[dict[str, str]] = Field(default_factory=list)
     articleProcessingCharge: ArticleProcessingCharge | None = None
     license: str | None = None
-    collectedFrom: dict[str, str] | None = None
-    hostedBy: dict[str, str] | None = None
+    collectedFrom: CollectedFrom | None = None
+    hostedBy: HostedBy | None = None
     distributionLocation: str | None = None
     embargoEndDate: str | None = None
     instanceId: str | None = None
@@ -292,25 +305,6 @@ class Instance(BaseModel):
     type: str | None = None
     urls: list[str] = Field(default_factory=list)
 
-    '''
-    @field_validator("license", mode="before")
-    @classmethod
-    def handle_string_license(cls, v: Any) -> License | None:
-        """Handle cases where license is provided as a simple string instead of an object."""
-        if v is None:
-            return None
-        if isinstance(v, str):
-            # If it's a string, create a License object with the string as both code and label
-            return License(code=v, label=v)
-        if isinstance(v, dict):
-            return License(**v)
-        if isinstance(v, License):
-            return v
-        logger.warning(
-            f"Unexpected license format: {v}. Expected string, dict, or License object."
-        )
-        return None
-    '''
     model_config = ConfigDict(extra="allow")
 
 
@@ -418,8 +412,6 @@ class ResearchProduct(BaseEntity):
                    (e.g., a journal for an article).
         geoLocation: A `GeoLocation` object, typically for datasets.
         keywords: A list of keywords. A validator attempts to parse comma-separated strings.
-        journal: An alias or alternative field for `container`, often used for journal details.
-                 (Note: API might use 'container' or 'journal' field for similar info).
     """
 
     # id is inherited from BaseEntity
@@ -440,7 +432,6 @@ class ResearchProduct(BaseEntity):
     container: Container | None = None
     geoLocation: GeoLocation | None = None
     keywords: list[str] | None = Field(default_factory=list)
-    journal: Container | None = None
 
     model_config = ConfigDict(extra="allow", populate_by_name=True)
 

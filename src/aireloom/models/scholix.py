@@ -161,16 +161,24 @@ class ScholixResponse(BaseModel):
     """Response structure for the Scholexplorer Links endpoint."""
 
     current_page: int = Field(
-        alias="currentPage", description="The current page number (0-indexed)."
+        default=0,
+        alias="currentPage",
+        description="The current page number (0-indexed).",
     )
     total_links: int = Field(
-        alias="totalLinks", description="Total number of links matching the query."
+        default=0,
+        alias="totalLinks",
+        description="Total number of links matching the query.",
     )
     total_pages: int = Field(
-        alias="totalPages", description="Total number of pages available."
+        default=0,
+        alias="totalPages",
+        description="Total number of pages available.",
     )
     result: list[ScholixRelationship] = Field(
-        alias="result", description="List of Scholix relationship links."
+        default_factory=list,
+        alias="result",
+        description="List of Scholix relationship links.",
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
