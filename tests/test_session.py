@@ -671,7 +671,7 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
         ],
     }
     _params_tsds_int = {
-        "openaireCompatibility": "UNKNOWN",
+        "dataSourceTypeName": "journal",
         "page": "1",
         "pageSize": "1",
     }
@@ -681,7 +681,7 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        filters = DataSourcesFilters(openaireCompatibility="UNKNOWN")
+        filters = DataSourcesFilters(dataSourceTypeName="journal")
         with patch(
             "bibliofabric.client.BaseApiClient._request_with_retry",
             new_callable=AsyncMock,

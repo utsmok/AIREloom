@@ -62,6 +62,9 @@ class ResearchProductsFilters(BaseModel):
         relProjectFundingStreamId (str | None): ID of the project funding stream.
         relHostingDataSourceId (str | None): ID of the hosting data source.
         relCollectedFromDatasourceId (str | None): ID of the datasource from which this was collected.
+        rorId (str | None): ROR identifier for an affiliated organization.
+        logicalOperator (Literal["AND", "OR"] | None): How multiple filters are combined (default: AND).
+
 
 
     """
@@ -102,6 +105,8 @@ class ResearchProductsFilters(BaseModel):
     relProjectFundingStreamId: str | None = None
     relHostingDataSourceId: str | None = None
     relCollectedFromDatasourceId: str | None = None
+    rorId: str | None = None
+    logicalOperator: Literal["AND", "OR"] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -118,6 +123,7 @@ class OrganizationsFilters(BaseModel):
         countryCode (str | None): Country code of the organization.
         relCommunityId (str | None): Related community ID.
         relCollectedFromDatasourceId (str | None): ID of the datasource from which this was collected.
+        logicalOperator (Literal["AND", "OR"] | None): How multiple filters are combined (default: AND).
     """
 
     search: str | None = None
@@ -128,6 +134,7 @@ class OrganizationsFilters(BaseModel):
     countryCode: str | None = None
     relCommunityId: str | None = None
     relCollectedFromDatasourceId: str | None = None
+    logicalOperator: Literal["AND", "OR"] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -146,10 +153,10 @@ class DataSourcesFilters(BaseModel):
         subjects (list[str] | None): List of subjects associated with the data source.
         dataSourceTypeName (str | None): Type name of the data source.
         contentTypes (list[str] | None): List of content types available in the data source.
-        openaireCompatibility (str | None): Compatibility status with OpenAIRE standards.
         relOrganizationId (str | None): Related organization ID.
         relCommunityId (str | None): Related community ID.
         relCollectedFromDatasourceId (str | None): ID of the datasource from which this was collected.
+        logicalOperator (Literal["AND", "OR"] | None): How multiple filters are combined (default: AND).
     """
 
     search: str | None = None
@@ -161,10 +168,10 @@ class DataSourcesFilters(BaseModel):
     subjects: list[str] | None = None
     dataSourceTypeName: str | None = None
     contentTypes: list[str] | None = None
-    openaireCompatibility: str | None = None
     relOrganizationId: str | None = None
     relCommunityId: str | None = None
     relCollectedFromDatasourceId: str | None = None
+    logicalOperator: Literal["AND", "OR"] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -192,6 +199,7 @@ class ProjectsFilters(BaseModel):
         relCommunityId (str | None): ID of the related community.
         relOrganizationCountryCode (str | None): Country code of the related organization.
         relCollectedFromDatasourceId (str | None): ID of the datasource from which this was collected.
+        logicalOperator (Literal["AND", "OR"] | None): How multiple filters are combined (default: AND).
 
 
     """
@@ -215,6 +223,7 @@ class ProjectsFilters(BaseModel):
     relCommunityId: str | None = None
     relOrganizationCountryCode: str | None = None
     relCollectedFromDatasourceId: str | None = None
+    logicalOperator: Literal["AND", "OR"] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -251,12 +260,17 @@ class ScholixFilters(BaseModel):
 class PersonsFilters(BaseModel):
     """Filter model for Persons API endpoint.
 
+    Note: The OpenAIRE API accepts 'givenName' and 'lastName' as filter parameters,
+    but they currently cause HTTP 500 errors from the server. Only 'search', 'id',
+    and 'originalId' work reliably. These params are kept for forward compatibility.
+
     Attributes:
         search (str | None): Keyword search for the person.
         id (str | None): OpenAIRE identifier.
-        originalId (str | None): Original identifier.
-        givenName (str | None): Person's given (first) name.
-        lastName (str | None): Person's family (last) name.
+        originalId (str | None): Original identifier (e.g. ORCID).
+        givenName (str | None): Person's given (first) name. CAUTION: causes API 500.
+        lastName (str | None): Person's family (last) name. CAUTION: causes API 500.
+        logicalOperator (Literal["AND", "OR"] | None): How multiple filters are combined.
     """
 
     search: str | None = None
@@ -264,6 +278,7 @@ class PersonsFilters(BaseModel):
     originalId: str | None = None
     givenName: str | None = None
     lastName: str | None = None
+    logicalOperator: Literal["AND", "OR"] | None = None
 
     model_config = ConfigDict(extra="forbid")
 
@@ -277,7 +292,6 @@ ENDPOINT_DEFINITIONS = {
             "publicationDate": {},
             "dateOfCollection": {},
             "influence": {},
-            "popularity": {},
             "citationCount": {},
             "impulse": {},
         },
@@ -300,7 +314,11 @@ ENDPOINT_DEFINITIONS = {
     },
     PERSONS: {
         "filters_model": PersonsFilters,
-        "sort": {"relevance": {}},
+        "sort": {
+            "relevance": {},
+            "startDate": {},
+            "endDate": {},
+        },
     },
     SCHOLIX: {
         "filters_model": ScholixFilters,

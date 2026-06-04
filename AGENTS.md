@@ -129,7 +129,9 @@ uv run mkdocs serve                       # Local docs
 
 - **Cursor pagination ordering**: Solr's cursorMark uses deterministic internal ordering that ignores `sortBy`. The first pages of cursor results may surface records without PIDs even when filtering for DOI-rich records. Not a library issue — use page-based pagination (`search()`) when PIDs matter.
 - **Graph API v3**: OpenAIRE Graph API v3 uses kebab-case URLs and string-based filters. Not yet supported — stick with v1/v2. (Scholix v3 is fully supported and is not a beta.)
-- **`constants.py` TODO** comment lists unfinished enumerations (sortable fields, filter keys).
+- **No sub-endpoints**: The API does NOT support `/{entity}/{id}/related*`, `/{entity}/{id}/links`, or `/{entity}/count` — all return 405/404. Verified by live testing.
+- **Person filter bug**: `givenName` and `lastName` are accepted API parameters but cause HTTP 500 from the server. Only `search`, `id`, `originalId` work reliably.
+- **Sort format**: `sortBy` takes `"fieldname ASC|DESC"` as a single string (e.g. `sortBy="relevance ASC"`). No separate `sortOrder` param exists.
 ## Resolved Issues
 
 - ~~Duplicate `BaseResourceClient`~~ — Removed. All resource clients now use `bibliofabric.resources.BaseResourceClient`.
@@ -144,3 +146,9 @@ uv run mkdocs serve                       # Local docs
 - ~~Single Python version in CI~~ — Matrix includes 3.12 + 3.13.
 - ~~Docs deploy on PRs~~ — Guarded to only deploy on pushes.
 - ~~No coverage enforcement~~ — `--cov-fail-under=95` in CI.
+- ~~`openaireCompatibility` filter~~ — Removed from `DataSourcesFilters`. Not a valid API parameter (returns 400 "Unknown parameter").
+- ~~Missing `logicalOperator` filter~~ — Added to all 5 Graph API filter models. Accepts `"AND"` or `"OR"`.
+- ~~Missing `rorId` filter~~ — Added to `ResearchProductsFilters`. ROR identifier for affiliated organization.
+- ~~`popularity` sort field~~ — Removed from RP sort fields. Not a valid sort field (API returns 400).
+- ~~Persons sort fields~~ — Added `startDate`, `endDate` (matching API validation).
+- ~~Person model incomplete~~ — Added `originalId`, `alternativeNames` fields, typed `consent` as `bool`, typed list elements.
