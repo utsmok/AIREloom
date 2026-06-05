@@ -13,6 +13,7 @@ async with AireloomSession() as session:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `search` | `str` | Full-text search query |
 | `legalName` | `str` | Full legal name |
 | `legalShortName` | `str` | Short name or acronym |
 | `pid` | `str` | Persistent identifier (ROR, etc.) |
@@ -55,10 +56,10 @@ from aireloom.endpoints import ResearchProductsFilters, ProjectsFilters
 
 async with AireloomSession() as session:
     products = await session.research_products.collect(
-        filters=ResearchProductsFilters(relOrganizationId=org.id), max_items=20,
+        filters=ResearchProductsFilters(relOrganizationId=org.id), limit=20,
     )
     projects = await session.projects.collect(
-        filters=ProjectsFilters(relOrganizationId=org.id), max_items=20,
+        filters=ProjectsFilters(relOrganizationId=org.id), limit=20,
     )
 ```
 

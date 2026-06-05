@@ -13,6 +13,7 @@ async with AireloomSession() as session:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `search` | `str` | Full-text search query |
 | `type` | `str` | `publication`, `dataset`, `software`, `other` |
 | `mainTitle` | `str` | Filter by main title |
 | `pid` | `str` | Persistent identifier (e.g. DOI) |

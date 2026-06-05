@@ -13,6 +13,7 @@ async with AireloomSession() as session:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `search` | `str` | Full-text search query |
 | `title` | `str` | Project title |
 | `keywords` | `list[str]` | Keywords |
 | `acronym` | `str` | Project acronym |
@@ -71,6 +72,6 @@ from aireloom.endpoints import ResearchProductsFilters
 
 async with AireloomSession() as session:
     outputs = await session.research_products.collect(
-        filters=ResearchProductsFilters(relProjectId=project.id), max_items=50,
+        filters=ResearchProductsFilters(relProjectId=project.id), limit=50,
     )
 ```

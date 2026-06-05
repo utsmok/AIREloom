@@ -90,7 +90,7 @@ Every resource client provides three helpers on top of `iterate()`:
 ```python
 async with AireloomSession() as session:
     # Collect into a list
-    papers = await session.research_products.collect(filters=f, max_items=100)
+    papers = await session.research_products.collect(filters=f, limit=100)
 
     # Count without downloading
     total = await session.research_products.count(filters=f)

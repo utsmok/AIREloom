@@ -13,6 +13,7 @@ async with AireloomSession() as session:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `search` | `str` | Full-text search query |
 | `officialName` | `str` | Official data source name |
 | `englishName` | `str` | English name |
 | `legalShortName` | `str` | Short name or acronym |

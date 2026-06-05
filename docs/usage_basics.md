@@ -37,7 +37,7 @@ Every session exposes a property per entity type:
 | `session.persons` | `PersonsClient` | Persons |
 | `session.scholix` | `ScholixClient` | Scholix links |
 
-Every client above (except `ScholixClient`) supports the same five operations.
+Every client above (except `ScholixClient`) supports the same five operations. `ScholixClient` uses `search_links()` and `iterate_links()` instead — see [Scholix](usage/scholix.md).
 
 ## Common operations
 
