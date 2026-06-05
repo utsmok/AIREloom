@@ -2,11 +2,10 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #     "aireloom",
+#     "certifi",
 #     "marimo",
 # ]
 #
-# [tool.marimo.runtime]
-# auto_instantiate = true
 # ///
 
 import marimo

@@ -2,11 +2,9 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #   "aireloom",
+#   "certifi",
 #   "marimo",
 # ]
-#
-# [tool.uv.sources]
-# aireloom = { path = "..", editable = true }
 # ///
 
 import marimo
