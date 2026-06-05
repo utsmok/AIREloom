@@ -18,6 +18,8 @@ def _():
 
     mo.md(
         r"""
+    > 💡 **Switch to code view with Ctrl+. to see all code cells**
+
     # Convenience Queries — High-Level Research Workflows
 
     `AireloomSession.queries` exposes nine pre-built query functions that

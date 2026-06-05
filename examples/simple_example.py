@@ -1,117 +1,136 @@
-#!/usr/bin/env python3
-"""
-Simple AIREloom Usage Example
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "aireloom",
+#     "marimo",
+# ]
+#
+# [tool.marimo.runtime]
+# auto_instantiate = false
+# ///
 
-This script demonstrates basic usage of the AIREloom library
-for retrieving and analyzing OpenAIRE research data.
+import marimo
 
-Run with: uv run examples/simple_example.py
-"""
-
-import asyncio
-import os
-from datetime import datetime
-
-from dotenv import load_dotenv
-from rich.console import Console
-from rich.table import Table
-
-from aireloom import AireloomClient
-from aireloom.endpoints import ResearchProductsFilters
-
-console = Console()
+__generated_with = "0.13.15"
+app = marimo.App(width="medium")
 
 
-async def main():
-    """Demonstrate basic AIREloom usage."""
-    console.print("[bold blue]🚀 AIREloom Simple Example[/bold blue]")
+@app.cell
+def _():
+    import marimo as mo
 
-    # Load credentials
-    load_dotenv(".env")
-    client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
-    client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
+    mo.md(
+        """
+    # AIREloom Quick Start
 
-    if not client_id or not client_secret:
-        console.print("[red]❌ Missing credentials in .env[/red]")
-        return
+    **Switch to code view with Ctrl+. to see all code cells**
 
-    # Initialize client
-    async with AireloomClient(
-        client_id=client_id, client_secret=client_secret
-    ) as client:
-        # Example 1: Get a single research product
-        console.print("\n[yellow]📄 Example 1: Get single research product[/yellow]")
-        try:
-            product = await client.research_products.get(
-                "doi_dedup___::2b3cb7130c506d1c3a05e9160b2c4108"
-            )
-            console.print(f"Found: {product.title}")
-        except Exception as e:
-            console.print(f"[red]Error: {e}[/red]")
+    This notebook demonstrates basic usage of AIREloom for retrieving
+    and searching OpenAIRE research data.
+    """
+    )
+    return (mo,)
 
-        # Example 2: Search research products
-        console.print("\n[yellow]🔍 Example 2: Search research products[/yellow]")
-        filters = ResearchProductsFilters(
-            search="machine learning", fromPublicationDate=datetime(2024, 1, 1).date()
+
+@app.cell
+def _():
+    from aireloom import AireloomClient
+    from aireloom.endpoints import ResearchProductsFilters
+    from datetime import date
+
+    client = AireloomClient()
+    return ResearchProductsFilters, client, date
+
+
+@app.cell
+async def _(client, mo):
+    mo.md("## 📄 Get a Single Research Product")
+    try:
+        product = await client.research_products.get(
+            "doi_dedup___::2b3cb7130c506d1c3a05e9160b2c4108"
+        )
+        mo.md(f"**Found:** {product.title}")
+    except Exception as e:
+        mo.md(f"**Error:** {e}")
+    return (product,)
+
+
+@app.cell
+async def _(ResearchProductsFilters, client, date, mo):
+    mo.md("## 🔍 Search Research Products")
+    filters = ResearchProductsFilters(
+        search="machine learning", fromPublicationDate=date(2024, 1, 1)
+    )
+
+    response = await client.research_products.search(
+        page=1, page_size=5, filters=filters
+    )
+
+    total_results = (
+        response.header.numFound if response.header else len(response.results or [])
+    )
+
+    mo.md(f"Found **{total_results}** total results")
+    return filters, response, total_results
+
+
+@app.cell
+def _(mo, response):
+    mo.md("### Results Table")
+
+    results = response.results or []
+    rows = []
+    for product in results[:5]:
+        title = product.title or "No title"
+        rows.append(
+            {
+                "Title": title,
+                "Type": product.type or "Unknown",
+                "Date": product.publicationDate or "N/A",
+            }
         )
 
-        response = await client.research_products.search(
-            page=1, page_size=5, filters=filters
-        )
+    mo.ui.table(rows, selection=None)
+    return (rows,)
 
-        total_results = (
-            response.header.numFound if response.header else len(response.results or [])
-        )
-        console.print(f"Found {total_results} total results")
 
-        # Display results in a table
-        table = Table(title="Recent Machine Learning Research")
-        table.add_column("Title", style="cyan", max_width=50)
-        table.add_column("Type", style="magenta")
-        table.add_column("Date", style="green")
+@app.cell
+async def _(client, filters, mo):
+    mo.md("## 🔄 Iterate Through Results")
 
-        results = response.results or []
-        for product in results[:5]:
-            title = product.title or "No title"
-            title_display = title[:47] + "..." if len(title) > 50 else title
-            table.add_row(
-                title_display,
-                product.type or "Unknown",
-                product.publicationDate or "N/A",
+    count = 0
+    async for product in client.research_products.iterate(
+        page_size=10, filters=filters
+    ):
+        count += 1
+        if count >= 25:
+            break
+
+    mo.md(f"Processed **{count}** research products (capped at 25)")
+    return (count,)
+
+
+@app.cell
+async def _(client, mo):
+    mo.md("## 📊 Search Projects")
+    try:
+        projects_response = await client.projects.search(page_size=3)
+        project_rows = []
+        for project in projects_response.results or []:
+            project_rows.append(
+                {
+                    "Title": project.title or "No title",
+                    "Code": project.code or "N/A",
+                    "Funding": (
+                        project.funding[0].fundingPath if project.funding else "N/A"
+                    ),
+                }
             )
-
-        console.print(table)
-
-        # Example 3: Iterate through all results (limited)
-        console.print("\n[yellow]🔄 Example 3: Iterate through results[/yellow]")
-        count = 0
-        async for product in client.research_products.iterate(
-            page_size=10, filters=filters
-        ):
-            count += 1
-            if count <= 3:  # Limit for demo
-                title = product.title or "No title"
-                console.print(f"  {count}. {title[:60]}...")
-            if count >= 10:  # Stop after 10 for demo
-                break
-
-        console.print(f"Processed {count} research products")
-
-        # Example 4: Get project information
-        console.print("\n[yellow]📊 Example 4: Search projects[/yellow]")
-        try:
-            projects = await client.projects.search(page_size=3)
-            total_projects = getattr(
-                projects.header, "total", len(projects.results or [])
-            )
-            console.print(f"Found {total_projects} total projects")
-
-            project_results = projects.results or []
-            for project in project_results[:3]:
-                console.print(f"  • {project.title or 'No title'}")
-        except Exception as e:
-            console.print(f"[red]Error fetching projects: {e}[/red]")
+        mo.ui.table(project_rows, selection=None)
+    except Exception as e:
+        mo.md(f"**Error fetching projects:** {e}")
+    return (project_rows,)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run()

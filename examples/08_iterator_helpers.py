@@ -16,6 +16,8 @@ app = marimo.App(width="medium")
 def _(mo):
     mo.md(
         r"""
+    > 💡 **Switch to code view with Ctrl+. to see all code cells**
+
     # Iterator Helpers — collect(), count(), first()
 
     AIREloom provides three convenience helpers on every resource client that build on top

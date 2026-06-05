@@ -1,164 +1,203 @@
-#!/usr/bin/env python3
-"""
-Scholix Link Discovery — Discover datasets linked to a publication DOI.
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "aireloom",
+#     "marimo",
+# ]
+# ///
+import marimo
 
-This example queries the Scholix (Scholexplorer) API to find all datasets
-linked to a specific publication DOI, then displays the relationships in a
-rich table showing source→target, relationship type, and providers.
-
-Run with: uv run examples/02_scholix_link_discovery.py
-
-What AIREloom provides over raw HTTP:
-  - Typed ScholixRelationship objects with nested ScholixEntity, identifiers,
-    and relationship types — no manual dict traversal.
-  - ScholixFilters with Pydantic validation (sourcePid/targetPid enforced,
-    extra='forbid' catches typos before the API call).
-  - Async iteration via iterate_links() with automatic pagination — no manual
-    page tracking or cursor juggling.
-"""
-
-import asyncio
-import os
-from collections import Counter
-
-from dotenv import load_dotenv
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
-from aireloom import AireloomClient
-from aireloom.endpoints import ScholixFilters
-
-console = Console()
-
-# A well-known publication DOI with 118+ Scholix links to related entities.
-SOURCE_DOI = "10.1016/j.respol.2021.104226"
+__generated_with = "0.23.9"
+app = marimo.App(width="medium")
 
 
-def _pid_str(identifiers: list, scheme: str = "doi") -> str:
-    """Extract the first identifier matching a scheme, or the first available."""
-    for pid in identifiers:
-        s = getattr(pid, "id_scheme", "") or ""
-        if s.lower() == scheme:
-            return getattr(pid, "id_val", "")
-    if identifiers:
-        return getattr(identifiers[0], "id_val", "")
-    return "—"
+@app.cell
+def _():
+    import marimo as mo
+
+    mo.md(
+        """
+    # Scholix Link Discovery
+
+    Discover datasets linked to a publication DOI via the Scholix (Scholexplorer) API.
+
+    **Switch to code view with Ctrl+. to see all code cells**
+    """
+    )
+    return (mo,)
 
 
-async def main() -> None:
-    load_dotenv(".env")
-    client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
-    client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
-    if not client_id or not client_secret:
-        console.print(
-            "[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]"
+@app.cell
+def _():
+    from collections import Counter
+
+    from aireloom import AireloomClient
+    from aireloom.endpoints import ScholixFilters
+
+    SOURCE_DOI = "10.1016/j.respol.2021.104226"
+
+    client = AireloomClient()
+    return AireloomClient, Counter, ScholixFilters, SOURCE_DOI, client
+
+
+@app.cell
+def _pid_str():
+    def _pid_str(identifiers: list, scheme: str = "doi") -> str:
+        """Extract the first identifier matching a scheme, or the first available."""
+        for pid in identifiers:
+            s = getattr(pid, "id_scheme", "") or ""
+            if s.lower() == scheme:
+                return getattr(pid, "id_val", "")
+        if identifiers:
+            return getattr(identifiers[0], "id_val", "")
+        return "—"
+
+    return (_pid_str,)
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+async def _(ScholixFilters, SOURCE_DOI, client, mo):
+    filters = ScholixFilters(sourcePid=SOURCE_DOI, targetType="Dataset")
+
+    mo.md(
+        f"""
+    ## 1. Single-page search (up to 20 results)
+
+    Querying Scholix for datasets linked to DOI `{SOURCE_DOI}` …
+    """
+    )
+    return (filters,)
+
+
+@app.cell
+async def _(SOURCE_DOI, client, filters, mo):
+    try:
+        response = await client.scholix.search_links(
+            page=0, page_size=20, filters=filters
         )
-        return
+        total = response.total_links
+        page_count = len(response.result)
+    except Exception as exc:
+        total = 0
+        page_count = 0
+        response = None
 
-    console.print(
-        Panel(
-            f"Discovering Scholix links for publication DOI:\n[bold cyan]{SOURCE_DOI}[/bold cyan]",
-            title="Scholix Link Discovery",
-            border_style="blue",
+    mo.md(
+        f"""
+    **Total linked datasets reported by Scholix:** {total}
+    **Retrieved in this page:** {page_count}
+    """
+    )
+    return page_count, response, total
+
+
+@app.cell
+async def _(SOURCE_DOI, client, filters, mo):
+    mo.md("## 2. Streaming ALL linked datasets via `iterate_links()`")
+
+    links = []
+    try:
+        async for rel in client.scholix.iterate_links(page_size=50, filters=filters):
+            links.append(rel)
+            if len(links) >= 100:
+                break
+    except Exception:
+        pass
+
+    mo.md(f"Collected **{len(links)}** links (capped at 100 for demo).")
+    return (links,)
+
+
+@app.cell
+async def _(links, mo):
+    if not links:
+        mo.md("**No linked datasets found.**")
+    return
+
+
+@app.cell
+def _(SOURCE_DOI, links, mo, _pid_str):
+    if not links:
+        mo.md("")
+
+    # Build table data
+    rows = []
+    for i, rel in enumerate(links[:20], 1):
+        target = rel.target
+        title = (target.title or "—")[:55]
+        doi = _pid_str(target.identifier, "doi")
+        rel_name = rel.relationship_type.name
+        providers = ", ".join(p.name for p in (rel.link_provider or []))[:30]
+        rows.append(
+            {
+                "#": i,
+                "Target Title": title,
+                "Target DOI": doi,
+                "Relationship": rel_name,
+                "Providers": providers,
+            }
         )
+
+    table = mo.ui.table(
+        data=rows,
+        label=f"Linked Datasets for {SOURCE_DOI} (first 20 shown)",
     )
 
-    async with AireloomClient(
-        client_id=client_id, client_secret=client_secret
-    ) as client:
-        # --- Step 1: search_links (single-page snapshot) -----------------------
-        # ScholixFilters requires sourcePid or targetPid — Pydantic validates
-        # field names. A typo like 'sorucePid' raises ValidationError instantly.
-        filters = ScholixFilters(sourcePid=SOURCE_DOI, targetType="Dataset")
+    remaining = len(links) - 20 if len(links) > 20 else 0
+    footer = f"… and {remaining} more (capped for display)" if remaining > 0 else ""
 
-        console.print("\n[yellow]1. Single-page search (up to 20 results)[/yellow]")
-        try:
-            response = await client.scholix.search_links(
-                page=0, page_size=20, filters=filters
-            )
-        except Exception as exc:
-            console.print(f"[red]search_links failed: {exc}[/red]")
-            return
+    mo.md(f"{table}\n{footer}")
+    return
 
-        # Typed response: .total_links, .result (list[ScholixRelationship])
-        total = response.total_links
-        console.print(
-            f"   Total linked datasets reported by Scholix: [bold]{total}[/bold]"
-        )
-        console.print(f"   Retrieved in this page: {len(response.result)}")
 
-        # --- Step 2: iterate_links (async generator over ALL pages) -----------
-        console.print(
-            "\n[yellow]2. Streaming ALL linked datasets via iterate_links()[/yellow]"
-        )
-        console.print("   [dim](AIREloom handles pagination automatically)[/dim]")
+@app.cell
+def _(Counter, links, mo):
+    rel_type_counts = Counter(rel.relationship_type.name for rel in links)
 
-        links = []
-        rel_type_counts: Counter[str] = Counter()
-        try:
-            async for rel in client.scholix.iterate_links(
-                page_size=50, filters=filters
-            ):
-                links.append(rel)
-                # Typed access to relationship_type.name — no dict key guessing.
-                rel_name = rel.relationship_type.name
-                rel_type_counts[rel_name] += 1
-                if len(links) >= 100:  # cap for demo
-                    break
-        except Exception as exc:
-            console.print(f"[red]iterate_links failed: {exc}[/red]")
+    lines = ["## 3. Relationship type distribution\n"]
+    for rel_name, count in rel_type_counts.most_common():
+        lines.append(f"- **{rel_name}**: {count}")
+    lines.append(f"\n**Total links collected:** {len(links)}")
 
-        if not links:
-            console.print("[yellow]No linked datasets found.[/yellow]")
-            return
+    mo.md("\n".join(lines))
+    return
 
-        # --- Step 3: Display results in a rich table -------------------------
-        table = Table(
-            title=f"Linked Datasets for {SOURCE_DOI}",
-            show_lines=True,
-            border_style="dim",
-        )
-        table.add_column("#", style="dim", width=4)
-        table.add_column("Target Title", style="cyan", max_width=55)
-        table.add_column("Target DOI", style="green", max_width=38)
-        table.add_column("Relationship", style="magenta")
-        table.add_column("Providers", style="yellow", max_width=30)
 
-        for i, rel in enumerate(links[:20], 1):
-            target = rel.target
-            title = (target.title or "—")[:55]
-            doi = _pid_str(target.identifier, "doi")
-            rel_name = rel.relationship_type.name
-            providers = ", ".join(p.name for p in (rel.link_provider or []))[:30]
-            table.add_row(str(i), title, doi, rel_name, providers)
+@app.cell
+def _(links, mo):
+    if not links:
+        mo.md("")
 
-        console.print(table)
-        if len(links) > 20:
-            console.print(
-                f"   [dim]... and {len(links) - 20} more (capped for display)[/dim]"
-            )
+    sample = links[0]
+    src_ids = sample.source.identifier
+    src_pid = f"{src_ids[0].id_scheme}:{src_ids[0].id_val}" if src_ids else "—"
 
-        # --- Step 4: Summary statistics from typed model fields ---------------
-        console.print("\n[bold]Relationship type distribution:[/bold]")
-        for rel_name, count in rel_type_counts.most_common():
-            console.print(f"  • {rel_name}: {count}")
+    mo.md(
+        f"""
+    ## 4. Sample link — typed field access
 
-        console.print(f"\n[bold]Total links collected:[/bold] {len(links)}")
+    | Field | Value |
+    |---|---|
+    | `source.type` | `{sample.source.type!r}` |
+    | `source.title` | `{sample.source.title!r}` |
+    | `target.type` | `{sample.target.type!r}` |
+    | `relationship_type` | `{sample.relationship_type.name!r}` |
+    | `source PID` | `{src_pid}` |
+    """
+    )
+    return
 
-        # Show a single link's structure to highlight typed access
-        sample = links[0]
-        console.print("\n[bold]Sample link — typed field access vs raw dict:[/bold]")
-        console.print(f"  source.type       = {sample.source.type!r}")
-        console.print(f"  source.title      = {sample.source.title!r}")
-        console.print(f"  target.type       = {sample.target.type!r}")
-        console.print(f"  relationship_type = {sample.relationship_type.name!r}")
-        src_ids = sample.source.identifier
-        if src_ids:
-            console.print(
-                f"  source PID        = {src_ids[0].id_scheme}:{src_ids[0].id_val}"
-            )
+
+@app.cell
+async def _(client):
+    await client.aclose()
+    return
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run()

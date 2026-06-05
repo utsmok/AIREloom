@@ -1,4 +1,14 @@
-#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "aireloom",
+#     "marimo",
+# ]
+#
+# [tool.marimo.display]
+# cell_output = "above"
+# ///
+
 """
 Advanced Filtering — Complex filter combinations with Pydantic validation.
 
@@ -7,42 +17,111 @@ combining type/date/access/subject constraints, using sort parameters, and
 showing how Pydantic validation catches mistakes before hitting the API.
 
 Run with: uv run examples/05_advanced_filtering.py
-
-What AIREloom provides over raw HTTP:
-  - Pydantic filter models with extra='forbid': typos like 'fromDate' instead of
-    'fromPublicationDate' raise ValidationError IMMEDIATELY — no silent 400 or
-    unexpected empty results from the API.
-  - Type-coerced fields: date fields accept datetime.date objects, bools are
-    validated, Literal types constrain values to valid options.
-  - Sort parameter validation via the library's endpoint definitions.
-  - Multiple resource clients share one authenticated session — no manual token
-    management or header injection.
 """
 
-import asyncio
-import os
-from datetime import date
+import marimo
 
-from dotenv import load_dotenv
-from rich.console import Console
-from rich.panel import Panel
-from rich.table import Table
-
-from aireloom import AireloomClient
-from aireloom.endpoints import ProjectsFilters, ResearchProductsFilters, ScholixFilters
-
-console = Console()
+__generated_with = "0.13.9"
+app = marimo.App(width="medium")
 
 
-async def demo_research_products(client: AireloomClient) -> None:
-    """Complex ResearchProductsFilters: type + date range + open access + subject."""
-    console.print(
-        "\n[bold cyan]━━━ Research Products: Multi-Field Filter ━━━[/bold cyan]"
+@app.cell
+def _():
+    import marimo as mo
+    from datetime import date
+
+    from aireloom import AireloomClient
+    from aireloom.endpoints import (
+        ProjectsFilters,
+        ResearchProductsFilters,
+        ScholixFilters,
     )
 
-    # Build a complex filter combining multiple dimensions.
-    # Each field is type-checked by Pydantic. 'fromPublicationDate' accepts date objects.
-    # 'bestOpenAccessRightLabel' constrains to known labels.
+    return (
+        AireloomClient,
+        ProjectsFilters,
+        ResearchProductsFilters,
+        ScholixFilters,
+        date,
+        mo,
+    )
+
+
+@app.cell
+def _(mo):
+    mo.md(
+        """
+    # Advanced Filtering: Complex Queries & Validation
+
+    **Switch to code view with Ctrl+. to see all code cells**
+
+    This notebook demonstrates:
+
+    - Building complex **ResearchProductsFilters** (type + date + OA + peer-reviewed + subjects)
+    - Building **ProjectsFilters** (funding program + date range + sort)
+    - How **Pydantic validation** catches typos and invalid values *before* any API call
+    """
+    )
+
+
+@app.cell
+async def _(AireloomClient, ProjectsFilters, date, mo):
+    mo.md("## EC-Funded Projects (2023–2024)").center()
+
+    filters = ProjectsFilters(
+        fundingShortName="EC",
+        fromStartDate=date(2023, 1, 1),
+        toStartDate=date(2024, 12, 31),
+    )
+
+    mo.md(
+        f"""
+    **Filters applied:**
+
+    | Field | Value |
+    |---|---|
+    | `fundingShortName` | `EC` |
+    | `fromStartDate` | `2023-01-01` |
+    | `toStartDate` | `2024-12-31` |
+    | `sort_by` | `startDate DESC` |
+    """
+    )
+
+    async with AireloomClient() as client:
+        try:
+            response = await client.projects.search(
+                page=1, page_size=10, filters=filters, sort_by="startDate DESC"
+            )
+        except Exception as exc:
+            mo.md(f"**Search failed:** {exc}")
+            return
+
+    total = response.header.numFound or 0
+    mo.md(f"**Results:** {total:,} EC-funded projects starting 2023–2024").center()
+
+    rows = []
+    for project in (response.results or [])[:10]:
+        funded = "—"
+        if project.granted and project.granted.fundedAmount is not None:
+            curr = project.granted.currency or "EUR"
+            funded = f"{project.granted.fundedAmount:,.0f} {curr}"
+        rows.append(
+            {
+                "Acronym": project.acronym or "—",
+                "Title": (project.title or "—")[:80],
+                "Code": project.code or "—",
+                "Start → End": f"{project.startDate or '?'} → {project.endDate or '?'}",
+                "Funded": funded,
+            }
+        )
+
+    mo.ui.table(rows, selection=None)
+
+
+@app.cell
+async def _(AireloomClient, ResearchProductsFilters, date, mo):
+    mo.md("## Research Products: Multi-Field Filter").center()
+
     filters = ResearchProductsFilters(
         search="machine learning",
         type="publication",
@@ -53,194 +132,159 @@ async def demo_research_products(client: AireloomClient) -> None:
         subjects=["computer science"],
     )
 
-    console.print("  [dim]Filters:[/dim]")
-    console.print("    search = 'machine learning'")
-    console.print("    type = 'publication'")
-    console.print("    fromPublicationDate = 2023-01-01")
-    console.print("    toPublicationDate = 2024-12-31")
-    console.print("    bestOpenAccessRightLabel = 'OPEN'")
-    console.print("    isPeerReviewed = True")
-    console.print("    subjects = ['computer science']")
+    mo.md(
+        """
+    **Filters applied:**
 
-    try:
-        response = await client.research_products.search(
-            page=1,
-            page_size=10,
-            filters=filters,
-            sort_by="publicationDate DESC",
-        )
-    except Exception as exc:
-        console.print(f"[red]Search failed: {exc}[/red]")
-        return
+    | Field | Value |
+    |---|---|
+    | `search` | `machine learning` |
+    | `type` | `publication` |
+    | `fromPublicationDate` | `2023-01-01` |
+    | `toPublicationDate` | `2024-12-31` |
+    | `bestOpenAccessRightLabel` | `OPEN` |
+    | `isPeerReviewed` | `True` |
+    | `subjects` | `['computer science']` |
+    """
+    )
+
+    async with AireloomClient() as client:
+        try:
+            response = await client.research_products.search(
+                page=1,
+                page_size=10,
+                filters=filters,
+                sort_by="publicationDate DESC",
+            )
+        except Exception as exc:
+            mo.md(f"**Search failed:** {exc}")
+            return
 
     total = response.header.numFound or 0
-    console.print(f"\n  Results: [bold]{total:,}[/bold] matching publications\n")
+    mo.md(f"**Results:** {total:,} matching publications").center()
 
-    table = Table(title="Open Access ML Publications (2023-2024)", border_style="dim")
-    table.add_column("Title", style="cyan", max_width=55)
-    table.add_column("DOI", style="green", max_width=32)
-    table.add_column("Date", style="yellow", width=12)
-    table.add_column("Publisher", style="magenta", max_width=22)
-
+    rows = []
     for product in (response.results or [])[:10]:
-        title = (product.title or "—")[:55]
         doi = "—"
         if product.pids:
             for pid in product.pids:
                 if (pid.scheme or "").lower() == "doi":
                     doi = pid.value or "—"
                     break
-        pub_date = product.publicationDate or "—"
-        publisher = (product.publisher or "—")[:22]
-        table.add_row(title, doi, pub_date, publisher)
-
-    console.print(table)
-
-    # Show how iterate() works with these filters (brief sample)
-    console.print("\n  [dim]Streaming first 5 via iterate() with same filters:[/dim]")
-    count = 0
-    try:
-        async for product in client.research_products.iterate(
-            page_size=50, filters=filters, sort_by="publicationDate DESC"
-        ):
-            count += 1
-            console.print(f"    {count}. {product.title}")
-            if count >= 5:
-                break
-    except Exception as exc:
-        console.print(f"    [red]iterate error: {exc}[/red]")
-
-
-async def demo_ec_projects(client: AireloomClient) -> None:
-    """ProjectsFilters: fundingShortName + date range + sort."""
-    console.print(
-        "\n[bold cyan]━━━ Projects: EC Funding with Date Range ━━━[/bold cyan]"
-    )
-
-    # Filter for European Commission-funded projects started in 2023+
-    filters = ProjectsFilters(
-        fundingShortName="EC",
-        fromStartDate=date(2023, 1, 1),
-        toStartDate=date(2024, 12, 31),
-    )
-
-    console.print("  [dim]Filters:[/dim]")
-    console.print("    fundingShortName = 'EC'")
-    console.print("    fromStartDate = 2023-01-01")
-    console.print("    toStartDate = 2024-12-31")
-
-    try:
-        response = await client.projects.search(
-            page=1, page_size=10, filters=filters, sort_by="startDate DESC"
+        rows.append(
+            {
+                "Title": (product.title or "—")[:80],
+                "DOI": doi,
+                "Date": product.publicationDate or "—",
+                "Publisher": (product.publisher or "—")[:30],
+            }
         )
-    except Exception as exc:
-        console.print(f"[red]Search failed: {exc}[/red]")
-        return
 
-    total = response.header.numFound or 0
-    console.print(
-        f"\n  Results: [bold]{total:,}[/bold] EC-funded projects starting 2023-2024\n"
+    table = mo.ui.table(rows, selection=None)
+
+    # iterate() sample
+    async with AireloomClient() as client:
+        iterated = []
+        try:
+            async for product in client.research_products.iterate(
+                page_size=50, filters=filters, sort_by="publicationDate DESC"
+            ):
+                iterated.append(product.title or "—")
+                if len(iterated) >= 5:
+                    break
+        except Exception as exc:
+            iterated.append(f"(error: {exc})")
+
+    sample = mo.md(
+        "**Streaming first 5 via `iterate()` with same filters:**\n\n"
+        + "\n".join(f"{i + 1}. {t}" for i, t in enumerate(iterated))
     )
 
-    table = Table(
-        title="Recent EC-Funded Projects", border_style="dim", show_lines=True
-    )
-    table.add_column("Acronym", style="cyan", max_width=14)
-    table.add_column("Title", style="cyan", max_width=50)
-    table.add_column("Code", style="green", max_width=14)
-    table.add_column("Start → End", style="yellow", width=22)
-    table.add_column("Funded", style="magenta", max_width=16)
-
-    for project in (response.results or [])[:10]:
-        acronym = project.acronym or "—"
-        title = (project.title or "—")[:50]
-        code = project.code or "—"
-        period = f"{project.startDate or '?'} → {project.endDate or '?'}"
-        funded = "—"
-        if project.granted and project.granted.fundedAmount is not None:
-            curr = project.granted.currency or "EUR"
-            funded = f"{project.granted.fundedAmount:,.0f} {curr}"
-        table.add_row(acronym, title, code, period, funded)
-
-    console.print(table)
+    mo.vstack([table, sample])
 
 
-async def demo_validation_errors() -> None:
-    """Show that Pydantic catches invalid filter values at instantiation."""
-    console.print(
-        "\n[bold cyan]━━━ Pydantic Validation: Catching Errors Early ━━━[/bold cyan]"
+@app.cell
+def _(ResearchProductsFilters, ScholixFilters, mo):
+    mo.md(
+        """
+    ## Pydantic Validation: Catching Errors Early
+
+    All filter models use `extra='forbid'` and strict type checking.
+    Typos, invalid values, and wrong types are caught **at instantiation** —
+    no silent 400 errors or empty result sets from the server.
+    """
     )
 
-    # --- Typo in field name ---
-    console.print("\n  [yellow]1. Typo in filter field name:[/yellow]")
-    console.print('    ResearchProductsFilters(tipe="publication")  # wrong key')
+    results = []
+
+    # 1. Typo in field name
     try:
         ResearchProductsFilters(tipe="publication")  # type: ignore[call-arg]
     except Exception as exc:
-        console.print(f"    [green]✓ Caught instantly:[/green] {type(exc).__name__}")
-        console.print(f"    [dim]{exc}[/dim]")
+        results.append(
+            (
+                "Typo in filter field name",
+                "tipe='publication'",
+                type(exc).__name__,
+                str(exc),
+            )
+        )
 
-    # --- Invalid literal value ---
-    console.print("\n  [yellow]2. Invalid literal value for 'type':[/yellow]")
-    console.print('    ResearchProductsFilters(type="journal")  # not a valid type')
+    # 2. Invalid literal value for 'type'
     try:
         ResearchProductsFilters(type="journal")  # type: ignore[call-arg]
     except Exception as exc:
-        console.print(f"    [green]✓ Caught instantly:[/green] {type(exc).__name__}")
-        console.print(f"    [dim]{exc}[/dim]")
+        results.append(
+            (
+                "Invalid literal value for 'type'",
+                "type='journal'",
+                type(exc).__name__,
+                str(exc),
+            )
+        )
 
-    # --- Invalid date type ---
-    console.print("\n  [yellow]3. Wrong type for date field:[/yellow]")
-    console.print('    ResearchProductsFilters(fromPublicationDate="last year")')
+    # 3. Wrong type for date field
     try:
         ResearchProductsFilters(fromPublicationDate="last year")  # type: ignore[arg-type]
     except Exception as exc:
-        console.print(f"    [green]✓ Caught instantly:[/green] {type(exc).__name__}")
-        console.print(f"    [dim]{exc}[/dim]")
+        results.append(
+            (
+                "Wrong type for date field",
+                "fromPublicationDate='last year'",
+                type(exc).__name__,
+                str(exc),
+            )
+        )
 
-    # --- Extra field (forbidden by config) ---
-    console.print("\n  [yellow]4. Unknown field (extra='forbid'):[/yellow]")
-    console.print('    ScholixFilters(sourceDOI="10.1234/x")  # should be sourcePid')
+    # 4. Unknown field (extra='forbid')
     try:
         ScholixFilters(sourceDOI="10.1234/x")  # type: ignore[call-arg]
     except Exception as exc:
-        console.print(f"    [green]✓ Caught instantly:[/green] {type(exc).__name__}")
-        console.print(f"    [dim]{exc}[/dim]")
-
-    console.print(
-        "\n  [bold green]All invalid inputs caught BEFORE any API call.[/bold green]"
-    )
-    console.print("  With raw HTTP, these would either silently return empty results")
-    console.print("  or produce confusing 400 errors from the server.")
-
-
-async def main() -> None:
-    load_dotenv(".env")
-    client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
-    client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
-    if not client_id or not client_secret:
-        console.print(
-            "[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]"
+        results.append(
+            (
+                "Unknown field (extra='forbid')",
+                "sourceDOI='10.1234/x'",
+                type(exc).__name__,
+                str(exc),
+            )
         )
-        return
 
-    console.print(
-        Panel(
-            "Complex filters + sort + Pydantic validation",
-            title="Advanced Filtering Demo",
-            border_style="blue",
+    sections = []
+    for label, code_snippet, exc_type, exc_msg in results:
+        sections.append(
+            f"### {label}\n\n"
+            f"```python\n{code_snippet}\n```\n\n"
+            f"**✓ Caught:** `{exc_type}`\n\n"
+            f"> {exc_msg}\n"
         )
+
+    sections.append(
+        "\n---\n\n**All invalid inputs caught BEFORE any API call.**\n\n"
+        "With raw HTTP, these would either silently return empty results or produce confusing 400 errors."
     )
 
-    async with AireloomClient(
-        client_id=client_id, client_secret=client_secret
-    ) as client:
-        await demo_research_products(client)
-        await demo_ec_projects(client)
-
-    # Validation demo doesn't need a client
-    await demo_validation_errors()
+    mo.md("\n".join(sections))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run()

@@ -16,14 +16,16 @@ app = marimo.App(width="medium")
 def _(mo):
     mo.md(
         """
-# Computed Fields & Safe Types
+    > 💡 **Switch to code view with Ctrl+. to see all code cells**
 
-AIREloom models include **computed properties** that eliminate boilerplate
-(null-checking, nested navigation, manual extraction) and **safe types**
-(`SafeStr`, `SafeList`) that default to `""` and `[]` instead of `None`.
+    # Computed Fields & Safe Types
 
-This notebook demonstrates every computed field and safe type across all
-entity models.
+    AIREloom models include **computed properties** that eliminate boilerplate
+    (null-checking, nested navigation, manual extraction) and **safe types**
+    (`SafeStr`, `SafeList`) that default to `""` and `[]` instead of `None`.
+
+    This notebook demonstrates every computed field and safe type across all
+    entity models.
 """
     )
 

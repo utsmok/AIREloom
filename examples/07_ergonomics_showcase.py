@@ -23,6 +23,8 @@ def _():
 def _(mo):
     mo.md(
         r"""
+    > 💡 **Switch to code view with Ctrl+. to see all code cells**
+
     # Ergonomics Showcase — Before & After
 
     AIREloom provides an **ergonomics layer** on top of the raw API:
@@ -39,14 +41,12 @@ def _(mo):
 
 @app.cell
 def _():
-    from aireloom import AireloomClient
     from aireloom.endpoints import ResearchProductsFilters
     from aireloom.session import AireloomSession
 
     DOI = "10.1038/s41586-024-07386-0"
-    client = AireloomClient()
     session = AireloomSession()
-    return DOI, ResearchProductsFilters, client, session
+    return DOI, ResearchProductsFilters, session
 
 
 @app.cell
@@ -55,8 +55,8 @@ def _(mo):
 
 
 @app.cell
-async def _(DOI, ResearchProductsFilters, client, mo):
-    resp = await client.research_products.search(
+async def _(DOI, ResearchProductsFilters, mo, session):
+    resp = await session.research_products.search(
         page=1,
         page_size=1,
         filters=ResearchProductsFilters(pid=DOI),
