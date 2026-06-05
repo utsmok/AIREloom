@@ -116,8 +116,7 @@ async def _(SOURCE_DOI, client, filters, mo):
 @app.cell
 async def _(links, mo):
     if not links:
-        mo.md("**No linked datasets found.**")
-    return
+        mo.stop(True, mo.md("**No linked datasets found.**"))
 
 
 @app.cell

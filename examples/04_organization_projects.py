@@ -238,5 +238,10 @@ def _(mo):
     )
 
 
+@app.cell
+async def _(client):
+    await client.aclose()
+
+
 if __name__ == "__main__":
     app.run()

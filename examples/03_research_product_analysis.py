@@ -220,12 +220,16 @@ def _(
     """
     )
 
-    mo.md("### Access Rights")
-    display(access_table)
-    display(publisher_table)
-    display(citation_table)
-    display(year_table)
-    display(summary)
+    mo.vstack(
+        [
+            mo.md("### Access Rights"),
+            access_table,
+            publisher_table,
+            citation_table,
+            year_table,
+            summary,
+        ]
+    )
     return (
         access_table,
         citation_rows,
