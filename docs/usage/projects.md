@@ -1,57 +1,18 @@
 # Projects
 
-Projects represent funded research initiatives — EU Framework Programme grants, national funding calls, and more. Use `session.projects` to discover projects, inspect funding details, and find linked research outputs.
+Projects represent funded research initiatives — EU Framework Programme grants, national funding calls, and more.
 
-## Accessing the Client
-
-```python
-from aireloom import AireloomSession
-from aireloom.endpoints import ProjectsFilters
-
-async with AireloomSession() as session:
-    response = await session.projects.search(
-        filters=ProjectsFilters(fundingShortName="EC"),
-        page_size=10,
-    )
-```
-
-## Fetch a Single Project
+## Access
 
 ```python
 async with AireloomSession() as session:
-    project = await session.projects.get(
-        "corda_______::6b9e0c4e1e5e4a1e5c6b9e0c4e1e5e4a"
-    )
-    print(project.title)
-    print(project.funder_name)
-    print(project.code)
+    client = session.projects  # ProjectsResource
 ```
 
-## Search with Filters
-
-```python
-from aireloom.endpoints import ProjectsFilters
-
-filters = ProjectsFilters(
-    search="machine learning",
-    fundingShortName="EC",
-    fromStartDate="2020-01-01",
-    toStartDate="2024-12-31",
-)
-
-async with AireloomSession() as session:
-    response = await session.projects.search(
-        filters=filters, sort_by="startDate desc"
-    )
-    for project in response.results:
-        print(f"{project.start_year} — {project.title[:60]}")
-```
-
-### Filter Reference
+## Filter Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `search` | `str` | General keyword search |
 | `title` | `str` | Project title |
 | `keywords` | `list[str]` | Keywords |
 | `acronym` | `str` | Project acronym |
@@ -67,33 +28,16 @@ async with AireloomSession() as session:
 | `relOrganizationName` | `str` | Linked organization name |
 | `relOrganizationCountryCode` | `str` | Linked organization country |
 
-See the [full filter reference](../endpoints/projects.md) for all available fields.
+See the [full filter reference](../endpoints/projects.md) for all available fields. See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
 
-### Sort Fields
+## Sort Fields
 
-Projects support sorting by: `relevance`, `startDate`, `endDate`.
+`relevance`, `startDate`, `endDate`. Use `"field asc"` or `"field desc"`.
 
-## Iterate Over Results
-
-```python
-from aireloom.endpoints import ProjectsFilters
-
-filters = ProjectsFilters(fundingShortName="EC", fromStartDate="2023-01-01")
-
-async with AireloomSession() as session:
-    async for project in session.projects.iterate(
-        filters=filters, sort_by="startDate desc"
-    ):
-        print(project.acronym, project.title[:50], project.funder_name)
-```
-
-## Model Overview
-
-Each result is a `Project` instance. Key fields:
+## Key Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `str` | OpenAIRE identifier |
 | `title` | `str` | Project title |
 | `acronym` | `str` | Short acronym |
 | `code` | `str \| None` | Project code or grant number |
@@ -103,7 +47,6 @@ Each result is a `Project` instance. Key fields:
 | `granted` | `Grant` | Awarded grant amounts |
 | `keywords` | `SafeList[str]` | Keywords |
 | `summary` | `str` | Project abstract |
-| `subjects` | `SafeList[str]` | Subject classifications |
 | `websiteUrl` | `str \| None` | Official website |
 | `openAccessMandateForPublications` | `bool \| None` | OA mandate for publications |
 | `openAccessMandateForDataset` | `bool \| None` | OA mandate for datasets |
@@ -117,7 +60,7 @@ Each result is a `Project` instance. Key fields:
 | `start_year` | `int \| None` | Year parsed from `startDate` |
 | `end_year` | `int \| None` | Year parsed from `endDate` |
 
-All `SafeList` fields (`fundings`, `keywords`, `subjects`) default to an empty list — never `None`.
+See [Features](../ergonomics.md) for an overview of computed properties and `SafeList`.
 
 ## Linked Entities
 
@@ -128,9 +71,6 @@ from aireloom.endpoints import ResearchProductsFilters
 
 async with AireloomSession() as session:
     outputs = await session.research_products.collect(
-        filters=ResearchProductsFilters(relProjectId=project.id),
-        max_items=50,
+        filters=ResearchProductsFilters(relProjectId=project.id), max_items=50,
     )
-    for p in outputs:
-        print(p.doi, p.mainTitle[:60])
 ```

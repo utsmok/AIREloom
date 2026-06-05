@@ -2,31 +2,26 @@
 
 **Async Python client for the [OpenAIRE Graph API](https://graph.openaire.eu/).**
 
+[![PyPI](https://img.shields.io/pypi/v/aireloom)](https://pypi.org/project/aireloom/)
+
 Built on [bibliofabric](https://github.com/afuetterer/bibliofabric), AIREloom provides a modern, typed interface to the OpenAIRE research graph — research products, projects, organizations, data sources, persons, and Scholix links.
 
 ## Features
 
-:rocket: &nbsp;**Async/await first** — native `asyncio` client with context-manager sessions  
-:gear: &nbsp;**Typed models** — Pydantic v2 models for every response, with IDE autocomplete everywhere  
-:arrows_counterclockwise: &nbsp;**Cursor pagination** — automatic page handling via `iterate()`, `collect()`, `count()`, `first()`  
-:wrench: &nbsp;**Ergonomics layer** — computed properties (`product.doi`, `product.is_open_access`), `SafeList`/`SafeStr` types, convenience queries  
-:link: &nbsp;**Scholix & Links** — Scholexplorer API integration plus research-product relations  
-:bust_in_silhouette: &nbsp;**Persons endpoint** — OpenAIRE Graph API v1 person entities  
+- **Async/await first** -- native asyncio client with context-manager sessions
+- **Typed models** -- Pydantic v2 for every response, with IDE autocomplete everywhere
+- **Cursor pagination** -- `iterate()`, `collect()`, `count()`, `first()` on every resource
+- **Ergonomics** -- computed properties, safe types (`SafeList`, `SafeStr`), convenience queries
+- **Full coverage** -- research products, projects, organizations, data sources, persons, Scholix links
 
 ## Install
 
 ```bash
-pip install aireloom
+uv add aireloom
 ```
 
 ## Quick Start
 
-```python
-from aireloom import AireloomSession
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/simple_example.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
-async with AireloomSession() as session:
-    product = await session.queries.search_by_doi("10.5281/zenodo.7664304")
-    print(product.mainTitle)
-```
-
-→ **[Get started →](getting_started.md)**
+[Get started](getting_started.md)

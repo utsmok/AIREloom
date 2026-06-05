@@ -25,7 +25,9 @@ nav:
   - Home: index.md
   - Getting Started: getting_started.md
   - Installation: installation.md
-  - Usage:
+  - Basic Usage: usage_basics.md
+  - Features: ergonomics.md
+  - Entities:
       - Research Products: usage/research_products.md
       - Data Sources: usage/data_sources.md
       - Organizations: usage/organizations.md
@@ -33,7 +35,6 @@ nav:
       - Persons: usage/persons.md
       - Links: usage/links.md
       - Scholix: usage/scholix.md
-  - Ergonomics: ergonomics.md
   - OpenAIRE Endpoints:
       - Research Products: endpoints/research_products.md
       - Data Sources: endpoints/data_sources.md
@@ -49,8 +50,8 @@ nav:
       - Request Hooks: advanced/hooks.md
       - Error Handling: advanced/error_handling.md
   - API Reference: api_reference.md
+  - Authentication: authentication.md
   - Changelog: changelog.md
   - Contributing: contributing.md
-  - Authentication: authentication.md
 watch:
   - src/aireloom

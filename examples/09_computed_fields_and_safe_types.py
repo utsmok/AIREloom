@@ -14,7 +14,9 @@ app = marimo.App(width="medium")
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md(
         """
     > 💡 **Switch to code view with Ctrl+. to see all code cells**
@@ -43,7 +45,9 @@ async def _():
 
 
 @app.cell
-async def _(ResearchProductsFilters, client, mo):
+async def _(ResearchProductsFilters, client):
+    import marimo as mo
+
     papers = await client.research_products.collect(
         filters=ResearchProductsFilters(pid="10.1038/s41586-024-07386-0"),
         limit=1,
@@ -54,7 +58,11 @@ async def _(ResearchProductsFilters, client, mo):
 
 
 @app.cell
-def _(mo, paper):
+def _(
+    paper,
+):
+    import marimo as mo
+
     mo.md(
         """
 ## Safe Types — No More None Checks
@@ -68,7 +76,11 @@ You can iterate, call `.upper()`, check `len()` — no guards needed.
 
 
 @app.cell
-def _(mo, paper):
+def _(
+    paper,
+):
+    import marimo as mo
+
     mo.md(
         f"""
 | Field | Type | Value | Works without guard? |
@@ -82,12 +94,18 @@ def _(mo, paper):
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md("## ResearchProduct — 9 Computed Properties")
 
 
 @app.cell
-def _(mo, paper):
+def _(
+    paper,
+):
+    import marimo as mo
+
     computed_table_data = [
         ("doi", str(paper.doi), "Loop through pids to find scheme='doi'"),
         ("all_dois", str(paper.all_dois), "Collect all pids with scheme='doi'"),
@@ -128,7 +146,9 @@ def _(mo, paper):
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md(
         """
 ## `__str__` & `__repr__` — Human-Readable Output
@@ -140,7 +160,9 @@ need to manually format titles, years, and identifiers.
 
 
 @app.cell
-async def _(client, mo, paper):
+async def _(client, paper):
+    import marimo as mo
+
     org = await client.organizations.first(
         filters={"search": "University of Twente"},
     )
@@ -174,12 +196,16 @@ async def _(client, mo, paper):
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md("## Other Entity Computed Fields")
 
 
 @app.cell
-def _(ds, mo, org, person, project):
+def _(ds, org, person, project):
+    import marimo as mo
+
     other_data = []
 
     if org is not None:

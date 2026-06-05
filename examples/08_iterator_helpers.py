@@ -14,7 +14,9 @@ app = marimo.App(width="medium")
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md(
         r"""
     > 💡 **Switch to code view with Ctrl+. to see all code cells**
@@ -49,7 +51,9 @@ def _():
 
 
 @app.cell
-async def _(ResearchProductsFilters, client, mo):
+async def _(ResearchProductsFilters, client):
+    import marimo as mo
+
     total_pubs = await client.research_products.count(
         filters=ResearchProductsFilters(type="publication"),
     )
@@ -85,7 +89,9 @@ async def _(ResearchProductsFilters, client, mo):
 
 
 @app.cell
-async def _(OrganizationsFilters, ProjectsFilters, ResearchProductsFilters, client, mo):
+async def _(OrganizationsFilters, ProjectsFilters, ResearchProductsFilters, client):
+    import marimo as mo
+
     paper = await client.research_products.first(
         filters=ResearchProductsFilters(
             search="transformer architecture",
@@ -141,7 +147,9 @@ async def _(OrganizationsFilters, ProjectsFilters, ResearchProductsFilters, clie
 
 
 @app.cell
-async def _(ProjectsFilters, ResearchProductsFilters, client, mo):
+async def _(ProjectsFilters, ResearchProductsFilters, client):
+    import marimo as mo
+
     software = await client.research_products.collect(
         filters=ResearchProductsFilters(
             type="software",
@@ -186,7 +194,9 @@ async def _(ProjectsFilters, ResearchProductsFilters, client, mo):
 
 
 @app.cell
-def _(mo):
+def _():
+    import marimo as mo
+
     mo.md(
         r"""
     ## Summary

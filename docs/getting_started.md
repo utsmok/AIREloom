@@ -1,73 +1,37 @@
 # Getting Started
 
-AIREloom is an async Python client for the OpenAIRE Graph API. This page walks you through installation, authentication, and your first queries.
-
 ## Install
 
-See the [Installation Guide](installation.md) for full details. The short version:
-
 ```bash
-pip install aireloom
+uv add aireloom
 ```
+
+See [Installation](installation.md) for alternatives including pip and one-off scripts.
 
 ## Authentication
 
-AIREloom defaults to public access — no credentials required for querying open data. For authenticated access (higher rate limits, protected resources), see the [Authentication Guide](authentication.md).
+No credentials required. The OpenAIRE Graph API is public by default. For higher rate limits, see [Authentication](authentication.md).
 
 ## Examples
 
-### Fetch a research product by DOI
+### Search research products
 
-```python
-from aireloom import AireloomSession
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/03_research_product_analysis.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
-async with AireloomSession() as session:
-    product = await session.queries.search_by_doi("10.5281/zenodo.7664304")
-    print(product.mainTitle)
-    print(product.doi)
-```
+### Filter and iterate
 
-### Search publications about a topic
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/05_advanced_filtering.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
-```python
-from aireloom import AireloomSession
-from aireloom.endpoints import ResearchProductsFilters
+### Explore organizations and projects
 
-async with AireloomSession() as session:
-    filters = ResearchProductsFilters(search="machine learning", type="publication")
-    results = await session.research_products.search(filters=filters, page_size=10)
-    for product in results.results:
-        print(product.mainTitle)
-```
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/04_organization_projects.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
-### Iterate all matching results
+### Discover Scholix links
 
-```python
-from aireloom import AireloomSession
-from aireloom.endpoints import ResearchProductsFilters
-
-async with AireloomSession() as session:
-    filters = ResearchProductsFilters(type="dataset", fromPublicationDate="2024-01-01")
-    async for dataset in session.research_products.iterate(filters=filters):
-        print(dataset.mainTitle)
-```
-
-## Ergonomics
-
-AIREloom includes an ergonomics layer that makes everyday queries simpler:
-
-- **Computed properties** — `product.doi`, `product.is_open_access`, `product.citation_class` and more, derived from the raw API response
-- **Convenience queries** — `session.queries.search_by_doi(...)`, `session.queries.search_publications(...)` for common lookups
-- **Iterator helpers** — `.collect(max_items=100)`, `.count()`, `.first()` on every resource client
-
-See the [Ergonomics](ergonomics.md) page for the full reference.
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/02_scholix_link_discovery.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
 ## Next Steps
 
-Explore the detailed usage guides for each entity type:
-
-- [Research Products](usage/research_products.md)
-- [Projects](usage/projects.md)
-- [Organizations](usage/organizations.md)
-- [Data Sources](usage/data_sources.md)
-- [Scholix Links](usage/scholix.md)
+- [Basic Usage](usage_basics.md) -- common patterns across all entity types
+- Per-entity guides: [Research Products](usage/research_products.md) | [Projects](usage/projects.md) | [Organizations](usage/organizations.md) | [Data Sources](usage/data_sources.md) | [Scholix](usage/scholix.md)
+- [Features](ergonomics.md) -- computed properties, safe types, convenience queries

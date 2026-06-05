@@ -1,47 +1,18 @@
 # Persons
 
-The Persons endpoint provides access to individual researcher profiles in the OpenAIRE Graph — including names, ORCID identifiers, co-authors, and research indicators. This is a **v1-only** endpoint, routed automatically by AIREloom.
+Individual researcher profiles in the OpenAIRE Graph — names, ORCID identifiers, co-authors, and research indicators.
 
-## Accessing the Client
+!!! info "v1-only endpoint"
+    This endpoint is only available on the v1 API. AIREloom routes it automatically.
 
-```python
-from aireloom import AireloomSession
-from aireloom.endpoints import PersonsFilters
-
-async with AireloomSession() as session:
-    response = await session.persons.search(
-        filters=PersonsFilters(search="dijkstra"),
-        page_size=10,
-    )
-```
-
-## Fetch a Single Person
+## Access
 
 ```python
 async with AireloomSession() as session:
-    person = await session.persons.get(
-        "30openaire____::5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f"
-    )
-    print(person.full_name)
-    print(person.orcid)
+    client = session.persons  # PersonsResource
 ```
 
-## Search with Filters
-
-```python
-from aireloom.endpoints import PersonsFilters
-
-filters = PersonsFilters(search="feynman")
-
-async with AireloomSession() as session:
-    response = await session.persons.search(
-        filters=filters, sort_by="relevance desc"
-    )
-    for person in response.results:
-        print(person.full_name, person.orcid)
-```
-
-### Filter Reference
+## Filter Reference
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -53,31 +24,18 @@ async with AireloomSession() as session:
 | `logicalOperator` | `str` | `AND` or `OR` (default `AND`) |
 
 !!! warning "API limitation"
-    The `givenName` and `lastName` filters currently cause HTTP 500 errors from the OpenAIRE API. Use `search` for name-based queries until this is resolved.
+    The `givenName` and `lastName` filters currently cause HTTP 500 errors. Use `search` for name-based queries until this is resolved.
 
-### Sort Fields
+See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
 
-Persons support sorting by: `relevance`, `startDate`, `endDate`.
+## Sort Fields
 
-## Iterate Over Results
+`relevance`, `startDate`, `endDate`. Use `"field asc"` or `"field desc"`.
 
-```python
-from aireloom.endpoints import PersonsFilters
-
-filters = PersonsFilters(search="knuth")
-
-async with AireloomSession() as session:
-    async for person in session.persons.iterate(filters=filters):
-        print(person.full_name, person.orcid)
-```
-
-## Model Overview
-
-Each result is a `Person` instance. Key fields:
+## Key Fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `str` | OpenAIRE identifier |
 | `givenName` | `str` | Given (first) name |
 | `familyName` | `str` | Family (last) name |
 | `originalId` | `SafeList[str]` | Source identifiers (ORCID, etc.) |
@@ -85,9 +43,7 @@ Each result is a `Person` instance. Key fields:
 | `biography` | `str` | Biography text |
 | `subject` | `SafeList[str]` | Research subjects |
 | `indicator` | `dict \| None` | Metrics (hIndex, citationCount, etc.) |
-| `context` | `dict \| None` | Affiliation info |
 | `coAuthors` | `SafeList[str]` | Co-author names |
-| `consent` | `bool \| None` | Data processing consent |
 
 ## Computed Properties
 
@@ -96,7 +52,7 @@ Each result is a `Person` instance. Key fields:
 | `full_name` | `str` | Combined given + family name |
 | `orcid` | `str \| None` | ORCID extracted from `originalId` or `id` |
 
-All `SafeList` fields (`originalId`, `alternativeNames`, `subject`, `coAuthors`) default to an empty list — never `None`.
+See [Features](../ergonomics.md) for an overview of computed properties and `SafeList`.
 
 ## Example Notebook
 
