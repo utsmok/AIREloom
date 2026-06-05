@@ -1,289 +1,305 @@
-"""Example: AIREloom Ergonomics Layer — Before & After.
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "aireloom",
+#     "marimo",
+# ]
+# ///
 
-Demonstrates the difference between raw API usage and the ergonomics layer
-(computed fields, safe types, convenience queries, iterator helpers).
+import marimo
 
-Run with: uv run examples/07_ergonomics_showcase.py
-"""
-import asyncio
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv(".env")
-
-from rich.console import Console  # noqa: E402
-from rich.table import Table  # noqa: E402
-
-from aireloom import AireloomClient  # noqa: E402
-from aireloom.endpoints import (  # noqa: E402
-    OrganizationsFilters,
-    ResearchProductsFilters,
-)
-from aireloom.session import AireloomSession  # noqa: E402
-
-console = Console()
-DOI = "10.1038/s41586-024-07386-0"  # A real paper to query
+__generated_with = "0.23.9"
+app = marimo.App(width="medium")
 
 
-async def raw_api_usage(client: AireloomClient) -> None:
-    """Traditional API usage — manually handling missing data, building filters."""
-    console.rule("[bold red]Traditional API Usage[/bold red]")
+@app.cell
+def _():
+    import marimo as mo
+    return (mo,)
 
-    # --- Fetch a paper by DOI ---
-    console.print("\n[bold]1. Fetch a paper by DOI[/bold]")
+
+@app.cell
+def _(mo):
+    mo.md(
+        r"""
+    # Ergonomics Showcase — Before & After
+
+    AIREloom provides an **ergonomics layer** on top of the raw API:
+
+    - **Computed fields** replace manual data extraction loops and null-guard chains
+    - **Safe types** (`SafeStr`, `SafeList`) eliminate `None` checks for common fields
+    - **Convenience queries** compose multi-step workflows into single calls
+
+    This notebook demonstrates the difference using a real paper
+    (`10.1038/s41586-024-07386-0`).
+    """
+    )
+
+
+@app.cell
+def _():
+    from aireloom import AireloomClient
+    from aireloom.endpoints import ResearchProductsFilters
+    from aireloom.session import AireloomSession
+
+    DOI = "10.1038/s41586-024-07386-0"
+    client = AireloomClient()
+    session = AireloomSession()
+    return DOI, ResearchProductsFilters, client, session
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## Raw API Usage — Manual Extraction""")
+    return
+
+
+@app.cell
+async def _(DOI, ResearchProductsFilters, client, mo):
     resp = await client.research_products.search(
         page=1,
         page_size=1,
         filters=ResearchProductsFilters(pid=DOI),
     )
     results = resp.results or []
-    if not results:
-        console.print("  [red]No results found[/red]")
-        return
+    raw_paper = results[0] if results else None
+    raw_paper
+    return (raw_paper,)
 
-    paper = results[0]
 
+@app.cell
+def _(mo, raw_paper):
     # Manually extract DOI from pids list
-    doi = None
-    for pid in (paper.pids or []):
-        if (pid.scheme or "").lower() == "doi" and pid.value:
-            doi = pid.value
+    manual_doi = None
+    for _pid in (raw_paper.pids or []):
+        if (_pid.scheme or "").lower() == "doi" and _pid.value:
+            manual_doi = _pid.value
             break
-    console.print(f"  DOI (manual extraction): {doi}")
 
     # Manually check open access
-    is_oa = (
-        paper.bestAccessRight
-        and paper.bestAccessRight.label
-        and paper.bestAccessRight.label.upper() == "OPEN"
+    manual_is_oa = (
+        raw_paper.bestAccessRight
+        and raw_paper.bestAccessRight.label
+        and raw_paper.bestAccessRight.label.upper() == "OPEN"
     )
-    console.print(f"  Is Open Access (manual check): {is_oa}")
 
     # Manually find open access URL
-    oa_url = None
-    for inst in (paper.instances or []):
+    manual_oa_url = None
+    for _inst in (raw_paper.instances or []):
         if (
-            inst.accessRight
-            and inst.accessRight.label
-            and inst.accessRight.label.upper() == "OPEN"
-            and inst.urls
+            _inst.accessRight
+            and _inst.accessRight.label
+            and _inst.accessRight.label.upper() == "OPEN"
+            and _inst.urls
         ):
-            oa_url = inst.urls[0]
+            manual_oa_url = _inst.urls[0]
             break
-    console.print(f"  OA URL (manual search): {oa_url}")
 
     # Manually extract citation count (deeply nested, each level may be None)
-    citation_count = None
-    if paper.indicators:  # noqa: SIM102
-        if paper.indicators.citationImpact:
-            citation_count = paper.indicators.citationImpact.citationCount
-    console.print(f"  Citation count (manual nesting): {citation_count}")
+    manual_citation_count = None
+    if raw_paper.indicators:
+        if raw_paper.indicators.citationImpact:
+            manual_citation_count = raw_paper.indicators.citationImpact.citationCount
 
     # Manually get author names
-    author_names = []
-    for author in (paper.authors or []):
-        if author.fullName:
-            author_names.append(author.fullName)  # noqa: PERF401
-    console.print(f"  Authors (manual loop): {author_names[:3]}")
+    manual_author_names = []
+    for _author in (raw_paper.authors or []):
+        if _author.fullName:
+            manual_author_names.append(_author.fullName)
 
     # Manually extract journal name
-    journal = None
-    if paper.container and paper.container.name:
-        journal = paper.container.name
-    console.print(f"  Journal (manual guard): {journal}")
+    manual_journal = None
+    if raw_paper.container and raw_paper.container.name:
+        manual_journal = raw_paper.container.name
 
-    # --- Fetch publications for an organization ---
-    console.print("\n[bold]2. Publications by organization[/bold]")
-    org_resp = await client.organizations.search(
-        page=1,
-        page_size=1,
-        filters=OrganizationsFilters(search="University of Twente"),
-    )
-    orgs = org_resp.results or []
-    if orgs:
-        org_id = orgs[0].id
-        pub_resp = await client.research_products.search(
-            page=1,
-            page_size=5,
-            filters=ResearchProductsFilters(
-                relOrganizationId=org_id,
-                type="publication",
-                fromPublicationDate="2024-01-01",
-            ),
-        )
-        pubs = pub_resp.results or []
-        console.print(f"  Found {pub_resp.header.numFound if pub_resp.header else 0} publications")
-        for pub in pubs[:3]:
-            # Manual title extraction (may be None)
-            title = pub.title or pub.mainTitle or "Untitled"
-            console.print(f"  - {title[:60]}")
-
-
-async def ergonomics_usage(session: AireloomSession) -> None:
-    """Ergonomics layer — computed fields, safe defaults, convenience queries."""
-    console.rule("[bold green]Ergonomics Layer Usage[/bold green]")
-
-    # --- Fetch papers by DOI with convenience query ---
-    console.print("\n[bold]1. Fetch a paper by DOI[/bold]")
-    papers = await session.queries.publications_by_doi(session, DOI)
-    if not papers:
-        console.print("  [red]No results found[/red]")
-        return
-
-    paper = papers[0]
-
-    # Computed fields — no manual extraction needed
-    console.print(f"  DOI:           {paper.doi}")
-    console.print(f"  Is Open Access: {paper.is_open_access}")
-    console.print(f"  OA URL:        {paper.open_access_url}")
-    console.print(f"  Citation count: {paper.citation_count}")
-    console.print(f"  Authors:       {paper.author_names[:3]}")
-    console.print(f"  Journal:       {paper.journal_name}")
-    console.print(f"  Year:          {paper.publication_year}")
-    console.print(f"  License:       {paper.license}")
-
-    # Safe defaults — title is always a string, never None
-    console.print(f"\n  Title (safe):  {paper.title[:60]}")
-
-    # __str__ gives a human-readable summary
-    console.print(f"  str():         {paper}")
-
-    # --- Convenience queries ---
-    console.print("\n[bold]2. Publications by organization[/bold]")
-    pubs = await session.queries.publications_by_organization(
-        session,
-        "University of Twente",
-        type="publication",
-        from_publication_date="2024-01-01",
-        limit=5,
-    )
-    console.print(f"  Retrieved {len(pubs)} publications")
-    for pub in pubs[:3]:
-        # Computed fields + __str__ make this trivial
-        console.print(f"  - {pub}")
-
-    # --- Count ---
-    console.print("\n[bold]3. Count publications[/bold]")
-    count = await session.queries.count_publications(
-        session,
-        type="publication",
-        open_access_only=True,
-        search="machine learning",
-    )
-    console.print(f"  Open Access ML publications: {count:,}")
-
-    # --- Author lookup ---
-    console.print("\n[bold]4. Publications by author ORCID[/bold]")
-    pubs = await session.queries.publications_by_author(
-        session,
-        "0000-0002-3639-3956",
-        search_on="orcid",
-        limit=3,
-    )
-    for pub in pubs:
-        console.print(f"  - {pub}")
-
-    # --- Scholix links ---
-    console.print("\n[bold]5. Related datasets for a paper[/bold]")
-    datasets = await session.queries.related_datasets(session, DOI, limit=5)
-    console.print(f"  Found {len(datasets)} related datasets")
-    for ds in datasets[:3]:
-        console.print(f"  - {ds}")
-
-
-async def side_by_side(client: AireloomClient, session: AireloomSession) -> None:
-    """Side-by-side comparison table."""
-    console.rule("[bold yellow]Side-by-Side Comparison[/bold yellow]")
-
-    table = Table(title="Raw API vs Ergonomics Layer")
-    table.add_column("Task", style="bold")
-    table.add_column("Raw API", style="red")
-    table.add_column("Ergonomics", style="green")
-
-    table.add_row(
-        "Get DOI",
-        "for pid in pids:\n    if pid.scheme == 'doi'...",
-        "paper.doi",
-    )
-    table.add_row(
-        "Check OA",
-        "bestAccessRight and\nbestAccessRight.label\n== 'OPEN'",
-        "paper.is_open_access",
-    )
-    table.add_row(
-        "OA URL",
-        "for inst in instances:\n    if inst.accessRight...",
-        "paper.open_access_url",
-    )
-    table.add_row(
-        "Citations",
-        "indicators and\nindicators.citationImpact\nand .citationCount",
-        "paper.citation_count",
-    )
-    table.add_row(
-        "Authors",
-        "[a.fullName for a in\nauthors if a.fullName]",
-        "paper.author_names",
-    )
-    table.add_row(
-        "Journal",
-        "container and\ncontainer.name or None",
-        "paper.journal_name",
-    )
-    table.add_row(
-        "Year",
-        "int(publicationDate[:4])\nwith try/except",
-        "paper.publication_year",
-    )
-    table.add_row(
-        "License",
-        "for inst in instances:\n    if inst.license...",
-        "paper.license",
-    )
-    table.add_row(
-        "Org pubs",
-        "search org → get id\n→ search products\nwith filters",
-        "queries.publications_by_\norganization(session, name)",
-    )
-    table.add_row(
-        "Count",
-        "search with pageSize=0\n→ header.numFound",
-        "queries.count_publications(\nsession, ...)",
-    )
-    table.add_row(
-        "Display",
-        "product.title or\n'Untitled'",
-        "str(product)",
-    )
-    table.add_row(
-        "Null safety",
-        "if x is not None:\n    for item in x or []:",
-        "SafeList defaults to []\nSafeStr defaults to ''",
-    )
-
-    console.print(table)
-
-
-async def main():
-    client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
-    client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
-    if not client_id or not client_secret:
-        console.print("[red]Missing credentials in .env[/red]")
-        return
-
-    # Both approaches use the same client under the hood
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
-        session = AireloomSession(client_id=client_id, client_secret=client_secret)
+    # Manually extract publication year
+    manual_year = None
+    if raw_paper.publicationDate and len(raw_paper.publicationDate) >= 4:
         try:
-            await raw_api_usage(client)
-            console.print()
-            await ergonomics_usage(session)
-            console.print()
-            await side_by_side(client, session)
-        finally:
-            await session.close()
+            manual_year = int(raw_paper.publicationDate[:4])
+        except ValueError:
+            pass
+
+    mo.md(
+        f"""
+    ### What you had to write with the raw API
+
+    **DOI** — loop through `pids`, check `scheme == "doi"`:
+
+    ```
+    for pid in (paper.pids or []):
+        if (pid.scheme or "").lower() == "doi" and pid.value:
+            doi = pid.value; break
+    ```
+    → **`{manual_doi}`**
+
+    **Open Access** — null-guard chain on `bestAccessRight`:
+
+    ```
+    paper.bestAccessRight and paper.bestAccessRight.label
+        and paper.bestAccessRight.label.upper() == "OPEN"
+    ```
+    → **`{manual_is_oa}`**
+
+    **OA URL** — loop instances, check accessRight, grab first URL:
+
+    ```
+    for inst in (paper.instances or []):
+        if inst.accessRight and inst.accessRight.label == "OPEN" and inst.urls:
+            url = inst.urls[0]; break
+    ```
+    → **`{manual_oa_url}`**
+
+    **Citation count** — navigate three nullable levels:
+
+    ```
+    if paper.indicators:
+        if paper.indicators.citationImpact:
+            count = paper.indicators.citationImpact.citationCount
+    ```
+    → **`{manual_citation_count}`**
+
+    **Authors** — loop with None guard on each fullName:
+
+    ```
+    [a.fullName for a in (paper.authors or []) if a.fullName]
+    ```
+    → **`{manual_author_names[:5]}`**
+
+    **Journal** — guard `container` and `container.name`:
+
+    ```
+    paper.container and paper.container.name or None
+    ```
+    → **`{manual_journal}`**
+
+    **Year** — parse from date string with try/except:
+
+    ```
+    int(paper.publicationDate[:4])
+    ```
+    → **`{manual_year}`**
+    """
+    )
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## Ergonomics Layer — Computed Fields & Convenience Queries""")
+    return
+
+
+@app.cell
+async def _(DOI, mo, session):
+    papers = await session.queries.publications_by_doi(session, DOI)
+    paper = papers[0] if papers else None
+    paper
+    return (paper,)
+
+
+@app.cell
+def _(mo, paper):
+    mo.md(
+        f"""
+    ### What you write with the ergonomics layer
+
+    Each computed field is a single property access — no loops, no null guards:
+
+    | Extraction | Raw API lines | Ergonomics | Result |
+    |---|---|---|---|
+    | DOI | `for pid in pids: if scheme == "doi"…` | `paper.doi` | `{paper.doi}` |
+    | Open Access | `bestAccessRight and .label == "OPEN"` | `paper.is_open_access` | `{paper.is_open_access}` |
+    | OA URL | `for inst in instances: if accessRight…` | `paper.open_access_url` | `{paper.open_access_url}` |
+    | Citations | `indicators and .citationImpact.citationCount` | `paper.citation_count` | `{paper.citation_count}` |
+    | Authors | `[a.fullName for a in authors if a.fullName]` | `paper.author_names` | `{paper.author_names[:5]}` |
+    | Journal | `container and container.name or None` | `paper.journal_name` | `{paper.journal_name}` |
+    | Year | `int(publicationDate[:4])` with try/except | `paper.publication_year` | `{paper.publication_year}` |
+    | License | `for inst in instances: if inst.license…` | `paper.license` | `{paper.license}` |
+
+    **Safe defaults** — `paper.title` is always a `str` (never `None`),
+    `paper.authors` is always a `list` (never `None`).
+
+    **Human-readable summary** — `str(paper)` produces:
+
+    > `{paper}`
+    """
+    )
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## Comparison Summary""")
+    return
+
+
+@app.cell
+def _(mo):
+    comparison = [
+        {
+            "Task": "Get DOI",
+            "Raw API": "for pid in pids:\n    if pid.scheme == 'doi'…",
+            "Ergonomics": "paper.doi",
+        },
+        {
+            "Task": "Check Open Access",
+            "Raw API": "bestAccessRight and\nbestAccessRight.label\n== 'OPEN'",
+            "Ergonomics": "paper.is_open_access",
+        },
+        {
+            "Task": "Find OA URL",
+            "Raw API": "for inst in instances:\n    if inst.accessRight…",
+            "Ergonomics": "paper.open_access_url",
+        },
+        {
+            "Task": "Citation count",
+            "Raw API": "indicators and\nindicators.citationImpact\nand .citationCount",
+            "Ergonomics": "paper.citation_count",
+        },
+        {
+            "Task": "Author names",
+            "Raw API": "[a.fullName for a in\nauthors if a.fullName]",
+            "Ergonomics": "paper.author_names",
+        },
+        {
+            "Task": "Journal name",
+            "Raw API": "container and\ncontainer.name or None",
+            "Ergonomics": "paper.journal_name",
+        },
+        {
+            "Task": "Publication year",
+            "Raw API": "int(publicationDate[:4])\nwith try/except",
+            "Ergonomics": "paper.publication_year",
+        },
+        {
+            "Task": "License",
+            "Raw API": "for inst in instances:\n    if inst.license…",
+            "Ergonomics": "paper.license",
+        },
+        {
+            "Task": "Org publications",
+            "Raw API": "search org → get id\n→ search products\nwith relOrganizationId",
+            "Ergonomics": "queries.publications_by_\norganization(session, name)",
+        },
+        {
+            "Task": "Count results",
+            "Raw API": "search(pageSize=0)\n→ header.numFound",
+            "Ergonomics": "queries.count_publications(\nsession, ...)",
+        },
+        {
+            "Task": "Display summary",
+            "Raw API": "product.title or\n'Untitled'",
+            "Ergonomics": "str(product)",
+        },
+        {
+            "Task": "Null safety",
+            "Raw API": "if x is not None:\n    for item in x or []:",
+            "Ergonomics": "SafeList → []\nSafeStr → ''",
+        },
+    ]
+    mo.ui.table(comparison, selection=None)
+    return
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run()

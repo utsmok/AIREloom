@@ -1,175 +1,194 @@
-"""Example: Computed Fields & Safe Types.
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "aireloom",
+#     "marimo",
+# ]
+# ///
 
-Demonstrates the computed properties and safe defaults added to all entity models.
-These eliminate common patterns of null-checking and manual data extraction.
+import marimo
 
-Run with: uv run examples/09_computed_fields_and_safe_types.py
+__generated_with = "0.23.9"
+app = marimo.App(width="medium")
+
+
+@app.cell
+def _(mo):
+    mo.md(
 """
-import asyncio
-import os
+# Computed Fields & Safe Types
 
-from dotenv import load_dotenv
+AIREloom models include **computed properties** that eliminate boilerplate
+(null-checking, nested navigation, manual extraction) and **safe types**
+(`SafeStr`, `SafeList`) that default to `""` and `[]` instead of `None`.
 
-load_dotenv(".env")
-
-from rich.console import Console  # noqa: E402
-from rich.table import Table  # noqa: E402
-
-from aireloom import AireloomClient  # noqa: E402
-from aireloom.endpoints import ResearchProductsFilters  # noqa: E402
-
-console = Console()
+This notebook demonstrates every computed field and safe type across all
+entity models.
+"""
+    )
+    return
 
 
-async def main():
-    client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
-    client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
-    if not client_id or not client_secret:
-        console.print("[red]Missing credentials in .env[/red]")
-        return
+@app.cell
+async def _():
+    from aireloom import AireloomClient
+    from aireloom.endpoints import (
+        ResearchProductsFilters,
+    )
 
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
-        # Fetch a well-known paper
-        paper = await client.research_products.get(
-            "doi_________::07ac7530e7435e29ba33e5a74bec687d"
-        )
-        if not paper:
-            # Fallback: search by DOI
-            results = await client.research_products.collect(
-                filters=ResearchProductsFilters(
-                    pid="10.1038/s41586-024-07386-0"
-                ),
-                limit=1,
-            )
-            paper = results[0] if results else None
+    client = AireloomClient()
+    return AireloomClient, ResearchProductsFilters, client
 
-        if not paper:
-            console.print("[red]Could not fetch paper[/red]")
-            return
 
-        # ── Safe Types: no more None checks ───────────────────────
-        console.rule("[bold magenta]Safe Types — No More None Checks[/bold magenta]")
+@app.cell
+async def _(ResearchProductsFilters, client, mo):
+    papers = await client.research_products.collect(
+        filters=ResearchProductsFilters(pid="10.1038/s41586-024-07386-0"),
+        limit=1,
+    )
+    paper = papers[0]
+    mo.md(f"**Fetched paper:** {paper}")
+    return paper, papers
 
-        console.print("\n[bold]Before Safe Types:[/bold]")
-        console.print("  title = paper.title or 'Untitled'  # guard against None")
-        console.print("  for author in paper.authors or []:  # guard against None")
-        console.print("  keywords = paper.keywords if paper.keywords else []")
 
-        console.print("\n[bold]With Safe Types (SafeStr, SafeList):[/bold]")
-        console.print(f"  paper.title    → {paper.title!r}  (SafeStr: always str, never None)")
-        console.print(f"  paper.authors  → list with {len(paper.authors)} items  (SafeList: always list)")
-        console.print(f"  paper.keywords → {paper.keywords[:3]}  (SafeList: always list)")
-        console.print(f"  len(paper.authors) works directly: {len(paper.authors)}")
-        console.print(f"  iterating paper.authors never raises: {paper.author_names[:2]}")
+@app.cell
+def _(mo, paper):
+    mo.md(
+"""
+## Safe Types — No More None Checks
 
-        # ── Computed Fields on ResearchProduct ─────────────────────
-        console.rule("[bold magenta]ResearchProduct Computed Fields[/bold magenta]")
+**SafeStr** (`title`, `description`, …) is always a `str`, never `None`.
+**SafeList** (`authors`, `keywords`, `pids`, …) is always a `list`, never `None`.
 
-        table = Table(title="ResearchProduct Computed Properties")
-        table.add_column("Property", style="bold")
-        table.add_column("Value")
-        table.add_column("What it replaces")
+You can iterate, call `.upper()`, check `len()` — no guards needed.
+"""
+    )
+    return
 
-        table.add_row(
-            "doi",
-            str(paper.doi),
-            "Loop through pids to find scheme='doi'",
-        )
-        table.add_row(
-            "all_dois",
-            str(paper.all_dois),
-            "Collect all pids with scheme='doi'",
-        )
-        table.add_row(
-            "is_open_access",
-            str(paper.is_open_access),
-            "Check bestAccessRight.label == 'OPEN'",
-        )
-        table.add_row(
-            "open_access_url",
-            str(paper.open_access_url),
-            "Search instances for OA access URL",
-        )
-        table.add_row(
-            "citation_count",
-            str(paper.citation_count),
-            "Navigate indicators.citationImpact.citationCount",
-        )
-        table.add_row(
-            "publication_year",
-            str(paper.publication_year),
-            "Parse publicationDate[:4] with error handling",
-        )
-        table.add_row(
-            "journal_name",
-            str(paper.journal_name),
-            "Guard container.name against None",
-        )
-        table.add_row(
-            "author_names",
-            str(paper.author_names[:3]),
-            "List comprehension with None filtering",
-        )
-        table.add_row(
-            "license",
-            str(paper.license),
-            "Search instances for first non-empty license",
-        )
 
-        console.print(table)
+@app.cell
+def _(mo, paper):
+    mo.md(
+f"""
+| Field | Type | Value | Works without guard? |
+|---|---|---|---|
+| `paper.title` | `SafeStr` | `{paper.title[:60]!r}` | ✅ always `str` |
+| `paper.authors` | `SafeList` | `list` with `{len(paper.authors)}` items | ✅ always `list` |
+| `paper.keywords` | `SafeList` | `{paper.keywords[:3]}` | ✅ always `list` |
+| `len(paper.authors)` | — | `{len(paper.authors)}` | ✅ never `None` |
+"""
+    )
+    return
 
-        # ── __str__ and __repr__ ───────────────────────────────────
-        console.rule("[bold magenta]__str__ & __repr__ — Human-Readable Output[/bold magenta]")
 
-        console.print(f"\n  repr(paper): {paper!r}")
-        console.print(f"  str(paper):  {paper}")
-        console.print("  → No need to manually format: print(f'{title} ({year}) DOI:{doi}')")
+@app.cell
+def _(mo):
+    mo.md("## ResearchProduct — 9 Computed Properties")
+    return
 
-        # Fetch other entities to show their __str__
-        org = await client.organizations.first(
-            filters={"search": "University of Twente"},
-        )
-        if org:
-            console.print(f"\n  str(org):  {org}")
-            console.print(f"  repr(org): {org!r}")
 
-        project = await client.projects.first(
-            filters={"search": "European"},
-        )
-        if project:
-            console.print(f"\n  str(project):  {project}")
-            console.print(
-                f"  funder_name: {project.funder_name}, "
-                f"period: {project.start_year}–{project.end_year}"
-            )
+@app.cell
+def _(mo, paper):
+    computed_table_data = [
+        ("doi", str(paper.doi), "Loop through pids to find scheme='doi'"),
+        ("all_dois", str(paper.all_dois), "Collect all pids with scheme='doi'"),
+        ("is_open_access", str(paper.is_open_access), "Check bestAccessRight.label == 'OPEN'"),
+        ("open_access_url", str(paper.open_access_url), "Search instances for OA access URL"),
+        ("citation_count", str(paper.citation_count), "Navigate indicators.citationImpact.citationCount"),
+        ("publication_year", str(paper.publication_year), "Parse publicationDate[:4] with error handling"),
+        ("journal_name", str(paper.journal_name), "Guard container.name against None"),
+        ("author_names", str(paper.author_names[:3]), "List comprehension with None filtering"),
+        ("license", str(paper.license), "Search instances for first non-empty license"),
+    ]
+    mo.ui.table(
+        computed_table_data,
+        headers=["Property", "Value", "What it replaces"],
+        page_size=9,
+    )
+    return (computed_table_data,)
 
-        person = await client.persons.first(
-            filters={"search": "machine learning"},
-        )
-        if person:
-            console.print(f"\n  str(person): {person}")
-            console.print(f"  full_name:   {person.full_name}")
-            console.print(f"  orcid:       {person.orcid}")
 
-        ds = await client.data_sources.first(
-            filters={"search": "Zenodo"},
-        )
-        if ds:
-            console.print(f"\n  str(datasource): {ds}")
-            console.print(f"  type_name:       {ds.type_name}")
+@app.cell
+def _(mo):
+    mo.md(
+"""
+## `__str__` & `__repr__` — Human-Readable Output
 
-        # ── Organization computed fields ───────────────────────────
-        if org:
-            console.rule("[bold magenta]Organization Computed Fields[/bold magenta]")
-            console.print(f"  ror_id:      {org.ror_id}")
-            console.print(f"  country_code: {org.country_code}")
+Every entity model provides a useful `str()` and `repr()` so you never
+need to manually format titles, years, and identifiers.
+"""
+    )
+    return
 
-        # ── Person computed fields ─────────────────────────────────
-        if person:
-            console.rule("[bold magenta]Person Computed Fields[/bold magenta]")
-            console.print(f"  full_name: {person.full_name}")
-            console.print(f"  orcid:     {person.orcid}")
+
+@app.cell
+async def _(client, mo, paper):
+    org = await client.organizations.first(
+        filters={"search": "University of Twente"},
+    )
+    project = await client.projects.first(
+        filters={"search": "European"},
+    )
+    person = await client.persons.first(
+        filters={"search": "machine learning"},
+    )
+    ds = await client.data_sources.first(
+        filters={"search": "Zenodo"},
+    )
+
+    entity_strs = []
+    entity_strs.append(("ResearchProduct", repr(paper), str(paper)))
+    if org:
+        entity_strs.append(("Organization", repr(org), str(org)))
+    if project:
+        entity_strs.append(("Project", repr(project), str(project)))
+    if person:
+        entity_strs.append(("Person", repr(person), str(person)))
+    if ds:
+        entity_strs.append(("DataSource", repr(ds), str(ds)))
+
+    mo.ui.table(
+        entity_strs,
+        headers=["Entity", "repr()", "str()"],
+        page_size=5,
+    )
+    return ds, entity_strs, org, person, project
+
+
+@app.cell
+def _(mo):
+    mo.md("## Other Entity Computed Fields")
+    return
+
+
+@app.cell
+def _(ds, mo, org, person, project):
+    other_data = []
+
+    if org is not None:
+        other_data.append(("Organization", "ror_id", str(org.ror_id)))
+        other_data.append(("Organization", "country_code", str(org.country_code)))
+
+    if person is not None:
+        other_data.append(("Person", "full_name", person.full_name))
+        other_data.append(("Person", "orcid", str(person.orcid)))
+
+    if project is not None:
+        other_data.append(("Project", "funder_name", str(project.funder_name)))
+        other_data.append(("Project", "funder_jurisdiction", str(project.funder_jurisdiction)))
+        other_data.append(("Project", "start_year", str(project.start_year)))
+        other_data.append(("Project", "end_year", str(project.end_year)))
+
+    if ds is not None:
+        other_data.append(("DataSource", "type_name", str(ds.type_name)))
+
+    mo.ui.table(
+        other_data,
+        headers=["Entity", "Property", "Value"],
+        page_size=10,
+    )
+    return (other_data,)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    app.run()
