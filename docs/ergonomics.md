@@ -82,7 +82,7 @@ async with AireloomSession() as session:
     print(f"Authors: {', '.join(product.author_names)}")
 ```
 
-<iframe src="https://marimo.app/gh/utsmok/AIREloom/main/examples/09_computed_fields_and_safe_types.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/09_computed_fields_and_safe_types.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
 ## Convenience Queries
 
@@ -131,7 +131,7 @@ async with AireloomSession() as session:
     citations = await session.queries.citing_works("10.1038/s41586-024-07386-0")
 ```
 
-<iframe src="https://marimo.app/gh/utsmok/AIREloom/main/examples/10_convenience_queries.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/10_convenience_queries.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
 ## Iterator Helpers
 
@@ -174,7 +174,7 @@ async with AireloomSession() as session:
         print(f"Top result: {top.mainTitle}")
 ```
 
-<iframe src="https://marimo.app/gh/utsmok/AIREloom/main/examples/08_iterator_helpers.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/08_iterator_helpers.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
 
 ## Before and After
 
@@ -205,4 +205,4 @@ for author in product.authors:        # SafeList: never None
 doi = product.doi                     # computed property
 ```
 
-<iframe src="https://marimo.app/gh/utsmok/AIREloom/main/examples/07_ergonomics_showcase.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/07_ergonomics_showcase.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>

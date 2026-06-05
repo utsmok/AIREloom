@@ -119,4 +119,4 @@ async with AireloomSession() as session:
 
 ## Example Notebook
 
-<iframe src="https://marimo.app/gh/utsmok/AIREloom/main/examples/04_organization_projects.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/04_organization_projects.py/wasm?embed=true" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
