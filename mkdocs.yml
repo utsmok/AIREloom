@@ -26,29 +26,29 @@ nav:
   - Getting Started: getting_started.md
   - Installation: installation.md
   - Usage:
+      - Research Products: usage/research_products.md
       - Data Sources: usage/data_sources.md
       - Organizations: usage/organizations.md
       - Projects: usage/projects.md
-      - Research Products: usage/research_products.md
+      - Persons: usage/persons.md
+      - Links: usage/links.md
       - Scholix: usage/scholix.md
-  - Filtering: filter_options.md
-  - OpenAIRE endpoints:
+  - Ergonomics: ergonomics.md
+  - OpenAIRE Endpoints:
+      - Research Products: endpoints/research_products.md
       - Data Sources: endpoints/data_sources.md
       - Organizations: endpoints/organizations.md
       - Projects: endpoints/projects.md
-      - Research Products: endpoints/research_products.md
+      - Persons: endpoints/persons.md
+      - Links: endpoints/links.md
       - Scholix: endpoints/scholix.md
   - Advanced:
-      - Caching: advanced/caching.md
       - Configuration: advanced/configuration.md
-      - Error Handling: advanced/error_handling.md
-      - Hooks: advanced/hooks.md
+      - Caching: advanced/caching.md
       - Rate Limiting: advanced/rate_limiting.md
-  - API Reference:
-      - Client: client.md
-      - Session: session.md
-      - Configuration: config.md
-      - Models: models.md
+      - Request Hooks: advanced/hooks.md
+      - Error Handling: advanced/error_handling.md
+  - API Reference: api_reference.md
   - Changelog: changelog.md
   - Contributing: contributing.md
   - Authentication: authentication.md

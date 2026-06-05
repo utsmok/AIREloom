@@ -1,14 +1,23 @@
 # Research Products
 
-
-## Models
-
-::: aireloom.models.research_product
-
-## Filters
+## ResearchProductsFilters
 
 ::: aireloom.endpoints.ResearchProductsFilters
+    options:
+      members: true
+      show_docstring_description: true
 
-## Client
+## ResearchProductsClient
 
-::: aireloom.resources.research_products_client
+::: aireloom.resources.research_products_client.ResearchProductsClient
+    options:
+      members:
+        - search
+        - iterate
+        - get
+        - collect
+        - count
+        - first
+        - search_links
+        - iterate_links
+        - get_relations_info

@@ -1,14 +1,21 @@
 # Scholix
 
-
-## Models
-
-::: aireloom.models.scholix
-
-## Filters
+## ScholixFilters
 
 ::: aireloom.endpoints.ScholixFilters
+    options:
+      members: true
+      show_docstring_description: true
 
-## Client
+## ScholixClient
 
-::: aireloom.resources.scholix_client
+::: aireloom.resources.scholix_client.ScholixClient
+    options:
+      members:
+        - search
+        - search_links
+        - iterate_links
+        - iterate
+        - collect
+        - count
+        - first

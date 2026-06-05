@@ -1,14 +1,20 @@
 # Organizations
 
-
-## Models
-
-::: aireloom.models.organization
-
-## Filters
+## OrganizationsFilters
 
 ::: aireloom.endpoints.OrganizationsFilters
+    options:
+      members: true
+      show_docstring_description: true
 
-## Client
+## OrganizationsClient
 
-::: aireloom.resources.organizations_client
+::: aireloom.resources.organizations_client.OrganizationsClient
+    options:
+      members:
+        - search
+        - iterate
+        - get
+        - collect
+        - count
+        - first

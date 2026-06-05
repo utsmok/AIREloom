@@ -1,15 +1,15 @@
-# Projects
+# Persons
 
-## ProjectsFilters
+## PersonsFilters
 
-::: aireloom.endpoints.ProjectsFilters
+::: aireloom.endpoints.PersonsFilters
     options:
       members: true
       show_docstring_description: true
 
-## ProjectsClient
+## PersonsClient
 
-::: aireloom.resources.projects_client.ProjectsClient
+::: aireloom.resources.persons_client.PersonsClient
     options:
       members:
         - search

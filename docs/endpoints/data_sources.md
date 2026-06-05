@@ -1,14 +1,20 @@
 # Data Sources
 
-
-## Models
-
-::: aireloom.models.data_source
-
-## Filters
+## DataSourcesFilters
 
 ::: aireloom.endpoints.DataSourcesFilters
+    options:
+      members: true
+      show_docstring_description: true
 
-## Client
+## DataSourcesClient
 
-::: aireloom.resources.data_sources_client
+::: aireloom.resources.data_sources_client.DataSourcesClient
+    options:
+      members:
+        - search
+        - iterate
+        - get
+        - collect
+        - count
+        - first
