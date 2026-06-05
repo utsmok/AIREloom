@@ -10,17 +10,21 @@ Reference: https://graph.openaire.eu/docs/data-model/entities/research-product
 """
 
 import logging
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import (
     BaseModel,
+    BeforeValidator,
     ConfigDict,
     Field,
+    computed_field,
     field_validator,
     model_validator,
 )
 
+from .._helpers import extract_all_pids_by_scheme, extract_pid_by_scheme
 from .base import ApiResponse, BaseEntity
+from .safe_types import SafeList, SafeStr
 
 OpenAccessRouteType = Literal["gold", "green", "hybrid", "bronze"]
 """Type alias for allowed Open Access routes (e.g., gold, green)."""
@@ -45,8 +49,8 @@ class Pid(BaseModel):
         value: The actual value of the PID.
     """
 
-    scheme: str | None = None
-    value: str | None = None
+    scheme: SafeStr = ""
+    value: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
 
@@ -59,14 +63,14 @@ class Author(BaseModel):
         rank: The rank or order of the author in an author list.
         name: The given name(s) of the author.
         surname: The surname or family name of the author.
-        pid: A `Pid` object representing a persistent identifier for the author (e.g., ORCID).
+        pid: A dictionary representing a persistent identifier for the author (e.g., ORCID).
     """
 
-    fullName: str | None = None
+    fullName: SafeStr = ""
     rank: int | None = None
-    name: str | None = None
+    name: SafeStr = ""
     surname: str | None = None
-    pid: Pid | None = None
+    pid: dict | None = None
 
     model_config = ConfigDict(extra="allow")
 
@@ -80,11 +84,14 @@ class BestAccessRight(BaseModel):
         scheme: The scheme or vocabulary defining the access right code.
     """
 
-    code: str | None = None
-    label: str | None = None
-    scheme: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
+    scheme: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeBestAccessRight = Annotated[BestAccessRight, BeforeValidator(lambda v: BestAccessRight() if v is None else v)]
 
 
 class ResultCountry(BaseModel):
@@ -95,10 +102,13 @@ class ResultCountry(BaseModel):
         label: The human-readable name of the country.
     """
 
-    code: str | None = None
-    label: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeResultCountry = Annotated[ResultCountry, BeforeValidator(lambda v: ResultCountry() if v is None else v)]
 
 
 class CitationImpact(BaseModel):
@@ -125,6 +135,9 @@ class CitationImpact(BaseModel):
     impulseClass: Literal["C1", "C2", "C3", "C4", "C5"] | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeCitationImpact = Annotated[CitationImpact, BeforeValidator(lambda v: CitationImpact() if v is None else v)]
 
 
 class UsageCounts(BaseModel):
@@ -167,6 +180,9 @@ class UsageCounts(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeUsageCounts = Annotated[UsageCounts, BeforeValidator(lambda v: UsageCounts() if v is None else v)]
+
+
 class Indicator(BaseModel):
     """Container for various impact indicators of a research product.
 
@@ -175,10 +191,13 @@ class Indicator(BaseModel):
         usageCounts: A `UsageCounts` object detailing view and download counts.
     """
 
-    citationImpact: CitationImpact | None = None
-    usageCounts: UsageCounts | None = None
+    citationImpact: SafeCitationImpact = Field(default_factory=CitationImpact)
+    usageCounts: SafeUsageCounts = Field(default_factory=UsageCounts)
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeIndicator = Annotated[Indicator, BeforeValidator(lambda v: Indicator() if v is None else v)]
 
 
 class AccessRight(BaseModel):
@@ -191,12 +210,15 @@ class AccessRight(BaseModel):
         scheme: The scheme defining the access right codes.
     """
 
-    code: str | None = None
-    label: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
     openAccessRoute: OpenAccessRouteType | None = None
-    scheme: str | None = None
+    scheme: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeAccessRight = Annotated[AccessRight, BeforeValidator(lambda v: AccessRight() if v is None else v)]
 
 
 class ArticleProcessingCharge(BaseModel):
@@ -208,7 +230,7 @@ class ArticleProcessingCharge(BaseModel):
     """
 
     amount: str | None = None
-    currency: str | None = None
+    currency: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
 
@@ -224,8 +246,8 @@ class ResultPid(BaseModel):
         value: The value of the PID.
     """
 
-    scheme: str | None = None
-    value: str | None = None
+    scheme: SafeStr = ""
+    value: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
 
@@ -242,8 +264,8 @@ class License(BaseModel):
         label: A human-readable label for the license.
     """
 
-    code: str | None = None
-    label: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
 
@@ -251,19 +273,25 @@ class License(BaseModel):
 class CollectedFrom(BaseModel):
     """Represents the data source from which an instance was collected."""
 
-    name: str | None = None
+    name: SafeStr = ""
     id: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeCollectedFrom = Annotated[CollectedFrom, BeforeValidator(lambda v: CollectedFrom() if v is None else v)]
 
 
 class HostedBy(BaseModel):
     """Represents the data source hosting an instance."""
 
-    name: str | None = None
+    name: SafeStr = ""
     id: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeHostedBy = Annotated[HostedBy, BeforeValidator(lambda v: HostedBy() if v is None else v)]
 
 
 class Instance(BaseModel):
@@ -290,18 +318,18 @@ class Instance(BaseModel):
         urls: A list of URLs associated with this instance.
     """
 
-    accessRight: AccessRight | None = None
+    accessRight: SafeAccessRight = Field(default_factory=AccessRight)
     alternateIdentifier: list[dict[str, str]] = Field(default_factory=list)
     articleProcessingCharge: ArticleProcessingCharge | None = None
     license: str | None = None
-    collectedFrom: CollectedFrom | None = None
-    hostedBy: HostedBy | None = None
+    collectedFrom: SafeCollectedFrom = Field(default_factory=CollectedFrom)
+    hostedBy: SafeHostedBy = Field(default_factory=HostedBy)
     distributionLocation: str | None = None
     embargoEndDate: str | None = None
     instanceId: str | None = None
     publicationDate: str | None = None
     refereed: RefereedType | None = None
-    type: str | None = None
+    type: SafeStr = ""
     urls: list[str] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="allow")
@@ -315,10 +343,13 @@ class Language(BaseModel):
         label: The human-readable name of the language (e.g., "English").
     """
 
-    code: str | None = None
-    label: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeLanguage = Annotated[Language, BeforeValidator(lambda v: Language() if v is None else v)]
 
 
 class Subject(BaseModel):
@@ -359,12 +390,15 @@ class Container(BaseModel):
     issnLinking: str | None = None
     issnOnline: str | None = None
     issnPrinted: str | None = None
-    name: str | None = None
+    name: SafeStr = ""
     sp: str | None = None
     ep: str | None = None
     vol: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeContainer = Annotated[Container, BeforeValidator(lambda v: Container() if v is None else v)]
 
 
 # GeoLocation for Data
@@ -381,6 +415,9 @@ class GeoLocation(BaseModel):
     place: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeGeoLocation = Annotated[GeoLocation, BeforeValidator(lambda v: GeoLocation() if v is None else v)]
 
 
 # Update main ResearchProduct model
@@ -441,34 +478,34 @@ class ResearchProduct(BaseEntity):
         communities: Related community relationships.
     """
     # id is inherited from BaseEntity
-    originalIds: list[str] | None = Field(default_factory=list)
-    pids: list[Pid] | None = Field(default_factory=list)
+    originalIds: SafeList[str] = Field(default_factory=list)
+    pids: SafeList[Pid] = Field(default_factory=list)
     type: ResearchProductType | None = None
-    mainTitle: str | None = None
-    title: str | None = None
-    subTitle: str | None = None
-    authors: list[Author] | None = Field(default_factory=list)
-    bestAccessRight: BestAccessRight | None = None
-    country: ResultCountry | None = None
+    mainTitle: SafeStr = ""
+    title: SafeStr = ""
+    subTitle: SafeStr = ""
+    authors: SafeList[Author] = Field(default_factory=list)
+    bestAccessRight: SafeBestAccessRight = Field(default_factory=BestAccessRight)
+    country: SafeResultCountry = Field(default_factory=ResultCountry)
     countries: list | None = None
-    description: str | None = None
-    descriptions: list[str] | None = None
+    description: SafeStr = ""
+    descriptions: SafeList[str] = Field(default_factory=list)
     publicationDate: str | None = None
-    publisher: str | None = None
+    publisher: SafeStr = ""
     embargoEndDate: str | None = None
-    contributors: list[str] | None = None
-    sources: list[str] | None = None
-    formats: list[str] | None = None
-    coverages: list[str] | None = None
+    contributors: SafeList[str] = Field(default_factory=list)
+    sources: SafeList[str] = Field(default_factory=list)
+    formats: SafeList[str] = Field(default_factory=list)
+    coverages: SafeList[str] = Field(default_factory=list)
     dateOfCollection: str | None = None
     lastUpdateTimeStamp: int | None = None
-    indicators: Indicator | None = None
-    instances: list[Instance] | None = Field(default_factory=list)
-    language: Language | None = None
-    subjects: list[Subject] | None = Field(default_factory=list)
-    container: Container | None = None
-    keywords: list[str] | None = Field(default_factory=list)
-    geoLocation: GeoLocation | None = None
+    indicators: SafeIndicator = Field(default_factory=Indicator)
+    instances: SafeList[Instance] = Field(default_factory=list)
+    language: SafeLanguage = Field(default_factory=Language)
+    subjects: SafeList[Subject] = Field(default_factory=list)
+    container: SafeContainer = Field(default_factory=Container)
+    keywords: SafeList[str] = Field(default_factory=list)
+    geoLocation: SafeGeoLocation = Field(default_factory=GeoLocation)
     geoLocations: list | None = None
 
     # Open Access fields
@@ -479,7 +516,7 @@ class ResearchProduct(BaseEntity):
 
     # Subtype-specific fields (Software)
     codeRepositoryUrl: str | None = None
-    documentationUrls: list[str] | None = None
+    documentationUrls: SafeList[str] = Field(default_factory=list)
     programmingLanguage: str | None = None
 
     # Subtype-specific fields (Dataset)
@@ -492,7 +529,7 @@ class ResearchProduct(BaseEntity):
     tools: list | None = None
 
     # Relationship fields
-    collectedFrom: list[CollectedFrom] | None = None
+    collectedFrom: SafeList[CollectedFrom] = Field(default_factory=list)
     projects: list | None = None
     organizations: list | None = None
     communities: list | None = None
@@ -501,27 +538,26 @@ class ResearchProduct(BaseEntity):
 
     @field_validator("keywords", mode="before")
     @classmethod
-    def split_keywords(cls, v: Any) -> list[str] | None:
+    def split_keywords(cls, v: Any) -> list[str]:
         """Attempts to split a comma-separated string of keywords into a list.
 
         If the input `v` is a string, it's split by commas, and each part is stripped
-        of whitespace. If `v` is None or not a string, it's returned as is (or None
-        if the string was empty after stripping).
+        of whitespace. If `v` is None or not a string, it returns an empty list.
 
         Args:
             v: The value to parse, expected to be a string or None.
 
         Returns:
-            A list of keyword strings, or None if input was None or empty.
+            A list of keyword strings, or [] if input was None or unexpected.
         """
         if v is None:
-            return None
+            return []
         if isinstance(v, str):
             return [kw.strip() for kw in v.split(",") if kw.strip()]
         logger.warning(
             f"Unexpected value for ResearchProduct.keywords: {v}. Expected string or None."
         )
-        return None  # Or raise ValueError if strictness is preferred
+        return []
 
     @model_validator(mode="before")
     @classmethod
@@ -543,6 +579,73 @@ class ResearchProduct(BaseEntity):
             data["title"] = data["mainTitle"]
             # Keep mainTitle in data so it populates the explicit field
         return data
+
+    # ── Computed fields ─────────────────────────────────────────────────
+
+    @computed_field
+    @property
+    def doi(self) -> str | None:
+        """First DOI from the pids list."""
+        return extract_pid_by_scheme(self.pids, "doi")
+
+    @computed_field
+    @property
+    def all_dois(self) -> list[str]:
+        """All DOI values from the pids list."""
+        return extract_all_pids_by_scheme(self.pids, "doi")
+
+    @computed_field
+    @property
+    def is_open_access(self) -> bool:
+        """True when the best access right is OPEN."""
+        return self.bestAccessRight.label.upper() == "OPEN"
+
+    @computed_field
+    @property
+    def open_access_url(self) -> str | None:
+        """URL of the first instance whose access right is OPEN."""
+        for inst in self.instances:
+            if inst.accessRight and inst.accessRight.label and inst.accessRight.label.upper() == "OPEN" and inst.urls:
+                return inst.urls[0]
+        return None
+
+    @computed_field
+    @property
+    def citation_count(self) -> int | None:
+        """Citation count from indicators, if available."""
+        return self.indicators.citationImpact.citationCount
+
+    @computed_field
+    @property
+    def publication_year(self) -> int | None:
+        """Year parsed from publicationDate."""
+        if self.publicationDate and len(self.publicationDate) >= 4:
+            try:
+                return int(self.publicationDate[:4])
+            except ValueError:
+                return None
+        return None
+
+    @computed_field
+    @property
+    def journal_name(self) -> str | None:
+        """Container / journal name, or None when empty."""
+        return self.container.name or None
+
+    @computed_field
+    @property
+    def author_names(self) -> list[str]:
+        """Non-empty full names of all authors."""
+        return [a.fullName for a in self.authors if a.fullName]
+
+    @computed_field
+    @property
+    def license(self) -> str | None:
+        """First non-empty license string found across instances."""
+        for inst in self.instances:
+            if inst.license:
+                return inst.license
+        return None
 
 # Define the specific response type for ResearchProduct results
 ResearchProductResponse = ApiResponse[ResearchProduct]

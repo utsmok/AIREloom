@@ -6,10 +6,13 @@ based on the OpenAIRE Graph API v1 persons endpoint.
 Reference: https://api.openaire.eu/graph/v1/persons
 """
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, Field, computed_field
+
+from .._helpers import extract_orcid
 
 # Import base classes
 from .base import ApiResponse, BaseEntity
+from .safe_types import SafeList, SafeStr
 
 
 class Person(BaseEntity):
@@ -35,16 +38,27 @@ class Person(BaseEntity):
     """
 
     # id is inherited from BaseEntity
-    originalId: list[str] | None = None
-    givenName: str | None = None
-    familyName: str | None = None
-    alternativeNames: list[str] | None = None
-    biography: str | None = None
-    subject: list[str] | None = None
+    originalId: SafeList[str] = Field(default_factory=list)
+    givenName: SafeStr = ""
+    familyName: SafeStr = ""
+    alternativeNames: SafeList[str] = Field(default_factory=list)
+    biography: SafeStr = ""
+    subject: SafeList[str] = Field(default_factory=list)
     indicator: dict | None = None
     context: dict | None = None
     consent: bool | None = None
-    coAuthors: list[str] | None = None
+    coAuthors: SafeList[str] = Field(default_factory=list)
+
+    @computed_field
+    @property
+    def orcid(self) -> str | None:
+        return extract_orcid(self.originalId, self.id)
+
+    @computed_field
+    @property
+    def full_name(self) -> str:
+        parts = [n for n in (self.givenName, self.familyName) if n]
+        return " ".join(parts)
 
     model_config = ConfigDict(extra="allow")
 

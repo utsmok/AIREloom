@@ -21,6 +21,7 @@ from .relation import (
     RelType,
 )
 from .research_product import ResearchProduct, ResearchProductResponse
+from .safe_types import SafeList, SafeStr
 from .scholix import (
     ScholixCreator,
     ScholixEntity,
@@ -34,6 +35,8 @@ from .scholix import (
 __all__ = [
     "ApiResponse",
     "BaseEntity",
+    "SafeList",
+    "SafeStr",
     "ControlledField",
     "Country",
     "DataSource",

@@ -96,6 +96,7 @@ select = [
     "UP", # check for deprecated ways of coding
     "FURB",
 ]
+ignore = ["PLR2004"]  # Magic number in comparison — too noisy for parsing constants
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

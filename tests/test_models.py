@@ -81,7 +81,7 @@ class TestProjectKeywords:
 
     def test_empty_string_returns_none(self):
         p = Project(id="p3", keywords="   ")
-        assert p.keywords is None
+        assert p.keywords == []
 
     def test_list_passthrough(self):
         p = Project(id="p4", keywords=["already", "a", "list"])
@@ -89,7 +89,7 @@ class TestProjectKeywords:
 
     def test_none_passthrough(self):
         p = Project(id="p5", keywords=None)
-        assert p.keywords is None
+        assert p.keywords == []
 
     def test_comma_priority_over_semicolon(self):
         """When string has both comma and semicolon, comma split wins."""
@@ -134,7 +134,7 @@ class TestResearchProductKeywords:
 
     def test_none_keywords(self):
         rp = ResearchProduct(id="rp1", keywords=None)
-        assert rp.keywords is None
+        assert rp.keywords == []
 
     def test_comma_separated_string(self):
         rp = ResearchProduct(id="rp2", keywords="ai, ml, nlp")
@@ -143,7 +143,7 @@ class TestResearchProductKeywords:
     def test_unexpected_type_returns_none(self):
         """Passing a non-string, non-None value (e.g. int) hits warning branch."""
         rp = ResearchProduct(id="rp3", keywords=123)
-        assert rp.keywords is None
+        assert rp.keywords == []
 
     def test_empty_string_returns_empty_list(self):
         rp = ResearchProduct(id="rp4", keywords="   ")

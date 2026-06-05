@@ -7,12 +7,19 @@ based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/project
 """
 
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+)
 
-# Import base classes
 from .base import ApiResponse, BaseEntity
+from .safe_types import SafeList, SafeStr
 
 
 class FundingStream(BaseModel):
@@ -23,9 +30,12 @@ class FundingStream(BaseModel):
         id: The unique identifier of the funding stream.
     """
 
-    description: str | None = None
+    description: SafeStr = ""
     id: str | None = None
     model_config = ConfigDict(extra="allow")
+
+
+SafeFundingStream = Annotated[FundingStream, BeforeValidator(lambda v: FundingStream() if v is None else v)]
 
 
 class Funding(BaseModel):
@@ -38,10 +48,10 @@ class Funding(BaseModel):
         shortName: An optional short name or acronym for the funding body.
     """
 
-    fundingStream: FundingStream | None = None
+    fundingStream: SafeFundingStream = Field(default_factory=FundingStream)
     jurisdiction: str | None = None
-    name: str | None = None
-    shortName: str | None = None
+    name: SafeStr = ""
+    shortName: SafeStr = ""
     model_config = ConfigDict(extra="allow")
 
 
@@ -54,10 +64,13 @@ class Grant(BaseModel):
         totalCost: The total cost of the project.
     """
 
-    currency: str | None = None
+    currency: SafeStr = ""
     fundedAmount: float | None = None
     totalCost: float | None = None
     model_config = ConfigDict(extra="allow")
+
+
+SafeGrant = Annotated[Grant, BeforeValidator(lambda v: Grant() if v is None else v)]
 
 
 class H2020Programme(BaseModel):
@@ -69,7 +82,7 @@ class H2020Programme(BaseModel):
     """
 
     code: str | None = None
-    description: str | None = None
+    description: SafeStr = ""
     model_config = ConfigDict(extra="allow")
 
 
@@ -103,41 +116,76 @@ class Project(BaseEntity):
 
     # id is inherited from BaseEntity
     code: str | None = None
-    acronym: str | None = None
-    title: str | None = None
+    acronym: SafeStr = ""
+    title: SafeStr = ""
     callIdentifier: str | None = None
-    fundings: list[Funding] | None = Field(default_factory=list)
-    granted: Grant | None = None
-    h2020Programmes: list[H2020Programme] | None = Field(default_factory=list)
+    fundings: SafeList[Funding] = Field(default_factory=list)
+    granted: SafeGrant = Field(default_factory=Grant)
+    h2020Programmes: SafeList[H2020Programme] = Field(default_factory=list)
     # Keywords might be a single string or a delimited string. Attempt parsing.
-    keywords: list[str] | None = None
+    keywords: SafeList[str] = Field(default_factory=list)
     openAccessMandateForDataset: bool | None = None
     openAccessMandateForPublications: bool | None = None
     # Dates are kept as string for safety due to potential missing parts or nulls.
     # Expected format is typically YYYY-MM-DD.
     startDate: str | None = None
     endDate: str | None = None
-    subjects: list[str] | None = Field(default_factory=list)
-    summary: str | None = None
+    subjects: SafeList[str] = Field(default_factory=list)
+    summary: SafeStr = ""
     websiteUrl: str | None = None
+
+    @computed_field
+    @property
+    def funder_name(self) -> str | None:
+        if self.fundings:
+            f = self.fundings[0]
+            return f.shortName or f.name or None
+        return None
+
+    @computed_field
+    @property
+    def funder_jurisdiction(self) -> str | None:
+        if self.fundings:
+            return self.fundings[0].jurisdiction
+        return None
+
+    @computed_field
+    @property
+    def start_year(self) -> int | None:
+        if self.startDate and len(self.startDate) >= 4:
+            try:
+                return int(self.startDate[:4])
+            except ValueError:
+                return None
+        return None
+
+    @computed_field
+    @property
+    def end_year(self) -> int | None:
+        if self.endDate and len(self.endDate) >= 4:
+            try:
+                return int(self.endDate[:4])
+            except ValueError:
+                return None
+        return None
 
     model_config = ConfigDict(extra="allow")
 
     @field_validator("keywords", mode="before")
     @classmethod
-    def parse_keywords_string(cls, v: Any) -> list[str] | None:
+    def parse_keywords_string(cls, v: Any) -> list[str]:
         """Attempts to parse a keyword string into a list of strings.
 
         If the input `v` is a string, this validator tries to split it by common
         delimiters (comma, then semicolon). If splitting produces any parts,
-        a list of stripped parts is returned. Otherwise None is returned.
+        a list of stripped parts is returned. Otherwise an empty list is returned.
         If `v` is not a string (e.g., already a list or None), it's returned as is.
 
         Args:
             v: The value to parse, expected to be a string, list, or None.
 
         Returns:
-            A list of strings, or None if input was None or empty.
+            A list of strings. Returns [] if input was empty or unparseable.
         """
         if isinstance(v, str):
             # Prioritize comma, then semicolon
@@ -146,7 +194,7 @@ class Project(BaseEntity):
                 parts = [part.strip() for part in v.split(delimiter) if part.strip()]
                 if parts:
                     return parts
-            return None
+            return []
         # If not a string (e.g., already a list or None), return as is
         return v
 

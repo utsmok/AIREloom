@@ -7,10 +7,13 @@ based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/organization
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, computed_field
 
 # Import base classes
 from .base import ApiResponse, BaseEntity
+from .safe_types import SafeList, SafeStr
 
 
 class Country(BaseModel):
@@ -21,10 +24,14 @@ class Country(BaseModel):
         label: The human-readable name of the country (e.g., "Greece").
     """
 
-    code: str | None = None
-    label: str | None = None
+    code: SafeStr = ""
+    label: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+# Type alias for Country that defaults None to Country()
+SafeCountry = Annotated[Country, BeforeValidator(lambda v: Country() if v is None else v)]
 
 
 class OrganizationPid(BaseModel):
@@ -35,8 +42,8 @@ class OrganizationPid(BaseModel):
         value: The value of the PID.
     """
 
-    scheme: str | None = None
-    value: str | None = None
+    scheme: SafeStr = ""
+    value: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
 
@@ -59,12 +66,25 @@ class Organization(BaseEntity):
     """
 
     # id is inherited from BaseEntity
-    legalShortName: str | None = None
-    legalName: str | None = None
-    alternativeNames: list[str] | None = Field(default_factory=list)
+    legalShortName: SafeStr = ""
+    legalName: SafeStr = ""
+    alternativeNames: SafeList[str] = Field(default_factory=list)
     websiteUrl: str | None = None
-    country: Country | None = None
-    pids: list[OrganizationPid] | None = Field(default_factory=list)
+    country: SafeCountry = Field(default_factory=Country)
+    pids: SafeList[OrganizationPid] = Field(default_factory=list)
+
+    @computed_field
+    @property
+    def ror_id(self) -> str | None:
+        for pid in self.pids:
+            if pid.scheme and pid.scheme.lower() == "ror" and pid.value:
+                return pid.value
+        return None
+
+    @computed_field
+    @property
+    def country_code(self) -> str | None:
+        return self.country.code if self.country.code and self.country.code != "UNKNOWN" else None
 
     model_config = ConfigDict(extra="allow")
 

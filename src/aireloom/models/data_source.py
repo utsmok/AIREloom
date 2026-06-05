@@ -7,12 +7,13 @@ for restricted string values based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/data-source
 """
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, computed_field
 
 from .base import ApiResponse, BaseEntity
 from .research_product import Container
+from .safe_types import SafeList, SafeStr
 
 # Type literals for restricted values
 AccessRightType = Literal["open", "restricted", "closed"]
@@ -32,10 +33,14 @@ class ControlledField(BaseModel):
         value: The actual value from the controlled vocabulary.
     """
 
-    scheme: str | None = None
-    value: str | None = None
+    scheme: SafeStr = ""
+    value: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+SafeControlledField = Annotated[ControlledField, BeforeValidator(lambda v: ControlledField() if v is None else v)]
+
+SafeContainer = Annotated[Container, BeforeValidator(lambda v: Container() if v is None else v)]
 
 
 # Main DataSource model
@@ -46,19 +51,19 @@ class DataSource(BaseEntity):
     This model captures various metadata fields associated with a data source.
     """
 
-    originalIds: list[str] | None = Field(default_factory=list)
-    pids: list[ControlledField] | None = Field(default_factory=list)
-    type: ControlledField | None = None
+    originalIds: SafeList[str] = Field(default_factory=list)
+    pids: SafeList[ControlledField] = Field(default_factory=list)
+    type: SafeControlledField = Field(default_factory=ControlledField)
     openaireCompatibility: str | None = None
-    officialName: str | None = None
-    englishName: str | None = None
+    officialName: SafeStr = ""
+    englishName: SafeStr = ""
     websiteUrl: str | None = None
     logoUrl: str | None = None
     dateOfValidation: str | None = None
-    description: str | None = None
-    subjects: list[str] | None = Field(default_factory=list)
-    languages: list[str] | None = Field(default_factory=list)
-    contentTypes: list[str] | None = Field(default_factory=list)
+    description: SafeStr = ""
+    subjects: SafeList[str] = Field(default_factory=list)
+    languages: SafeList[str] = Field(default_factory=list)
+    contentTypes: SafeList[str] = Field(default_factory=list)
     releaseStartDate: str | None = None
     releaseEndDate: str | None = None
     accessRights: AccessRightType | None = None
@@ -69,10 +74,14 @@ class DataSource(BaseEntity):
     citationGuidelineUrl: str | None = None
     pidSystems: str | None = None
     certificates: str | None = None
-    policies: list[str] | None = Field(default_factory=list)
+    policies: SafeList[str] = Field(default_factory=list)
     missionStatementUrl: str | None = None
-    # Added based on documentation/analysis
-    journal: Container | None = None
+    journal: SafeContainer = Field(default_factory=Container)
+
+    @computed_field
+    @property
+    def type_name(self) -> str | None:
+        return self.type.value or None
 
     model_config = ConfigDict(extra="allow")
 

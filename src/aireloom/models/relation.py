@@ -2,9 +2,10 @@
 
 import logging
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from .base import Header
+from .safe_types import SafeList, SafeStr
 
 logger = logging.getLogger(__name__)
 
@@ -21,21 +22,21 @@ class Identifier(BaseModel):
 class EntityRef(BaseModel):
     """Named entity with identifiers (authors, collectedFrom)."""
 
-    name: str | None = None
-    identifiers: list[Identifier] | None = None
+    name: SafeStr = ""
+    identifiers: SafeList[Identifier] = Field(default_factory=list)
     model_config = ConfigDict(extra="allow")
 
 
 class Node(BaseModel):
     """A node (source or target) in a relation link."""
 
-    title: str | None = None
+    title: SafeStr = ""
     type: str | None = None
     instanceType: str | None = None
     publicationDate: str | None = None
-    identifiers: list[Identifier] | None = None
-    authors: list[EntityRef] | None = None
-    collectedFrom: list[EntityRef] | None = None
+    identifiers: SafeList[Identifier] = Field(default_factory=list)
+    authors: SafeList[EntityRef] = Field(default_factory=list)
+    collectedFrom: SafeList[EntityRef] = Field(default_factory=list)
     model_config = ConfigDict(extra="allow")
 
 

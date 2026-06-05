@@ -476,7 +476,7 @@ class TestRelationModels:
         node = Node(title="Minimal", type="publication")
         assert node.title == "Minimal"
         assert node.type == "publication"
-        assert node.identifiers is None
+        assert node.identifiers == []
 
     def test_rel_type_validation(self):
         rt = RelType(name="References", typeSchema="datacite")
@@ -516,7 +516,7 @@ class TestRelationModels:
         }
         rel = Relation.model_validate(data)
         assert rel.source.title == "Source"
-        assert rel.source.identifiers is None
+        assert rel.source.identifiers == []
         assert rel.relType.name == "References"
 
     def test_links_response_validation(self):

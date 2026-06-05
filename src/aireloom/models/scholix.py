@@ -13,17 +13,10 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .safe_types import SafeList, SafeStr
+
 ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
 """Defines the allowed types for a Scholix entity (e.g., publication, dataset)."""
-
-ScholixRelationshipNameValue = Literal[
-    "IsSupplementTo",
-    "IsSupplementedBy",
-    "References",
-    "IsReferencedBy",
-    "IsRelatedTo",
-]
-
 
 class ScholixIdentifier(BaseModel):
     """Represents a persistent identifier within the Scholix schema.
@@ -34,8 +27,8 @@ class ScholixIdentifier(BaseModel):
         id_url: An optional URL or string for the identifier (aliased from "IDURL").
     """
 
-    id_val: str = Field(alias="ID")
-    id_scheme: str = Field(alias="IDScheme")
+    id_val: SafeStr = Field(alias="ID", default="")
+    id_scheme: SafeStr = Field(alias="IDScheme", default="")
     id_url: str | None = Field(alias="IDURL", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
@@ -49,7 +42,7 @@ class ScholixCreator(BaseModel):
         identifier: An optional list of `ScholixIdentifier` objects for the creator.
     """
 
-    name: str | None = Field(alias="Name", default=None)
+    name: SafeStr = Field(alias="Name", default="")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
@@ -63,7 +56,7 @@ class ScholixPublisher(BaseModel):
         identifier: An optional list of `ScholixIdentifier` objects for the publisher.
     """
 
-    name: str = Field(alias="Name")
+    name: SafeStr = Field(alias="Name", default="")
     identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
@@ -82,13 +75,13 @@ class ScholixEntity(BaseModel):
         publisher: A list of `ScholixPublisher` objects.
     """
 
-    identifier: list[ScholixIdentifier] = Field(alias="Identifier")
+    identifier: SafeList[ScholixIdentifier] = Field(alias="Identifier", default_factory=list)
     type: ScholixEntityTypeName = Field(alias="Type")
     sub_type: str | None = Field(alias="SubType", default=None)
-    title: str | None = Field(alias="Title", default=None)
-    creator: list[ScholixCreator] | None = Field(alias="Creator", default=None)
+    title: SafeStr = Field(alias="Title", default="")
+    creator: SafeList[ScholixCreator] = Field(alias="Creator", default_factory=list)
     publication_date: str | None = Field(alias="PublicationDate", default=None)
-    publisher: list[ScholixPublisher] | None = Field(alias="Publisher", default=None)
+    publisher: SafeList[ScholixPublisher] = Field(alias="Publisher", default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -98,12 +91,11 @@ class ScholixRelationshipType(BaseModel):
 
     Attributes:
         name: The primary name of the relationship type (e.g., "References", "IsSupplementTo").
-              Uses `ScholixRelationshipNameValue` literal type.
         sub_type: An optional subtype for more specific relationship classification.
         sub_type_schema: An optional schema identifier (may be a URL or a short string like 'datacite').
     """
 
-    name: ScholixRelationshipNameValue = Field(alias="Name")
+    name: SafeStr = Field(alias="Name", default="")
     sub_type: str | None = Field(alias="SubType", default=None)
     sub_type_schema: str | None = Field(alias="SubTypeSchema", default=None)
 
@@ -118,8 +110,8 @@ class ScholixLinkProvider(BaseModel):
         identifier: An optional list of `ScholixIdentifier` objects for the provider.
     """
 
-    name: str = Field(alias="Name")
-    identifier: list[ScholixIdentifier] | None = Field(alias="Identifier", default=None)
+    name: SafeStr = Field(alias="Name", default="")
+    identifier: SafeList[ScholixIdentifier] = Field(alias="Identifier", default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
