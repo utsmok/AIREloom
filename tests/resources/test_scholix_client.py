@@ -235,8 +235,6 @@ async def test_iterate_scholix_links_no_results(
     )
 
 
-
-
 @pytest.mark.asyncio
 async def test_iterate_scholix_links_zero_total_pages_with_results(
     scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
@@ -259,7 +257,9 @@ async def test_iterate_scholix_links_zero_total_pages_with_results(
 
     collected = []
     filters = ScholixFilters(sourcePid=source_pid_val)
-    async for link in scholix_client.iterate_links(filters=filters, page_size=page_size):
+    async for link in scholix_client.iterate_links(
+        filters=filters, page_size=page_size
+    ):
         collected.append(link)
 
     # Should yield the one result from the page, then break due to total_pages==0
@@ -297,9 +297,7 @@ async def test_search_scholix_links_bibliofabric_error_reraise(
 
     filters = ScholixFilters(sourcePid=source_pid_val)
     with pytest.raises(BibliofabricError, match="direct error"):
-        await scholix_client.search_links(
-            filters=filters, page=0, page_size=page_size
-        )
+        await scholix_client.search_links(filters=filters, page=0, page_size=page_size)
 
 
 @pytest.mark.asyncio
@@ -314,9 +312,7 @@ async def test_search_scholix_links_validation_error_reraise(
 
     filters = ScholixFilters(sourcePid=source_pid_val)
     with pytest.raises(ValidationError, match="validation failed"):
-        await scholix_client.search_links(
-            filters=filters, page=0, page_size=page_size
-        )
+        await scholix_client.search_links(filters=filters, page=0, page_size=page_size)
 
 
 @pytest.mark.asyncio
@@ -331,9 +327,7 @@ async def test_search_scholix_links_unexpected_error(
 
     filters = ScholixFilters(sourcePid=source_pid_val)
     with pytest.raises(BibliofabricError, match="Unexpected error searching"):
-        await scholix_client.search_links(
-            filters=filters, page=0, page_size=page_size
-        )
+        await scholix_client.search_links(filters=filters, page=0, page_size=page_size)
 
 
 @pytest.mark.asyncio

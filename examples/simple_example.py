@@ -59,7 +59,9 @@ async def main():
             page=1, page_size=5, filters=filters
         )
 
-        total_results = response.header.numFound if response.header else len(response.results or [])
+        total_results = (
+            response.header.numFound if response.header else len(response.results or [])
+        )
         console.print(f"Found {total_results} total results")
 
         # Display results in a table

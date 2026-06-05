@@ -68,8 +68,9 @@ async def _(mo, q, session):
         for p in _papers
     ]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 1. Publications by DOI
 
     `q.publications_by_doi(session, *dois)` — fetch research products
@@ -77,7 +78,9 @@ async def _(mo, q, session):
 
     Found **{len(_papers)}** results:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -98,8 +101,9 @@ async def _(mo, q, session):
         for p in _pubs
     ]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 2. Publications by Organization
 
     `q.publications_by_organization(session, identifier, …)` — recent
@@ -107,7 +111,9 @@ async def _(mo, q, session):
 
     Found **{len(_pubs)}** results:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -124,8 +130,9 @@ async def _(mo, q, session):
         for p in _pubs
     ]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 3. Publications by Author
 
     `q.publications_by_author(session, identifier, search_on="orcid", …)`
@@ -133,7 +140,9 @@ async def _(mo, q, session):
 
     Found **{len(_pubs)}** results:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -150,8 +159,9 @@ async def _(mo, q, session):
         for p in _pubs
     ]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 4. Publications by Project
 
     `q.publications_by_project(session, identifier, search_on="name", …)`
@@ -159,7 +169,9 @@ async def _(mo, q, session):
 
     Found **{len(_pubs)}** results:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -169,7 +181,10 @@ async def _(mo, q, session):
         ("All datasets", dict(type="dataset")),
         ("Open Access publications", dict(type="publication", open_access_only=True)),
         ("Machine learning", dict(search="machine learning")),
-        ("Deep learning publications", dict(search="deep learning", type="publication")),
+        (
+            "Deep learning publications",
+            dict(search="deep learning", type="publication"),
+        ),
     ]
 
     _rows = [
@@ -177,14 +192,17 @@ async def _(mo, q, session):
         for _label, _kw in _scenarios
     ]
 
-    mo.md(
-        r"""
+    (
+        mo.md(
+            r"""
     ## 5. Count Publications
 
     `q.count_publications(session, **filters)` — count matching products
     without downloading them. Various scenarios:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -206,8 +224,9 @@ async def _(mo, q, session):
         for p in _projects
     ]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 6. Projects by Organization
 
     `q.projects_by_organization(session, identifier, …)` — projects
@@ -215,7 +234,9 @@ async def _(mo, q, session):
 
     Found **{len(_projects)}** results:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -225,8 +246,9 @@ async def _(mo, q, session):
     _citations = await q.citing_works(session, _DOI, limit=5)
     _rows = [{"relationship": str(cite)} for cite in _citations]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 7. Citing Works (Scholix)
 
     `q.citing_works(session, doi, limit=5)` — works that cite
@@ -234,7 +256,9 @@ async def _(mo, q, session):
 
     Found **{len(_citations)}** citing works:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell
@@ -244,8 +268,9 @@ async def _(mo, q, session):
     _datasets = await q.related_datasets(session, _DOI, limit=5)
     _rows = [{"relationship": str(ds)} for ds in _datasets]
 
-    mo.md(
-        f"""
+    (
+        mo.md(
+            f"""
     ## 8. Related Datasets (Scholix)
 
     `q.related_datasets(session, doi, limit=5)` — datasets linked to
@@ -253,7 +278,9 @@ async def _(mo, q, session):
 
     Found **{len(_datasets)}** related datasets:
     """
-    ), mo.ui.table(_rows, selection=None)
+        ),
+        mo.ui.table(_rows, selection=None),
+    )
 
 
 @app.cell

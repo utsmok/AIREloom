@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 
 import httpx
 import pytest
-from bibliofabric.exceptions import BibliofabricError, ValidationError
+from bibliofabric.exceptions import BibliofabricError
 
 from aireloom.client import AireloomClient
 from aireloom.constants import DEFAULT_PAGE_SIZE

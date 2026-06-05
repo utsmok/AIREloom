@@ -11,8 +11,8 @@ from bibliofabric.auth import (
 )
 from bibliofabric.exceptions import BibliofabricError
 from dotenv import load_dotenv
-from pytest_httpx import HTTPXMock
 from pydantic import ValidationError
+from pytest_httpx import HTTPXMock
 
 from aireloom import AireloomSession
 from aireloom.constants import (
@@ -169,9 +169,7 @@ async def test_session_context_manager_aclose():
 async def test_session_get_research_product_integration():
     product_id = "rp123"
     token_url = "https://aai.openaire.eu/oidc/token"  # Standard token URL
-    expected_url = (
-        f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
-    )
+    expected_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
 
     mock_api_response_json = {
         "results": [
@@ -207,9 +205,7 @@ async def test_session_get_research_product_integration():
 @pytest.mark.asyncio
 async def test_session_search_research_products_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = (
-        f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
-    )
+    expected_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
 
     mock_api_response_json = {
         "header": {
@@ -1254,9 +1250,6 @@ async def test_iterate_scholix_links(httpx_mock: HTTPXMock):
             if count >= max_items_to_iterate:
                 break
         assert count == max_items_to_iterate
-
-
-
 
 
 @pytest.mark.asyncio

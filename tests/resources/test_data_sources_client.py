@@ -75,9 +75,7 @@ async def test_get_data_source(
         base_url_override=None,
     )
     assert data_source == expected_data_source
-    assert (
-        data_source.type and data_source.type.value == "repository"
-    )
+    assert data_source.type and data_source.type.value == "repository"
 
 
 @pytest.mark.asyncio

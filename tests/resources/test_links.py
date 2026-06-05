@@ -325,9 +325,7 @@ class TestIterateLinks:
         mock_http.json.return_value = response_data
         mock_api_client_fixture.request.return_value = mock_http
 
-        results = [
-            rel async for rel in research_products_client.iterate_links()
-        ]
+        results = [rel async for rel in research_products_client.iterate_links()]
         assert len(results) == 1
         assert isinstance(results[0], Relation)
         assert results[0].source.title == "Test Paper"

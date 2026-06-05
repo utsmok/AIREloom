@@ -51,7 +51,9 @@ async def main() -> None:
     client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
     client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
     if not client_id or not client_secret:
-        console.print("[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]")
+        console.print(
+            "[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]"
+        )
         return
 
     console.print(
@@ -62,7 +64,9 @@ async def main() -> None:
         )
     )
 
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
+    async with AireloomClient(
+        client_id=client_id, client_secret=client_secret
+    ) as client:
         # --- Step 1: search_links (single-page snapshot) -----------------------
         # ScholixFilters requires sourcePid or targetPid — Pydantic validates
         # field names. A typo like 'sorucePid' raises ValidationError instantly.
@@ -79,7 +83,9 @@ async def main() -> None:
 
         # Typed response: .total_links, .result (list[ScholixRelationship])
         total = response.total_links
-        console.print(f"   Total linked datasets reported by Scholix: [bold]{total}[/bold]")
+        console.print(
+            f"   Total linked datasets reported by Scholix: [bold]{total}[/bold]"
+        )
         console.print(f"   Retrieved in this page: {len(response.result)}")
 
         # --- Step 2: iterate_links (async generator over ALL pages) -----------
@@ -124,14 +130,14 @@ async def main() -> None:
             title = (target.title or "—")[:55]
             doi = _pid_str(target.identifier, "doi")
             rel_name = rel.relationship_type.name
-            providers = ", ".join(
-                p.name for p in (rel.link_provider or [])
-            )[:30]
+            providers = ", ".join(p.name for p in (rel.link_provider or []))[:30]
             table.add_row(str(i), title, doi, rel_name, providers)
 
         console.print(table)
         if len(links) > 20:
-            console.print(f"   [dim]... and {len(links) - 20} more (capped for display)[/dim]")
+            console.print(
+                f"   [dim]... and {len(links) - 20} more (capped for display)[/dim]"
+            )
 
         # --- Step 4: Summary statistics from typed model fields ---------------
         console.print("\n[bold]Relationship type distribution:[/bold]")

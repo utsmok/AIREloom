@@ -28,7 +28,11 @@ from rich.panel import Panel
 from rich.table import Table
 
 from aireloom import AireloomClient
-from aireloom.endpoints import OrganizationsFilters, ProjectsFilters, ResearchProductsFilters
+from aireloom.endpoints import (
+    OrganizationsFilters,
+    ProjectsFilters,
+    ResearchProductsFilters,
+)
 
 console = Console()
 
@@ -40,7 +44,9 @@ async def main() -> None:
     client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
     client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
     if not client_id or not client_secret:
-        console.print("[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]")
+        console.print(
+            "[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]"
+        )
         return
 
     console.print(
@@ -51,8 +57,9 @@ async def main() -> None:
         )
     )
 
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
-
+    async with AireloomClient(
+        client_id=client_id, client_secret=client_secret
+    ) as client:
         # --- Step 1: Find the organization ------------------------------------
         console.print(f"\n[yellow]1. Searching for organization '{ORG_NAME}'[/yellow]")
         org_filters = OrganizationsFilters(search=ORG_NAME)
@@ -90,7 +97,9 @@ async def main() -> None:
 
         try:
             rp_response = await client.research_products.search(
-                page=1, page_size=10, filters=rp_filters,
+                page=1,
+                page_size=10,
+                filters=rp_filters,
                 sort_by="publicationDate DESC",
             )
         except Exception as exc:
@@ -110,7 +119,9 @@ async def main() -> None:
             for product in (rp_response.results or [])[:10]:
                 title = (product.title or "—")[:60]
                 year = (product.publicationDate or "—")[:4]
-                access = product.bestAccessRight.label if product.bestAccessRight else "—"
+                access = (
+                    product.bestAccessRight.label if product.bestAccessRight else "—"
+                )
                 ptype = product.type or "—"
                 rp_table.add_row(title, year, access, ptype)
 
@@ -118,8 +129,7 @@ async def main() -> None:
 
         # --- Step 3: Projects linked to this org -----------------------------
         console.print(
-            f"\n[yellow]3. Projects linked to "
-            f"{org.legalShortName or ORG_NAME}[/yellow]"
+            f"\n[yellow]3. Projects linked to {org.legalShortName or ORG_NAME}[/yellow]"
         )
         proj_filters = ProjectsFilters(
             relOrganizationId=org_id,
@@ -127,7 +137,9 @@ async def main() -> None:
 
         try:
             proj_response = await client.projects.search(
-                page=1, page_size=20, filters=proj_filters,
+                page=1,
+                page_size=20,
+                filters=proj_filters,
                 sort_by="startDate DESC",
             )
         except Exception as exc:
@@ -203,8 +215,7 @@ async def main() -> None:
             "[/red]  # typo: should be relOrganizationId"
         )
         console.print(
-            "  [green]  ResearchProductsFilters(relOrganizationId='...')"
-            "[/green]  ✓"
+            "  [green]  ResearchProductsFilters(relOrganizationId='...')[/green]  ✓"
         )
 
 

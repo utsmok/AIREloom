@@ -300,9 +300,7 @@ async def test_iterate_persons_no_results(
     mock_api_client_fixture.request = AsyncMock(return_value=mock_http_response)
 
     count = 0
-    async for _ in persons_client.iterate(
-        filters=filters_model, page_size=page_size
-    ):
+    async for _ in persons_client.iterate(filters=filters_model, page_size=page_size):
         count += 1
 
     assert count == 0
@@ -413,7 +411,6 @@ def test_persons_filters_forbid_extra():
     """Test that PersonsFilters rejects unknown fields."""
     with pytest.raises(ValidationError):
         PersonsFilters(unknownField="value")
-
 
 
 def test_persons_client_routes_to_v1(persons_client):

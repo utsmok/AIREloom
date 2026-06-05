@@ -49,7 +49,9 @@ async def main() -> None:
     client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
     client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
     if not client_id or not client_secret:
-        console.print("[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]")
+        console.print(
+            "[red]Missing AIRELOOM_OPENAIRE_CLIENT_ID / CLIENT_SECRET in .env[/red]"
+        )
         return
 
     console.print(
@@ -67,8 +69,9 @@ async def main() -> None:
         isPeerReviewed=True,
     )
 
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
-
+    async with AireloomClient(
+        client_id=client_id, client_secret=client_secret
+    ) as client:
         # --- Phase 1: Get total count via single search ----------------------
         console.print("\n[yellow]1. Getting total result count[/yellow]")
         try:
@@ -80,7 +83,9 @@ async def main() -> None:
             console.print(f"[red]search failed: {exc}[/red]")
             return
 
-        console.print(f"   Total publications matching '{SEARCH_TOPIC}': [bold]{total:,}[/bold]")
+        console.print(
+            f"   Total publications matching '{SEARCH_TOPIC}': [bold]{total:,}[/bold]"
+        )
         cap = min(total, MAX_PRODUCTS)
         console.print(f"   Streaming up to {cap} for analysis...\n")
 
@@ -154,7 +159,9 @@ async def main() -> None:
 
         # Citation class distribution
         if citation_classes:
-            console.print("\n[bold]Citation Impact Classes (C1=top … C5=lowest):[/bold]")
+            console.print(
+                "\n[bold]Citation Impact Classes (C1=top … C5=lowest):[/bold]"
+            )
             for cls in ["C1", "C2", "C3", "C4", "C5"]:
                 cnt = citation_classes.get(cls, 0)
                 if cnt:
@@ -167,7 +174,7 @@ async def main() -> None:
                 console.print(f"  • {year}: {cnt}")
 
         # Summary
-        console.print(f"\n[bold]Summary:[/bold]")
+        console.print("\n[bold]Summary:[/bold]")
         console.print(f"  • Products analysed: {count:,}")
         console.print(f"  • With DOI: {with_doi} ({with_doi / count * 100:.1f}%)")
         console.print(f"  • Total citations (of sampled): {total_citations:,}")

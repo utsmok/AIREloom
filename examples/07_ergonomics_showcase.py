@@ -15,6 +15,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -51,7 +52,6 @@ def _():
 @app.cell
 def _(mo):
     mo.md(r"""## Raw API Usage — Manual Extraction""")
-    return
 
 
 @app.cell
@@ -71,7 +71,7 @@ async def _(DOI, ResearchProductsFilters, client, mo):
 def _(mo, raw_paper):
     # Manually extract DOI from pids list
     manual_doi = None
-    for _pid in (raw_paper.pids or []):
+    for _pid in raw_paper.pids or []:
         if (_pid.scheme or "").lower() == "doi" and _pid.value:
             manual_doi = _pid.value
             break
@@ -85,7 +85,7 @@ def _(mo, raw_paper):
 
     # Manually find open access URL
     manual_oa_url = None
-    for _inst in (raw_paper.instances or []):
+    for _inst in raw_paper.instances or []:
         if (
             _inst.accessRight
             and _inst.accessRight.label
@@ -103,7 +103,7 @@ def _(mo, raw_paper):
 
     # Manually get author names
     manual_author_names = []
-    for _author in (raw_paper.authors or []):
+    for _author in raw_paper.authors or []:
         if _author.fullName:
             manual_author_names.append(_author.fullName)
 
@@ -181,13 +181,11 @@ def _(mo, raw_paper):
     → **`{manual_year}`**
     """
     )
-    return
 
 
 @app.cell
 def _(mo):
     mo.md(r"""## Ergonomics Layer — Computed Fields & Convenience Queries""")
-    return
 
 
 @app.cell
@@ -230,7 +228,6 @@ def _(mo, paper):
 @app.cell
 def _(mo):
     mo.md(r"""## Comparison Summary""")
-    return
 
 
 @app.cell
@@ -298,7 +295,6 @@ def _(mo):
         },
     ]
     mo.ui.table(comparison, selection=None)
-    return
 
 
 if __name__ == "__main__":

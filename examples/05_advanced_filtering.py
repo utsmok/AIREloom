@@ -36,7 +36,9 @@ console = Console()
 
 async def demo_research_products(client: AireloomClient) -> None:
     """Complex ResearchProductsFilters: type + date range + open access + subject."""
-    console.print("\n[bold cyan]━━━ Research Products: Multi-Field Filter ━━━[/bold cyan]")
+    console.print(
+        "\n[bold cyan]━━━ Research Products: Multi-Field Filter ━━━[/bold cyan]"
+    )
 
     # Build a complex filter combining multiple dimensions.
     # Each field is type-checked by Pydantic. 'fromPublicationDate' accepts date objects.
@@ -62,7 +64,9 @@ async def demo_research_products(client: AireloomClient) -> None:
 
     try:
         response = await client.research_products.search(
-            page=1, page_size=10, filters=filters,
+            page=1,
+            page_size=10,
+            filters=filters,
             sort_by="publicationDate DESC",
         )
     except Exception as exc:
@@ -72,9 +76,7 @@ async def demo_research_products(client: AireloomClient) -> None:
     total = response.header.numFound or 0
     console.print(f"\n  Results: [bold]{total:,}[/bold] matching publications\n")
 
-    table = Table(
-        title="Open Access ML Publications (2023-2024)", border_style="dim"
-    )
+    table = Table(title="Open Access ML Publications (2023-2024)", border_style="dim")
     table.add_column("Title", style="cyan", max_width=55)
     table.add_column("DOI", style="green", max_width=32)
     table.add_column("Date", style="yellow", width=12)
@@ -111,7 +113,9 @@ async def demo_research_products(client: AireloomClient) -> None:
 
 async def demo_ec_projects(client: AireloomClient) -> None:
     """ProjectsFilters: fundingShortName + date range + sort."""
-    console.print("\n[bold cyan]━━━ Projects: EC Funding with Date Range ━━━[/bold cyan]")
+    console.print(
+        "\n[bold cyan]━━━ Projects: EC Funding with Date Range ━━━[/bold cyan]"
+    )
 
     # Filter for European Commission-funded projects started in 2023+
     filters = ProjectsFilters(
@@ -135,8 +139,7 @@ async def demo_ec_projects(client: AireloomClient) -> None:
 
     total = response.header.numFound or 0
     console.print(
-        f"\n  Results: [bold]{total:,}[/bold] EC-funded projects "
-        f"starting 2023-2024\n"
+        f"\n  Results: [bold]{total:,}[/bold] EC-funded projects starting 2023-2024\n"
     )
 
     table = Table(
@@ -188,9 +191,7 @@ async def demo_validation_errors() -> None:
 
     # --- Invalid date type ---
     console.print("\n  [yellow]3. Wrong type for date field:[/yellow]")
-    console.print(
-        '    ResearchProductsFilters(fromPublicationDate="last year")'
-    )
+    console.print('    ResearchProductsFilters(fromPublicationDate="last year")')
     try:
         ResearchProductsFilters(fromPublicationDate="last year")  # type: ignore[arg-type]
     except Exception as exc:
@@ -199,9 +200,7 @@ async def demo_validation_errors() -> None:
 
     # --- Extra field (forbidden by config) ---
     console.print("\n  [yellow]4. Unknown field (extra='forbid'):[/yellow]")
-    console.print(
-        '    ScholixFilters(sourceDOI="10.1234/x")  # should be sourcePid'
-    )
+    console.print('    ScholixFilters(sourceDOI="10.1234/x")  # should be sourcePid')
     try:
         ScholixFilters(sourceDOI="10.1234/x")  # type: ignore[call-arg]
     except Exception as exc:
@@ -211,9 +210,7 @@ async def demo_validation_errors() -> None:
     console.print(
         "\n  [bold green]All invalid inputs caught BEFORE any API call.[/bold green]"
     )
-    console.print(
-        "  With raw HTTP, these would either silently return empty results"
-    )
+    console.print("  With raw HTTP, these would either silently return empty results")
     console.print("  or produce confusing 400 errors from the server.")
 
 

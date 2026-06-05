@@ -77,7 +77,9 @@ class TestPublicationsByOrganization:
 
     @pytest.mark.asyncio
     async def test_by_openaire_id(self, session):
-        await publications_by_organization(session, "openaire:123", search_on="openaire_id")
+        await publications_by_organization(
+            session, "openaire:123", search_on="openaire_id"
+        )
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].relOrganizationId == "openaire:123"
 
@@ -104,7 +106,8 @@ class TestPublicationsByOrganization:
         from datetime import date
 
         await publications_by_organization(
-            session, "MIT",
+            session,
+            "MIT",
             from_publication_date="2020-01-01",
             to_publication_date="2023-12-31",
         )
@@ -115,7 +118,10 @@ class TestPublicationsByOrganization:
     @pytest.mark.asyncio
     async def test_with_sort_and_limit(self, session):
         await publications_by_organization(
-            session, "MIT", sort_by="publicationDate desc", limit=10,
+            session,
+            "MIT",
+            sort_by="publicationDate desc",
+            limit=10,
         )
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["sort_by"] == "publicationDate desc"
@@ -123,31 +129,37 @@ class TestPublicationsByOrganization:
 
     @pytest.mark.asyncio
     async def test_with_org_object_by_openaire_id(self, session):
-        org = Organization.model_validate({
-            "id": "openaire:org1",
-            "legalName": "MIT",
-        })
+        org = Organization.model_validate(
+            {
+                "id": "openaire:org1",
+                "legalName": "MIT",
+            }
+        )
         await publications_by_organization(session, org, search_on="openaire_id")
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].relOrganizationId == "openaire:org1"
 
     @pytest.mark.asyncio
     async def test_with_org_object_by_name(self, session):
-        org = Organization.model_validate({
-            "id": "org_no_id",
-            "legalName": "MIT",
-        })
+        org = Organization.model_validate(
+            {
+                "id": "org_no_id",
+                "legalName": "MIT",
+            }
+        )
         await publications_by_organization(session, org, search_on="name")
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].search == "MIT"
 
     @pytest.mark.asyncio
     async def test_with_org_object_by_ror(self, session):
-        org = Organization.model_validate({
-            "id": "org_ror",
-            "legalName": "MIT",
-            "pids": [{"scheme": "ROR", "value": "042tb2j39"}],
-        })
+        org = Organization.model_validate(
+            {
+                "id": "org_ror",
+                "legalName": "MIT",
+                "pids": [{"scheme": "ROR", "value": "042tb2j39"}],
+            }
+        )
         await publications_by_organization(session, org, search_on="ror")
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].rorId == "042tb2j39"
@@ -186,23 +198,27 @@ class TestPublicationsByAuthor:
 
     @pytest.mark.asyncio
     async def test_person_object_by_name(self, session):
-        person = Person.model_validate({
-            "id": "person_name",
-            "givenName": "Jane",
-            "familyName": "Smith",
-        })
+        person = Person.model_validate(
+            {
+                "id": "person_name",
+                "givenName": "Jane",
+                "familyName": "Smith",
+            }
+        )
         await publications_by_author(session, person)
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].authorFullName == "Jane Smith"
 
     @pytest.mark.asyncio
     async def test_person_object_by_orcid(self, session):
-        person = Person.model_validate({
-            "id": "person_orcid",
-            "givenName": "Jane",
-            "familyName": "Smith",
-            "originalId": ["0000-0001-2345-6789"],
-        })
+        person = Person.model_validate(
+            {
+                "id": "person_orcid",
+                "givenName": "Jane",
+                "familyName": "Smith",
+                "originalId": ["0000-0001-2345-6789"],
+            }
+        )
         await publications_by_author(session, person, search_on="orcid")
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].authorOrcid == "0000-0001-2345-6789"
@@ -210,11 +226,13 @@ class TestPublicationsByAuthor:
     @pytest.mark.asyncio
     async def test_person_object_by_orcid_falls_back_to_name(self, session):
         """When Person has no orcid but search_on='orcid', fall back to full_name."""
-        person = Person.model_validate({
-            "id": "person_no_orcid",
-            "givenName": "Jane",
-            "familyName": "Smith",
-        })
+        person = Person.model_validate(
+            {
+                "id": "person_no_orcid",
+                "givenName": "Jane",
+                "familyName": "Smith",
+            }
+        )
         await publications_by_author(session, person, search_on="orcid")
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].authorFullName == "Jane Smith"
@@ -235,7 +253,9 @@ class TestPublicationsByProject:
 
     @pytest.mark.asyncio
     async def test_by_openaire_id(self, session):
-        await publications_by_project(session, "openaire:proj1", search_on="openaire_id")
+        await publications_by_project(
+            session, "openaire:proj1", search_on="openaire_id"
+        )
         call_kwargs = session.research_products.collect.call_args[1]
         assert call_kwargs["filters"].relProjectId == "openaire:proj1"
 
@@ -355,17 +375,21 @@ class TestProjectsByOrganization:
 
     @pytest.mark.asyncio
     async def test_with_sort_and_limit(self, session):
-        await projects_by_organization(session, "MIT", sort_by="startDate desc", limit=5)
+        await projects_by_organization(
+            session, "MIT", sort_by="startDate desc", limit=5
+        )
         call_kwargs = session.projects.collect.call_args[1]
         assert call_kwargs["sort_by"] == "startDate desc"
         assert call_kwargs["limit"] == 5
 
     @pytest.mark.asyncio
     async def test_with_org_object(self, session):
-        org = Organization.model_validate({
-            "id": "openaire:org1",
-            "legalName": "MIT",
-        })
+        org = Organization.model_validate(
+            {
+                "id": "openaire:org1",
+                "legalName": "MIT",
+            }
+        )
         await projects_by_organization(session, org, search_on="openaire_id")
         call_kwargs = session.projects.collect.call_args[1]
         assert call_kwargs["filters"].relOrganizationId == "openaire:org1"

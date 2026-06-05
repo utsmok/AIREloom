@@ -16,8 +16,6 @@ from typing import Any
 
 import httpx
 import pytest
-
-
 from bibliofabric.log_config import configure_logging, logger
 
 pytestmark = pytest.mark.live_api

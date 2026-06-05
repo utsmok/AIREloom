@@ -1,6 +1,5 @@
 """Tests for model validators and edge cases."""
 
-
 from aireloom.models.base import ApiResponse, BaseEntity, Header
 from aireloom.models.project import Project
 from aireloom.models.research_product import ResearchProduct, UsageCounts
@@ -56,9 +55,7 @@ class TestApiResponseResults:
 
     def test_unexpected_type_returns_empty_list(self):
         """Passing a non-list, non-None value (e.g. a dict) to results."""
-        resp = ApiResponse[BaseEntity](
-            header=Header(), results={"nested": "dict"}
-        )
+        resp = ApiResponse[BaseEntity](header=Header(), results={"nested": "dict"})
         assert resp.results == []
 
 

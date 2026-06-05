@@ -3,6 +3,7 @@
 Demonstrates searching for researchers, retrieving individual person records,
 and exploring co-authorship networks.
 """
+
 import asyncio
 import os
 
@@ -18,7 +19,9 @@ async def main():
     client_id = os.getenv("AIRELOOM_OPENAIRE_CLIENT_ID")
     client_secret = os.getenv("AIRELOOM_OPENAIRE_CLIENT_SECRET")
 
-    async with AireloomClient(client_id=client_id, client_secret=client_secret) as client:
+    async with AireloomClient(
+        client_id=client_id, client_secret=client_secret
+    ) as client:
         # 1. Search for a researcher by name
         print("=== Search for researchers named 'Wesley Brewer' ===")
         response = await client.persons.search(
@@ -38,7 +41,9 @@ async def main():
 
         # 2. Get a specific person by OpenAIRE ID
         print("=== Get person by ID ===")
-        person = await client.persons.get("orcid_______::ebbe30d5171e6e53545e7acb391bc9a2")
+        person = await client.persons.get(
+            "orcid_______::ebbe30d5171e6e53545e7acb391bc9a2"
+        )
         print(f"  Name: {person.givenName} {person.familyName}")
         print(f"  ID: {person.id}")
         if person.originalId:
