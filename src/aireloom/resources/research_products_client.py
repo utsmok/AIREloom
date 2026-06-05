@@ -7,6 +7,7 @@ It leverages generic mixins from `bibliofabric.resources` for common API
 operations like retrieving individual entities, searching, and iterating
 through result sets.
 """
+
 from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING, Any
 

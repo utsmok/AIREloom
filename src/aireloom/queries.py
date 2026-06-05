@@ -10,7 +10,9 @@ Usage::
     from aireloom.queries import publications_by_doi
 
     async with AireloomSession() as session:
-        papers = await publications_by_doi(session, "10.1234/example")
+        papers = await publications_by_doi(
+            session, "10.1234/example"
+        )
 """
 
 from __future__ import annotations
@@ -103,7 +105,9 @@ async def publications_by_organization(
 
     filters = ResearchProductsFilters(**filter_kwargs)
     return await session.research_products.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -152,7 +156,9 @@ async def publications_by_author(
 
     filters = ResearchProductsFilters(**filter_kwargs)
     return await session.research_products.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -204,7 +210,9 @@ async def publications_by_project(
 
     filters = ResearchProductsFilters(**filter_kwargs)
     return await session.research_products.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -277,7 +285,9 @@ async def projects_by_organization(
 
     filters = ProjectsFilters(**filter_kwargs)
     return await session.projects.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -312,7 +322,9 @@ async def citing_works(
 
     filters = ScholixFilters(**filter_kwargs)
     return await session.scholix.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -336,7 +348,9 @@ async def related_datasets(
     """
     filters = ScholixFilters(sourcePid=doi, targetType="Dataset")
     return await session.scholix.collect(
-        filters=filters, sort_by=sort_by, limit=limit,
+        filters=filters,
+        sort_by=sort_by,
+        limit=limit,
     )
 
 
@@ -365,7 +379,9 @@ async def all_links(
     if direction in ("source", "both"):
         filters = ScholixFilters(sourcePid=doi)
         items = await session.scholix.collect(
-            filters=filters, sort_by=sort_by, limit=limit,
+            filters=filters,
+            sort_by=sort_by,
+            limit=limit,
         )
         results.extend(items)
 
@@ -374,7 +390,9 @@ async def all_links(
         remaining = (limit - len(results)) if limit else None
         if remaining is None or remaining > 0:
             items = await session.scholix.collect(
-                filters=filters, sort_by=sort_by, limit=remaining,
+                filters=filters,
+                sort_by=sort_by,
+                limit=remaining,
             )
             results.extend(items)
 

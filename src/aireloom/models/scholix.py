@@ -18,18 +18,37 @@ from .safe_types import SafeList, SafeStr
 ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
 """Defines the allowed types for a Scholix entity (e.g., publication, dataset)."""
 ScholixRelationshipNameValue = Literal[
-    "IsRelatedTo", "References", "IsReferencedBy",
-    "IsSupplementTo", "IsSupplementedBy",
-    "IsSourceOf", "IsDerivedFrom", "IsVersionOf",
-    "HasVersion", "IsPartOf", "IsPreviousVersionOf",
-    "IsNewVersionOf", "IsIdenticalTo", "IsContinuedBy",
-    "Continues", "IsCompiledBy", "Compiles",
-    "IsDescribedBy", "Describes", "HasAmongTopNSimilarDocuments",
-    "IsAmongTopNSimilarDocuments", "Reviews", "IsReviewedBy",
-    "Cites", "IsCitedBy", "IsOriginalFormOf",
-    "IsVariantFormOf", "IsPublishedIn",
+    "IsRelatedTo",
+    "References",
+    "IsReferencedBy",
+    "IsSupplementTo",
+    "IsSupplementedBy",
+    "IsSourceOf",
+    "IsDerivedFrom",
+    "IsVersionOf",
+    "HasVersion",
+    "IsPartOf",
+    "IsPreviousVersionOf",
+    "IsNewVersionOf",
+    "IsIdenticalTo",
+    "IsContinuedBy",
+    "Continues",
+    "IsCompiledBy",
+    "Compiles",
+    "IsDescribedBy",
+    "Describes",
+    "HasAmongTopNSimilarDocuments",
+    "IsAmongTopNSimilarDocuments",
+    "Reviews",
+    "IsReviewedBy",
+    "Cites",
+    "IsCitedBy",
+    "IsOriginalFormOf",
+    "IsVariantFormOf",
+    "IsPublishedIn",
 ]
 """Known relationship type names in the Scholix schema."""
+
 
 class ScholixIdentifier(BaseModel):
     """Represents a persistent identifier within the Scholix schema.
@@ -88,13 +107,17 @@ class ScholixEntity(BaseModel):
         publisher: A list of `ScholixPublisher` objects.
     """
 
-    identifier: SafeList[ScholixIdentifier] = Field(alias="Identifier", default_factory=list)
+    identifier: SafeList[ScholixIdentifier] = Field(
+        alias="Identifier", default_factory=list
+    )
     type: ScholixEntityTypeName = Field(alias="Type")
     sub_type: str | None = Field(alias="SubType", default=None)
     title: SafeStr = Field(alias="Title", default="")
     creator: SafeList[ScholixCreator] = Field(alias="Creator", default_factory=list)
     publication_date: str | None = Field(alias="PublicationDate", default=None)
-    publisher: SafeList[ScholixPublisher] = Field(alias="Publisher", default_factory=list)
+    publisher: SafeList[ScholixPublisher] = Field(
+        alias="Publisher", default_factory=list
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -124,7 +147,9 @@ class ScholixLinkProvider(BaseModel):
     """
 
     name: SafeStr = Field(alias="Name", default="")
-    identifier: SafeList[ScholixIdentifier] = Field(alias="Identifier", default_factory=list)
+    identifier: SafeList[ScholixIdentifier] = Field(
+        alias="Identifier", default_factory=list
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 

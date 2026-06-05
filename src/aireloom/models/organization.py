@@ -31,7 +31,9 @@ class Country(BaseModel):
 
 
 # Type alias for Country that defaults None to Country()
-SafeCountry = Annotated[Country, BeforeValidator(lambda v: Country() if v is None else v)]
+SafeCountry = Annotated[
+    Country, BeforeValidator(lambda v: Country() if v is None else v)
+]
 
 
 class OrganizationPid(BaseModel):
@@ -84,8 +86,11 @@ class Organization(BaseEntity):
     @computed_field
     @property
     def country_code(self) -> str | None:
-        return self.country.code if self.country.code and self.country.code != "UNKNOWN" else None
-
+        return (
+            self.country.code
+            if self.country.code and self.country.code != "UNKNOWN"
+            else None
+        )
 
     def __str__(self) -> str:
         parts = []
@@ -96,6 +101,7 @@ class Organization(BaseEntity):
         if self.ror_id:
             parts.append(f"ROR:{self.ror_id}")
         return " | ".join(parts) if parts else f"Organization(id={self.id!r})"
+
     model_config = ConfigDict(extra="allow")
 
 

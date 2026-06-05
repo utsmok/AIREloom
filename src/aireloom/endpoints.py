@@ -267,14 +267,32 @@ class LinksFilters(BaseModel):
     Reference: https://api.openaire.eu/graph/v1/researchProducts/links
     """
 
-    sourcePid: str | None = Field(default=None, description="Filter by source persistent identifier (e.g. DOI)")
-    targetPid: str | None = Field(default=None, description="Filter by target persistent identifier")
-    sourcePublisher: str | None = Field(default=None, description="Filter by source publisher name")
-    targetPublisher: str | None = Field(default=None, description="Filter by target publisher name")
-    sourceType: str | None = Field(default=None, description="Filter by source type: publication, dataset, software, other")
-    targetType: str | None = Field(default=None, description="Filter by target type: publication, dataset, software, other")
-    relation: str | None = Field(default=None, description="Filter by specific relationship type")
-    fromDate: str | None = Field(default=None, description="From date (YYYY or YYYY-MM-DD)")
+    sourcePid: str | None = Field(
+        default=None, description="Filter by source persistent identifier (e.g. DOI)"
+    )
+    targetPid: str | None = Field(
+        default=None, description="Filter by target persistent identifier"
+    )
+    sourcePublisher: str | None = Field(
+        default=None, description="Filter by source publisher name"
+    )
+    targetPublisher: str | None = Field(
+        default=None, description="Filter by target publisher name"
+    )
+    sourceType: str | None = Field(
+        default=None,
+        description="Filter by source type: publication, dataset, software, other",
+    )
+    targetType: str | None = Field(
+        default=None,
+        description="Filter by target type: publication, dataset, software, other",
+    )
+    relation: str | None = Field(
+        default=None, description="Filter by specific relationship type"
+    )
+    fromDate: str | None = Field(
+        default=None, description="From date (YYYY or YYYY-MM-DD)"
+    )
     toDate: str | None = Field(default=None, description="To date (YYYY or YYYY-MM-DD)")
 
     model_config = ConfigDict(extra="forbid")

@@ -93,7 +93,9 @@ class BestAccessRight(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeBestAccessRight = Annotated[BestAccessRight, BeforeValidator(lambda v: BestAccessRight() if v is None else v)]
+SafeBestAccessRight = Annotated[
+    BestAccessRight, BeforeValidator(lambda v: BestAccessRight() if v is None else v)
+]
 
 
 class ResultCountry(BaseModel):
@@ -110,7 +112,9 @@ class ResultCountry(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeResultCountry = Annotated[ResultCountry, BeforeValidator(lambda v: ResultCountry() if v is None else v)]
+SafeResultCountry = Annotated[
+    ResultCountry, BeforeValidator(lambda v: ResultCountry() if v is None else v)
+]
 
 
 class CitationImpact(BaseModel):
@@ -139,7 +143,9 @@ class CitationImpact(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeCitationImpact = Annotated[CitationImpact, BeforeValidator(lambda v: CitationImpact() if v is None else v)]
+SafeCitationImpact = Annotated[
+    CitationImpact, BeforeValidator(lambda v: CitationImpact() if v is None else v)
+]
 
 
 class UsageCounts(BaseModel):
@@ -182,7 +188,9 @@ class UsageCounts(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeUsageCounts = Annotated[UsageCounts, BeforeValidator(lambda v: UsageCounts() if v is None else v)]
+SafeUsageCounts = Annotated[
+    UsageCounts, BeforeValidator(lambda v: UsageCounts() if v is None else v)
+]
 
 
 class Indicator(BaseModel):
@@ -199,7 +207,9 @@ class Indicator(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeIndicator = Annotated[Indicator, BeforeValidator(lambda v: Indicator() if v is None else v)]
+SafeIndicator = Annotated[
+    Indicator, BeforeValidator(lambda v: Indicator() if v is None else v)
+]
 
 
 class AccessRight(BaseModel):
@@ -220,7 +230,9 @@ class AccessRight(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeAccessRight = Annotated[AccessRight, BeforeValidator(lambda v: AccessRight() if v is None else v)]
+SafeAccessRight = Annotated[
+    AccessRight, BeforeValidator(lambda v: AccessRight() if v is None else v)
+]
 
 
 class ArticleProcessingCharge(BaseModel):
@@ -281,7 +293,9 @@ class CollectedFrom(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeCollectedFrom = Annotated[CollectedFrom, BeforeValidator(lambda v: CollectedFrom() if v is None else v)]
+SafeCollectedFrom = Annotated[
+    CollectedFrom, BeforeValidator(lambda v: CollectedFrom() if v is None else v)
+]
 
 
 class HostedBy(BaseModel):
@@ -293,7 +307,9 @@ class HostedBy(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeHostedBy = Annotated[HostedBy, BeforeValidator(lambda v: HostedBy() if v is None else v)]
+SafeHostedBy = Annotated[
+    HostedBy, BeforeValidator(lambda v: HostedBy() if v is None else v)
+]
 
 
 class Instance(BaseModel):
@@ -351,7 +367,9 @@ class Language(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeLanguage = Annotated[Language, BeforeValidator(lambda v: Language() if v is None else v)]
+SafeLanguage = Annotated[
+    Language, BeforeValidator(lambda v: Language() if v is None else v)
+]
 
 
 class Subject(BaseModel):
@@ -400,7 +418,9 @@ class Container(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeContainer = Annotated[Container, BeforeValidator(lambda v: Container() if v is None else v)]
+SafeContainer = Annotated[
+    Container, BeforeValidator(lambda v: Container() if v is None else v)
+]
 
 
 # GeoLocation for Data
@@ -419,7 +439,9 @@ class GeoLocation(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeGeoLocation = Annotated[GeoLocation, BeforeValidator(lambda v: GeoLocation() if v is None else v)]
+SafeGeoLocation = Annotated[
+    GeoLocation, BeforeValidator(lambda v: GeoLocation() if v is None else v)
+]
 
 
 # Update main ResearchProduct model
@@ -479,6 +501,7 @@ class ResearchProduct(BaseEntity):
         organizations: Related organization relationships.
         communities: Related community relationships.
     """
+
     # id is inherited from BaseEntity
     originalIds: SafeList[str] = Field(default_factory=list)
     pids: SafeList[Pid] = Field(default_factory=list)
@@ -577,7 +600,11 @@ class ResearchProduct(BaseEntity):
         Returns:
             The (potentially modified) input data dictionary.
         """
-        if isinstance(data, dict) and "mainTitle" in data and ("title" not in data or data["title"] is None):
+        if (
+            isinstance(data, dict)
+            and "mainTitle" in data
+            and ("title" not in data or data["title"] is None)
+        ):
             data["title"] = data["mainTitle"]
             # Keep mainTitle in data so it populates the explicit field
         return data
@@ -607,7 +634,12 @@ class ResearchProduct(BaseEntity):
     def open_access_url(self) -> str | None:
         """URL of the first instance whose access right is OPEN."""
         for inst in self.instances:
-            if inst.accessRight and inst.accessRight.label and inst.accessRight.label.upper() == "OPEN" and inst.urls:
+            if (
+                inst.accessRight
+                and inst.accessRight.label
+                and inst.accessRight.label.upper() == "OPEN"
+                and inst.urls
+            ):
                 return inst.urls[0]
         return None
 
@@ -658,6 +690,7 @@ class ResearchProduct(BaseEntity):
         if self.doi:
             parts.append(f"DOI:{self.doi}")
         return " | ".join(parts) if parts else f"ResearchProduct(id={self.id!r})"
+
 
 # Define the specific response type for ResearchProduct results
 ResearchProductResponse = ApiResponse[ResearchProduct]

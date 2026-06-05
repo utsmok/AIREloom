@@ -38,9 +38,14 @@ class ControlledField(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-SafeControlledField = Annotated[ControlledField, BeforeValidator(lambda v: ControlledField() if v is None else v)]
 
-SafeContainer = Annotated[Container, BeforeValidator(lambda v: Container() if v is None else v)]
+SafeControlledField = Annotated[
+    ControlledField, BeforeValidator(lambda v: ControlledField() if v is None else v)
+]
+
+SafeContainer = Annotated[
+    Container, BeforeValidator(lambda v: Container() if v is None else v)
+]
 
 
 # Main DataSource model
@@ -83,12 +88,12 @@ class DataSource(BaseEntity):
     def type_name(self) -> str | None:
         return self.type.value or None
 
-
     def __str__(self) -> str:
         name = self.officialName or self.englishName
         if name:
             return name
         return f"DataSource(id={self.id!r})"
+
     model_config = ConfigDict(extra="allow")
 
 

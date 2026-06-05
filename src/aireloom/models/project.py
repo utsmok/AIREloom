@@ -35,7 +35,9 @@ class FundingStream(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-SafeFundingStream = Annotated[FundingStream, BeforeValidator(lambda v: FundingStream() if v is None else v)]
+SafeFundingStream = Annotated[
+    FundingStream, BeforeValidator(lambda v: FundingStream() if v is None else v)
+]
 
 
 class Funding(BaseModel):
@@ -169,7 +171,6 @@ class Project(BaseEntity):
                 return None
         return None
 
-
     def __str__(self) -> str:
         parts = []
         if self.title:
@@ -179,6 +180,7 @@ class Project(BaseEntity):
         if self.funder_name:
             parts.append(f"funded by {self.funder_name}")
         return " | ".join(parts) if parts else f"Project(id={self.id!r})"
+
     model_config = ConfigDict(extra="allow")
 
     @field_validator("keywords", mode="before")

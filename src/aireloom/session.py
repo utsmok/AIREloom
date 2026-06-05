@@ -142,7 +142,9 @@ class AireloomSession:
         Returns the ``aireloom.queries`` module so you can call any
         convenience function with the session as the first argument::
 
-            papers = await session.queries.publications_by_doi(session, "10.1234/...")
+            papers = await session.queries.publications_by_doi(
+                session, "10.1234/..."
+            )
         """
         return queries
 
