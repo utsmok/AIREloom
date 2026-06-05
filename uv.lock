@@ -12,7 +12,7 @@ resolution-markers = [
 
 [[package]]
 name = "aireloom"
-version = "0.2.1"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "bibliofabric" },
@@ -56,7 +56,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bibliofabric", directory = "../bibliofabric" },
+    { name = "bibliofabric", specifier = ">=0.3.0,<0.4.0" },
     { name = "duckdb", marker = "extra == 'analysis'", specifier = ">=1.3.0" },
     { name = "matplotlib", marker = "extra == 'analysis'", specifier = ">=3.8.0" },
     { name = "networkx", marker = "extra == 'analysis'", specifier = ">=3.2" },
@@ -123,8 +123,8 @@ wheels = [
 
 [[package]]
 name = "bibliofabric"
-version = "0.2.1"
-source = { directory = "../bibliofabric" }
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cachetools" },
     { name = "httpx" },
@@ -133,34 +133,9 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "tenacity" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "cachetools", specifier = ">=5.3.0" },
-    { name = "httpx", specifier = ">=0.27.0" },
-    { name = "loguru", specifier = ">=0.7.0" },
-    { name = "pydantic", specifier = ">=2.9.0" },
-    { name = "pydantic-settings", specifier = ">=2.9.1" },
-    { name = "tenacity", specifier = ">=9.1.2" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=8.3.4" },
-    { name = "pytest-asyncio", specifier = ">=0.26.0" },
-    { name = "pytest-cov", specifier = ">=6.1.1" },
-    { name = "pytest-httpx", specifier = ">=0.35.0" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
-]
-docs = [
-    { name = "mkdocs", specifier = "~=1.6.0" },
-    { name = "mkdocs-material", specifier = "~=9.5.0" },
-    { name = "mkdocstrings", extras = ["python"] },
-]
-lint = [{ name = "ruff", specifier = ">=0.8.0" }]
-test = [
-    { name = "pytest" },
-    { name = "pytest-randomly" },
+sdist = { url = "https://files.pythonhosted.org/packages/65/2e/9f74b4b12174940dc8fa881d7588034988dee4fd71f23e5e84c1d555a060/bibliofabric-0.3.0.tar.gz", hash = "sha256:15cae3628794a031f71d5d03f0d61bf12d5176a04f1f52aae666ad25c5f5b97a", size = 85300, upload-time = "2026-06-05T12:10:33.718Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1f/32/79f6ed9bdd60712e3bc265e79c4571822178ee8e180f81010bc603ad1138/bibliofabric-0.3.0-py3-none-any.whl", hash = "sha256:496f0bf1538cbaaaa649caef355f33e20ae48ddac757eafd57bc7e0b8e3bac08", size = 28513, upload-time = "2026-06-05T12:10:32.85Z" },
 ]
 
 [[package]]
@@ -954,16 +929,16 @@ python = [
 
 [[package]]
 name = "mkdocstrings-python"
-version = "2.0.3"
+version = "2.0.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "griffelib" },
     { name = "mkdocs-autorefs" },
     { name = "mkdocstrings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/29/33/c225eaf898634bdda489a6766fc35d1683c640bffe0e0acd10646b13536d/mkdocstrings_python-2.0.3.tar.gz", hash = "sha256:c518632751cc869439b31c9d3177678ad2bfa5c21b79b863956ad68fc92c13b8", size = 199083, upload-time = "2026-02-20T10:38:36.368Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a4/b4/5fed370d8ebd96e4e399460a7146ae989263f16588b05a6facd6dbd51e60/mkdocstrings_python-2.0.4.tar.gz", hash = "sha256:58c73c5d358e64e9b1673447663f4a2f8a8941e392e225fc0a0c893758cc452f", size = 199219, upload-time = "2026-06-05T08:13:01.819Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/28/79f0f8de97cce916d5ae88a7bee1ad724855e83e6019c0b4d5b3fabc80f3/mkdocstrings_python-2.0.3-py3-none-any.whl", hash = "sha256:0b83513478bdfd803ff05aa43e9b1fca9dd22bcd9471f09ca6257f009bc5ee12", size = 104779, upload-time = "2026-02-20T10:38:34.517Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/e3/00ec594aef5f55522e6d373bc2ac53e53a8f5e9ae32f2d6854b0de4270f3/mkdocstrings_python-2.0.4-py3-none-any.whl", hash = "sha256:fd87c173e1e719a85997b6d4f852cdc55f36710e0ed08da3a7bd9abe79c9db00", size = 104790, upload-time = "2026-06-05T08:13:00.393Z" },
 ]
 
 [[package]]
