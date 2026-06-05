@@ -3,6 +3,7 @@
 # dependencies = [
 #   "aireloom",
 #   "certifi",
+#   "marimo",
 # ]
 # ///
 
