@@ -102,8 +102,8 @@ class AireloomSession:
             base_url=_api_base_url,  # Pass Graph API base URL
             scholix_base_url=_scholix_base_url,  # Pass Scholix base URL
         )
-        logger.info(f"AireloomSession initialized for API: {_api_base_url}")
-        logger.info(f"Scholexplorer base URL configured for: {_scholix_base_url}")
+        logger.debug(f"AireloomSession initialized for API: {_api_base_url}")
+        logger.debug(f"Scholexplorer base URL configured for: {_scholix_base_url}")
 
     @property
     def research_products(self) -> ResearchProductsClient:

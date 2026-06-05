@@ -123,12 +123,12 @@ class AireloomClient(BaseApiClient):
 
         # Determine authentication strategy if not explicitly provided
         if auth_strategy:
-            logger.info(
+            logger.debug(
                 f"Using explicitly provided authentication strategy: {type(auth_strategy).__name__}"
             )
             resolved_auth_strategy = auth_strategy
         else:
-            logger.info(
+            logger.debug(
                 "Determining auth type based on provided parameters or settings."
             )
             # Use overrides if provided, otherwise use settings
@@ -145,13 +145,13 @@ class AireloomClient(BaseApiClient):
             )
 
             if _client_id and _client_secret:
-                logger.info("Using Client Credentials authentication.")
+                logger.debug("Using Client Credentials authentication.")
                 if client_id and client_secret:
-                    logger.info(
+                    logger.debug(
                         "Client ID and secret were directly passed as parameters."
                     )
                 else:
-                    logger.info(
+                    logger.debug(
                         "Client ID and secret were loaded from settings or environment variables."
                     )
                 resolved_auth_strategy = ClientCredentialsAuth(
@@ -160,10 +160,10 @@ class AireloomClient(BaseApiClient):
                     token_url=_token_url,
                 )
             elif _api_token:
-                logger.info("Using Static Token authentication.")
+                logger.debug("Using Static Token authentication.")
                 resolved_auth_strategy = StaticTokenAuth(token=_api_token)
             else:
-                logger.info("No authentication credentials found, using NoAuth.")
+                logger.debug("No authentication credentials found, using NoAuth.")
                 resolved_auth_strategy = NoAuth()
 
         # Create the OpenAIRE response unwrapper
@@ -221,7 +221,7 @@ class AireloomClient(BaseApiClient):
 
     async def __aenter__(self) -> Self:
         """Async context manager entry."""
-        logger.info(
+        logger.debug(
             f"AireloomClient.__aenter__() called. Client ID: {id(self)}. "
             f"HTTP client closed: {self._http_client.is_closed if self._http_client else 'N/A'}"
         )
@@ -229,12 +229,12 @@ class AireloomClient(BaseApiClient):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Async context manager exit."""
-        logger.info(
+        logger.debug(
             f"AireloomClient.__aexit__() called. Client ID: {id(self)}. "
             f"HTTP client closed before aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
         )
         await self.aclose()
-        logger.info(
+        logger.debug(
             f"AireloomClient.__aexit__() finished. Client ID: {id(self)}. "
             f"HTTP client closed after aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
         )
