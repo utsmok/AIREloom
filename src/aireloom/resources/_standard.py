@@ -21,7 +21,7 @@ class StandardResourceClient(
         _search_response_model: Pydantic model for the search response envelope.
     """
 
-    def __init__(self, api_client):  # noqa: ANN001 – type checked via TYPE_CHECKING in subclasses
+    def __init__(self, api_client):  # noqa: ANN001 – accept generic api_client from bibliofabric
         """Initialize the resource client.
 
         Args:
@@ -29,5 +29,5 @@ class StandardResourceClient(
         """
         super().__init__(api_client)
         logger.debug(
-            f"{type(self).__name__} initialized for path: {self._entity_path}"
-        )  # ty: ignore[unresolved-attribute]
+            f"{type(self).__name__} initialized for path: {self._entity_path}"  # ty: ignore[unresolved-attribute]
+        )

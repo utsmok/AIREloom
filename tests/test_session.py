@@ -195,16 +195,6 @@ async def test_session_get_research_product_integration():
     assert product.title == "Mocked Research Product Title"
 
 
-@pytest.mark.asyncio
-async def test_session_search_research_products_integration():
-    pass
-
-
-@pytest.mark.asyncio
-async def test_session_iterate_research_products_integration():
-    pass
-
-
 # --- Organizations ---
 @pytest.mark.asyncio
 async def test_session_get_organization_integration():
