@@ -3,6 +3,7 @@
 from bibliofabric.auth import AuthStrategy
 from bibliofabric.log_config import configure_logging, logger
 
+from . import queries
 from .client import AireloomClient
 from .config import ApiSettings, get_settings  # Added ApiSettings
 from .constants import (
@@ -133,6 +134,17 @@ class AireloomSession:
     def scholix(self) -> ScholixClient:
         """Access the ScholixClient."""
         return self._api_client.scholix
+
+    @property
+    def queries(self):
+        """Access convenience query functions.
+
+        Returns the ``aireloom.queries`` module so you can call any
+        convenience function with the session as the first argument::
+
+            papers = await session.queries.publications_by_doi(session, "10.1234/...")
+        """
+        return queries
 
     async def close(self) -> None:
         """Closes the underlying HTTP client session."""

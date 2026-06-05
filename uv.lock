@@ -56,7 +56,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "bibliofabric", specifier = ">=0.1.0,<0.3.0" },
+    { name = "bibliofabric", directory = "../bibliofabric" },
     { name = "duckdb", marker = "extra == 'analysis'", specifier = ">=1.3.0" },
     { name = "matplotlib", marker = "extra == 'analysis'", specifier = ">=3.8.0" },
     { name = "networkx", marker = "extra == 'analysis'", specifier = ">=3.2" },
@@ -124,7 +124,7 @@ wheels = [
 [[package]]
 name = "bibliofabric"
 version = "0.2.1"
-source = { registry = "https://pypi.org/simple" }
+source = { directory = "../bibliofabric" }
 dependencies = [
     { name = "cachetools" },
     { name = "httpx" },
@@ -133,9 +133,34 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/32/01b9ab67e9988789e1203589da576ec66c3710470d4bd44f4eed35862fca/bibliofabric-0.2.1.tar.gz", hash = "sha256:2920a11195dd076d1acd101b51178d53abd215b087f0c5bf7a7ec3759174f1e2", size = 82964, upload-time = "2026-06-04T19:21:09.139Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/b6/cddfdcb0dc73fd03344abea8ae2239f5600ed6e0b8adb65776f7667f2e11/bibliofabric-0.2.1-py3-none-any.whl", hash = "sha256:7bbab2bf33a62b93e028f2b025198c73f05ce8d36c693bc1b20c29b624878e6d", size = 26810, upload-time = "2026-06-04T19:21:10.057Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "cachetools", specifier = ">=5.3.0" },
+    { name = "httpx", specifier = ">=0.27.0" },
+    { name = "loguru", specifier = ">=0.7.0" },
+    { name = "pydantic", specifier = ">=2.9.0" },
+    { name = "pydantic-settings", specifier = ">=2.9.1" },
+    { name = "tenacity", specifier = ">=9.1.2" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "pytest-asyncio", specifier = ">=0.26.0" },
+    { name = "pytest-cov", specifier = ">=6.1.1" },
+    { name = "pytest-httpx", specifier = ">=0.35.0" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
+]
+docs = [
+    { name = "mkdocs", specifier = "~=1.6.0" },
+    { name = "mkdocs-material", specifier = "~=9.5.0" },
+    { name = "mkdocstrings", extras = ["python"] },
+]
+lint = [{ name = "ruff", specifier = ">=0.8.0" }]
+test = [
+    { name = "pytest" },
+    { name = "pytest-randomly" },
 ]
 
 [[package]]

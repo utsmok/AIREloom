@@ -88,6 +88,16 @@ class BaseEntity(BaseModel):
     # Common identifier across most entities
     id: str
 
+    def __repr__(self) -> str:
+        cls = type(self).__name__
+        parts = []
+        if self.id:
+            parts.append(f"id={self.id!r}")
+        type_val = getattr(self, "type", None)
+        if type_val:
+            parts.append(f"type={type_val!r}")
+        return f"{cls}({', '.join(parts)})"
+
     model_config = ConfigDict(extra="allow")
 
 

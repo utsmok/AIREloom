@@ -647,6 +647,16 @@ class ResearchProduct(BaseEntity):
                 return inst.license
         return None
 
+    def __str__(self) -> str:
+        parts = []
+        if self.title:
+            parts.append(self.title[:80])
+        if self.publication_year:
+            parts.append(f"({self.publication_year})")
+        if self.doi:
+            parts.append(f"DOI:{self.doi}")
+        return " | ".join(parts) if parts else f"ResearchProduct(id={self.id!r})"
+
 # Define the specific response type for ResearchProduct results
 ResearchProductResponse = ApiResponse[ResearchProduct]
 """Type alias for an API response containing a list of `ResearchProduct` entities."""

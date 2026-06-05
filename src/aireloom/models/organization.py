@@ -86,6 +86,16 @@ class Organization(BaseEntity):
     def country_code(self) -> str | None:
         return self.country.code if self.country.code and self.country.code != "UNKNOWN" else None
 
+
+    def __str__(self) -> str:
+        parts = []
+        if self.legalName:
+            parts.append(self.legalName)
+        if self.country_code:
+            parts.append(f"({self.country_code})")
+        if self.ror_id:
+            parts.append(f"ROR:{self.ror_id}")
+        return " | ".join(parts) if parts else f"Organization(id={self.id!r})"
     model_config = ConfigDict(extra="allow")
 
 

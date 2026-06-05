@@ -169,6 +169,16 @@ class Project(BaseEntity):
                 return None
         return None
 
+
+    def __str__(self) -> str:
+        parts = []
+        if self.title:
+            parts.append(self.title[:80])
+        if self.code:
+            parts.append(f"[{self.code}]")
+        if self.funder_name:
+            parts.append(f"funded by {self.funder_name}")
+        return " | ".join(parts) if parts else f"Project(id={self.id!r})"
     model_config = ConfigDict(extra="allow")
 
     @field_validator("keywords", mode="before")

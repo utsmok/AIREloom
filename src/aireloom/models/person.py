@@ -60,6 +60,14 @@ class Person(BaseEntity):
         parts = [n for n in (self.givenName, self.familyName) if n]
         return " ".join(parts)
 
+
+    def __str__(self) -> str:
+        name = self.full_name
+        if name and self.orcid:
+            return f"{name} (ORCID:{self.orcid})"
+        if name:
+            return name
+        return f"Person(id={self.id!r})"
     model_config = ConfigDict(extra="allow")
 
 
