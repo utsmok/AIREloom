@@ -63,13 +63,15 @@ class Author(BaseModel):
         rank: The rank or order of the author in an author list.
         name: The given name(s) of the author.
         surname: The surname or family name of the author.
-        pid: A dictionary representing a persistent identifier for the author (e.g., ORCID).
+        pid: A dict representing a persistent identifier for the author.
+            The v2 API returns nested structure like {"id": {"scheme": "orcid", "value": "..."}},
+            which doesn't match the flat Pid model, so dict is used for flexibility.
     """
 
     fullName: SafeStr = ""
     rank: int | None = None
     name: SafeStr = ""
-    surname: str | None = None
+    surname: SafeStr = ""
     pid: dict | None = None
 
     model_config = ConfigDict(extra="allow")
@@ -482,7 +484,7 @@ class ResearchProduct(BaseEntity):
     pids: SafeList[Pid] = Field(default_factory=list)
     type: ResearchProductType | None = None
     mainTitle: SafeStr = ""
-    title: SafeStr = ""
+    title: SafeStr = ""  # Display title; backfilled from mainTitle when API omits title
     subTitle: SafeStr = ""
     authors: SafeList[Author] = Field(default_factory=list)
     bestAccessRight: SafeBestAccessRight = Field(default_factory=BestAccessRight)

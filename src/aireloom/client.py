@@ -204,11 +204,11 @@ class AireloomClient(BaseApiClient):
         """Provides access to the ProjectsClient for OpenAIRE project APIs."""
         return self._projects
 
-
     @property
     def persons(self) -> PersonsClient:
         """Provides access to the PersonsClient for OpenAIRE person APIs."""
         return self._persons
+
     @property
     def data_sources(self) -> DataSourcesClient:
         """Provides access to the DataSourcesClient for OpenAIRE data source APIs."""

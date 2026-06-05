@@ -413,3 +413,9 @@ def test_persons_filters_forbid_extra():
     """Test that PersonsFilters rejects unknown fields."""
     with pytest.raises(ValidationError):
         PersonsFilters(unknownField="value")
+
+
+
+def test_persons_client_routes_to_v1(persons_client):
+    """PersonsClient should NOT have a v2 base URL override — persons is v1-only."""
+    assert persons_client._base_url_override is None

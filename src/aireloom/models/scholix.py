@@ -17,6 +17,19 @@ from .safe_types import SafeList, SafeStr
 
 ScholixEntityTypeName = Literal["publication", "dataset", "software", "other"]
 """Defines the allowed types for a Scholix entity (e.g., publication, dataset)."""
+ScholixRelationshipNameValue = Literal[
+    "IsRelatedTo", "References", "IsReferencedBy",
+    "IsSupplementTo", "IsSupplementedBy",
+    "IsSourceOf", "IsDerivedFrom", "IsVersionOf",
+    "HasVersion", "IsPartOf", "IsPreviousVersionOf",
+    "IsNewVersionOf", "IsIdenticalTo", "IsContinuedBy",
+    "Continues", "IsCompiledBy", "Compiles",
+    "IsDescribedBy", "Describes", "HasAmongTopNSimilarDocuments",
+    "IsAmongTopNSimilarDocuments", "Reviews", "IsReviewedBy",
+    "Cites", "IsCitedBy", "IsOriginalFormOf",
+    "IsVariantFormOf", "IsPublishedIn",
+]
+"""Known relationship type names in the Scholix schema."""
 
 class ScholixIdentifier(BaseModel):
     """Represents a persistent identifier within the Scholix schema.
@@ -95,7 +108,7 @@ class ScholixRelationshipType(BaseModel):
         sub_type_schema: An optional schema identifier (may be a URL or a short string like 'datacite').
     """
 
-    name: SafeStr = Field(alias="Name", default="")
+    name: ScholixRelationshipNameValue | str = Field(alias="Name", default="")
     sub_type: str | None = Field(alias="SubType", default=None)
     sub_type_schema: str | None = Field(alias="SubTypeSchema", default=None)
 

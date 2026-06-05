@@ -29,6 +29,7 @@ from .scholix import (
     ScholixLinkProvider,
     ScholixPublisher,
     ScholixRelationship,
+    ScholixRelationshipNameValue,
     ScholixResponse,
 )
 
@@ -67,5 +68,6 @@ __all__ = [
     "ScholixLinkProvider",
     "ScholixPublisher",
     "ScholixRelationship",
+    "ScholixRelationshipNameValue",
     "ScholixResponse",
 ]

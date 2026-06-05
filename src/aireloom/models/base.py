@@ -53,7 +53,7 @@ class Header(BaseModel):
     totalPages: int | None = None
     totalLinks: int | None = None
 
-    @field_validator("queryTime", "numFound", "pageSize", mode="before")
+    @field_validator("queryTime", "numFound", "pageSize", "totalPages", "totalLinks", mode="before")
     @classmethod
     def coerce_str_to_int(cls, v: Any) -> int | None:
         """Coerce string representations of numbers to integers, logging on failure."""

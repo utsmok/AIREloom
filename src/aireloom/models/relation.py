@@ -1,13 +1,9 @@
 """Models for Graph API /researchProducts/links responses."""
 
-import logging
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from .base import Header
 from .safe_types import SafeList, SafeStr
-
-logger = logging.getLogger(__name__)
 
 
 class Identifier(BaseModel):
