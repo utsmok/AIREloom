@@ -121,50 +121,9 @@ class AireloomClient(BaseApiClient):
             f"timeout={self._settings.request_timeout}"
         )
 
-        # Determine authentication strategy if not explicitly provided
-        if auth_strategy:
-            logger.debug(
-                f"Using explicitly provided authentication strategy: {type(auth_strategy).__name__}"
-            )
-            resolved_auth_strategy = auth_strategy
-        else:
-            logger.debug(
-                "Determining auth type based on provided parameters or settings."
-            )
-            # Use overrides if provided, otherwise use settings
-            _client_id = client_id or self._settings.openaire_client_id
-            _client_secret = client_secret or self._settings.openaire_client_secret
-            _api_token = api_token or self._settings.openaire_api_token
-            _token_url = self._settings.openaire_token_url
-
-            logger.debug(
-                f"Auth decision: client_id_param={'***' if client_id else None}, "
-                f"settings_client_id={_cid_display}, "
-                f"api_token_param={'***' if api_token else None}, "
-                f"settings_api_token={'***' if self._settings.openaire_api_token else None}"
-            )
-
-            if _client_id and _client_secret:
-                logger.debug("Using Client Credentials authentication.")
-                if client_id and client_secret:
-                    logger.debug(
-                        "Client ID and secret were directly passed as parameters."
-                    )
-                else:
-                    logger.debug(
-                        "Client ID and secret were loaded from settings or environment variables."
-                    )
-                resolved_auth_strategy = ClientCredentialsAuth(
-                    client_id=_client_id,
-                    client_secret=_client_secret,
-                    token_url=_token_url,
-                )
-            elif _api_token:
-                logger.debug("Using Static Token authentication.")
-                resolved_auth_strategy = StaticTokenAuth(token=_api_token)
-            else:
-                logger.debug("No authentication credentials found, using NoAuth.")
-                resolved_auth_strategy = NoAuth()
+        self._auth_strategy = self._resolve_auth_strategy(
+            auth_strategy, api_token, client_id, client_secret, _cid_display
+        )
 
         # Create the OpenAIRE response unwrapper
         unwrapper = OpenAireUnwrapper()
@@ -173,7 +132,7 @@ class AireloomClient(BaseApiClient):
         super().__init__(
             base_url=base_url,
             settings=self._settings,
-            auth_strategy=resolved_auth_strategy,
+            auth_strategy=self._auth_strategy,
             response_unwrapper=unwrapper,
         )
 
@@ -188,6 +147,66 @@ class AireloomClient(BaseApiClient):
         )
 
         logger.debug("AireloomClient initialized successfully.")
+
+    def _resolve_auth_strategy(
+        self,
+        auth_strategy: AuthStrategy | None,
+        api_token: str | None,
+        client_id: str | None,
+        client_secret: str | None,
+        _cid_display: str,
+    ) -> AuthStrategy:
+        """Resolve the authentication strategy from explicit strategy or credentials.
+
+        Args:
+            auth_strategy: An explicit AuthStrategy, if provided.
+            api_token: Optional static API token override.
+            client_id: Optional client ID override.
+            client_secret: Optional client secret override.
+            _cid_display: Masked display string for logging.
+
+        Returns:
+            The resolved AuthStrategy instance.
+        """
+        if auth_strategy:
+            logger.debug(
+                f"Using explicitly provided authentication strategy: {type(auth_strategy).__name__}"
+            )
+            return auth_strategy
+
+        logger.debug("Determining auth type based on provided parameters or settings.")
+        _client_id = client_id or self._settings.openaire_client_id
+        _client_secret = client_secret or self._settings.openaire_client_secret
+        _api_token = api_token or self._settings.openaire_api_token
+        _token_url = self._settings.openaire_token_url
+
+        logger.debug(
+            f"Auth decision: client_id_param={'***' if client_id else None}, "
+            f"settings_client_id={_cid_display}, "
+            f"api_token_param={'***' if api_token else None}, "
+            f"settings_api_token={'***' if self._settings.openaire_api_token else None}"
+        )
+
+        if _client_id and _client_secret:
+            logger.debug("Using Client Credentials authentication.")
+            if client_id and client_secret:
+                logger.debug("Client ID and secret were directly passed as parameters.")
+            else:
+                logger.debug(
+                    "Client ID and secret were loaded from settings or environment variables."
+                )
+            return ClientCredentialsAuth(
+                client_id=_client_id,
+                client_secret=_client_secret,
+                token_url=_token_url,
+            )
+
+        if _api_token:
+            logger.debug("Using Static Token authentication.")
+            return StaticTokenAuth(token=_api_token)
+
+        logger.debug("No authentication credentials found, using NoAuth.")
+        return NoAuth()
 
     @property
     def research_products(self) -> ResearchProductsClient:

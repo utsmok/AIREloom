@@ -92,7 +92,15 @@ async def publications_by_organization(
         List of matching ResearchProduct instances.
     """
     filter_kwargs: dict = {}
-    _resolve_org_filter(identifier, search_on, filter_kwargs)
+    _resolve_identifier(
+        identifier,
+        search_on,
+        filter_kwargs,
+        str_map={"name": "search", "openaire_id": "relOrganizationId", "ror": "rorId"},
+        obj_fields={"openaire_id": "id", "ror": "ror_id"},
+        obj_name_field="legalName",
+        fallback_to_search=True,
+    )
 
     if type is not None:
         filter_kwargs["type"] = type
@@ -135,21 +143,14 @@ async def publications_by_author(
         List of matching ResearchProduct instances.
     """
     filter_kwargs: dict = {}
-
-    if isinstance(identifier, str):
-        if search_on == "orcid":
-            filter_kwargs["authorOrcid"] = identifier
-        else:
-            filter_kwargs["authorFullName"] = identifier
-    # Person object
-    elif search_on == "orcid":
-        orcid = identifier.orcid
-        if orcid:
-            filter_kwargs["authorOrcid"] = orcid
-        else:
-            filter_kwargs["authorFullName"] = identifier.full_name
-    else:
-        filter_kwargs["authorFullName"] = identifier.full_name
+    _resolve_identifier(
+        identifier,
+        search_on,
+        filter_kwargs,
+        str_map={"name": "authorFullName", "orcid": "authorOrcid"},
+        obj_fields={"orcid": "orcid"},
+        obj_name_field="full_name",
+    )
 
     if type is not None:
         filter_kwargs["type"] = type
@@ -186,23 +187,29 @@ async def publications_by_project(
         List of matching ResearchProduct instances.
     """
     filter_kwargs: dict = {}
-
     if isinstance(identifier, str):
-        if search_on == "openaire_id":
-            filter_kwargs["relProjectId"] = identifier
-        elif search_on == "code":
-            filter_kwargs["relProjectCode"] = identifier
-        else:
-            # Use search for name-based lookup
-            filter_kwargs["search"] = identifier
-            filter_kwargs["hasProjectRel"] = True
-    # Project object — use its ID
+        _resolve_identifier(
+            identifier,
+            search_on,
+            filter_kwargs,
+            str_map={
+                "name": "search",
+                "openaire_id": "relProjectId",
+                "code": "relProjectCode",
+            },
+            obj_name_field="title",
+            fallback_to_search=True,
+        )
     elif identifier.id:
+        # Project objects try structured identifiers in priority order,
+        # independent of search_on.
         filter_kwargs["relProjectId"] = identifier.id
     elif identifier.code:
         filter_kwargs["relProjectCode"] = identifier.code
     else:
         filter_kwargs["search"] = identifier.title
+    # Name-based lookups must also constrain to results with a project relation.
+    if "search" in filter_kwargs:
         filter_kwargs["hasProjectRel"] = True
 
     if type is not None:
@@ -281,7 +288,15 @@ async def projects_by_organization(
         List of matching Project instances.
     """
     filter_kwargs: dict = {}
-    _resolve_org_filter(identifier, search_on, filter_kwargs)
+    _resolve_identifier(
+        identifier,
+        search_on,
+        filter_kwargs,
+        str_map={"name": "search", "openaire_id": "relOrganizationId"},
+        obj_fields={"openaire_id": "id"},
+        obj_name_field="legalName",
+        fallback_to_search=True,
+    )
 
     filters = ProjectsFilters(**filter_kwargs)
     return await session.projects.collect(
@@ -404,34 +419,45 @@ async def all_links(
 # ---------------------------------------------------------------------------
 
 
-def _resolve_org_filter(
-    identifier: str | Organization,
+def _resolve_identifier(
+    identifier: str | object,
     search_on: str,
     filter_kwargs: dict,
+    *,
+    str_map: dict[str, str],
+    obj_fields: dict[str, str] | None = None,
+    obj_name_field: str = "",
+    fallback_to_search: bool = False,
 ) -> None:
-    """Resolve an organization identifier into the appropriate filter field.
+    """Resolve an identifier into the appropriate filter field.
 
     Mutates *filter_kwargs* in place.
+
+    Args:
+        str_map: Maps search_on values to filter kwarg names for string identifiers.
+        obj_fields: Maps search_on values to attribute names on object identifiers.
+        obj_name_field: Fallback attribute on object when specific field is empty.
+        fallback_to_search: If True, unknown search_on falls back to ``search`` filter.
     """
+    obj_fields = obj_fields or {}
 
     if isinstance(identifier, str):
-        if search_on == "openaire_id":
-            filter_kwargs["relOrganizationId"] = identifier
-        elif search_on == "ror":
-            filter_kwargs["rorId"] = identifier
-        else:
-            filter_kwargs["search"] = identifier
-    # Organization object
-    elif search_on == "openaire_id":
-        if identifier.id:
-            filter_kwargs["relOrganizationId"] = identifier.id
-        else:
-            filter_kwargs["search"] = identifier.legalName
-    elif search_on == "ror":
-        ror = identifier.ror_id
-        if ror:
-            filter_kwargs["rorId"] = ror
-        else:
-            filter_kwargs["search"] = identifier.legalName
-    else:
-        filter_kwargs["search"] = identifier.legalName
+        filter_key = str_map.get(search_on)
+        if filter_key is None and fallback_to_search:
+            filter_key = "search"
+        if filter_key is not None:
+            filter_kwargs[filter_key] = identifier
+        return
+
+    # Object identifier — try the specific attribute first.
+    attr_name = obj_fields.get(search_on)
+    if attr_name is not None:
+        value = getattr(identifier, attr_name, None)
+        if value:
+            filter_kwargs[str_map[search_on]] = value
+            return
+
+    # Fallback to the name field.
+    name_value = getattr(identifier, obj_name_field, None)
+    if name_value:
+        filter_kwargs[str_map["name"]] = name_value

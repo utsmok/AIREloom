@@ -1,5 +1,7 @@
 """Main user-facing session class for interacting with the OpenAIRE Graph API and Scholexplorer."""
 
+from functools import partial
+
 from bibliofabric.auth import AuthStrategy
 from bibliofabric.log_config import configure_logging, logger
 
@@ -10,18 +12,35 @@ from .constants import (
     OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
-from .resources import (
-    DataSourcesClient,
-    OrganizationsClient,
-    PersonsClient,
-    ProjectsClient,
-    ResearchProductsClient,
-    ScholixClient,
+
+_DELEGATED_CLIENTS = frozenset(
+    {
+        "research_products",
+        "organizations",
+        "projects",
+        "persons",
+        "data_sources",
+        "scholix",
+    }
 )
 
 configure_logging()
 
 # RESOURCE_CLIENTS_MAP is no longer needed as AireloomClient manages its own instances.
+
+
+class _QueryAccessor:
+    """Binds an AireloomSession to convenience query functions."""
+
+    def __init__(self, queries_module, session):
+        self._module = queries_module
+        self._session = session
+
+    def __getattr__(self, name):
+        attr = getattr(self._module, name)
+        if callable(attr):
+            return partial(attr, self._session)
+        return attr
 
 
 class AireloomSession:
@@ -106,47 +125,25 @@ class AireloomSession:
         logger.debug(f"Scholexplorer base URL configured for: {_scholix_base_url}")
 
     @property
-    def research_products(self) -> ResearchProductsClient:
-        """Access the ResearchProductsClient."""
-        return self._api_client.research_products
-
-    @property
-    def organizations(self) -> OrganizationsClient:
-        """Access the OrganizationsClient."""
-        return self._api_client.organizations
-
-    @property
-    def projects(self) -> ProjectsClient:
-        """Access the ProjectsClient."""
-        return self._api_client.projects
-
-    @property
-    def persons(self) -> PersonsClient:
-        """Access the PersonsClient."""
-        return self._api_client.persons
-
-    @property
-    def data_sources(self) -> DataSourcesClient:
-        """Access the DataSourcesClient."""
-        return self._api_client.data_sources
-
-    @property
-    def scholix(self) -> ScholixClient:
-        """Access the ScholixClient."""
-        return self._api_client.scholix
-
-    @property
     def queries(self):
         """Access convenience query functions.
 
-        Returns the ``aireloom.queries`` module so you can call any
-        convenience function with the session as the first argument::
+        Returns a ``_QueryAccessor`` bound to this session so you can call any
+        convenience function without passing the session explicitly::
 
             papers = await session.queries.publications_by_doi(
-                session, "10.1234/..."
+                "10.1234/..."
             )
         """
-        return queries
+        return _QueryAccessor(queries, self)
+
+    def __getattr__(self, name: str):
+        if name in _DELEGATED_CLIENTS:
+            return getattr(self._api_client, name)
+        raise AttributeError(f"'{type(self).__name__}' has no attribute '{name}'")
+
+    def __dir__(self):
+        return list(super().__dir__()) + list(_DELEGATED_CLIENTS)
 
     async def close(self) -> None:
         """Closes the underlying HTTP client session."""

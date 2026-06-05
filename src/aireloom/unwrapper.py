@@ -71,8 +71,7 @@ class OpenAireUnwrapper(ResponseUnwrapper):
         """Extract a single item from an OpenAIRE API response.
 
         For single-item requests (like GET by ID), OpenAIRE typically returns
-        the item as the first element in the "results" array. This method
-        extracts that first item.
+        the item as the first element in the "results" array.
 
         Args:
             response_json: The complete JSON response from the OpenAIRE API.
@@ -81,15 +80,8 @@ class OpenAireUnwrapper(ResponseUnwrapper):
             dict[str, Any]: The single result item's data.
 
         Raises:
-            ValueError: If response_json is invalid, no results found, or results is empty.
+            ValueError: If response_json is invalid or no results found.
         """
-        if response_json is None:
-            raise ValueError("Response JSON cannot be None")
-        if not isinstance(response_json, dict):
-            raise ValueError(
-                f"Response JSON must be a dictionary, got {type(response_json)}"
-            )
-
         results = self.unwrap_results(response_json)
         if not results:
             raise ValueError("No results found in response for single item request")
@@ -107,10 +99,6 @@ class OpenAireUnwrapper(ResponseUnwrapper):
 
         Returns:
             str | None: The next page cursor token, or None if no more pages.
-
-        Note:
-            Returns None for any errors in parsing rather than raising exceptions,
-            as missing pagination info should not break the request flow.
         """
         if not isinstance(response_json, dict):
             return None
@@ -123,23 +111,14 @@ class OpenAireUnwrapper(ResponseUnwrapper):
         if next_cursor is None:
             return None
 
-        # Handle case where nextCursor might be an empty string
-        if isinstance(next_cursor, str) and next_cursor.strip():
-            return next_cursor.strip()
-
-        # Handle potential URL objects or other types by converting to string
-        try:
-            cursor_str = str(next_cursor).strip()
-            return cursor_str or None
-        except Exception:
-            return None
+        cursor_str = str(next_cursor).strip()
+        return cursor_str or None
 
     def get_total_results(self, response_json: dict[str, Any]) -> int | None:
         """Extract the total count of results from an OpenAIRE API response.
 
         OpenAIRE typically provides the total number of available results
-        in the "numFound" field within the response header. This is useful
-        for pagination and progress tracking.
+        in the "numFound" field within the response header.
 
         Args:
             response_json: The complete JSON response from the OpenAIRE API.
@@ -147,10 +126,6 @@ class OpenAireUnwrapper(ResponseUnwrapper):
         Returns:
             int | None: The total number of results across all pages, or None
                 if this information is not available.
-
-        Note:
-            Returns None for any errors in parsing rather than raising exceptions,
-            as missing total count should not break the request flow.
         """
         if not isinstance(response_json, dict):
             return None
@@ -163,19 +138,7 @@ class OpenAireUnwrapper(ResponseUnwrapper):
         if num_found is None:
             return None
 
-        # Handle string representations of numbers (common in APIs)
-        if isinstance(num_found, str):
-            try:
-                return int(num_found)
-            except (ValueError, TypeError):
-                return None
-
-        # Handle integer values
-        if isinstance(num_found, int):
-            return num_found
-
-        # Handle other numeric types by attempting conversion
         try:
             return int(num_found)
-        except (ValueError, TypeError, AttributeError):
+        except (ValueError, TypeError):
             return None

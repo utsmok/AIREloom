@@ -16,16 +16,10 @@ from pytest_httpx import HTTPXMock
 
 from aireloom import AireloomSession
 from aireloom.constants import (
-    OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_GRAPH_API_V2_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
 from aireloom.endpoints import (
-    DATA_SOURCES,
-    ORGANIZATIONS,
-    PROJECTS,
-    RESEARCH_PRODUCTS,
-    SCHOLIX,
     DataSourcesFilters,
     OrganizationsFilters,
     ProjectsFilters,
@@ -169,7 +163,6 @@ async def test_session_context_manager_aclose():
 async def test_session_get_research_product_integration():
     product_id = "rp123"
     token_url = "https://aai.openaire.eu/oidc/token"  # Standard token URL
-    expected_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
 
     mock_api_response_json = {
         "results": [
@@ -204,67 +197,12 @@ async def test_session_get_research_product_integration():
 
 @pytest.mark.asyncio
 async def test_session_search_research_products_integration():
-    token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
-
-    mock_api_response_json = {
-        "header": {
-            "page": 1,
-            "size": 1,
-            "numFound": 1,
-            "totalPages": 1,
-            "maxPage": 1000,
-        },
-        "results": [
-            {
-                "id": "rp456",
-                "title": "Searched Research Product",
-                "type": "publication",
-                "publicationDate": "2023-02-01",
-            }
-        ],
-    }
+    pass
 
 
 @pytest.mark.asyncio
 async def test_session_iterate_research_products_integration():
-    token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/{RESEARCH_PRODUCTS}"
-
-    mock_response_page1 = {
-        "header": {
-            "page": 1,
-            "size": 1,
-            "numFound": 2,
-            "totalPages": 2,
-            "nextCursor": "cursor1",
-        },
-        "results": [
-            {
-                "id": "rp_iter1",
-                "title": "Iter Product 1",
-                "type": "publication",
-                "publicationDate": "2023-03-01",
-            }
-        ],
-    }
-    mock_response_page2 = {
-        "header": {
-            "page": 2,
-            "size": 1,
-            "numFound": 2,
-            "totalPages": 2,
-            "nextCursor": None,
-        },
-        "results": [
-            {
-                "id": "rp_iter2",
-                "title": "Iter Product 2",
-                "type": "publication",
-                "publicationDate": "2023-03-02",
-            }
-        ],
-    }
+    pass
 
 
 # --- Organizations ---
@@ -272,7 +210,6 @@ async def test_session_iterate_research_products_integration():
 async def test_session_get_organization_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
     org_id = "org123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -308,7 +245,6 @@ async def test_session_get_organization_integration():
 @pytest.mark.asyncio
 async def test_session_search_organizations_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -358,7 +294,6 @@ async def test_session_search_organizations_integration():
 @pytest.mark.asyncio
 async def test_session_iterate_organizations_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{ORGANIZATIONS}"
 
     # Mock for the token acquisition
 
@@ -434,7 +369,6 @@ async def test_session_iterate_organizations_integration():
 async def test_session_get_project_integration():
     token_url = "https://aai.openaire.eu/oidc/token"
     project_id = "proj123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -474,7 +408,6 @@ async def test_session_get_project_integration():
 @pytest.mark.asyncio
 async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -526,7 +459,6 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{PROJECTS}"
 
     # Mock for the token acquisition
 
@@ -606,7 +538,6 @@ async def test_session_iterate_projects_integration(httpx_mock: HTTPXMock):
 async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     ds_id = "ds123"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -644,7 +575,6 @@ async def test_session_get_data_source_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    expected_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -698,7 +628,6 @@ async def test_session_search_data_sources_integration(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/{DATA_SOURCES}"
 
     # Mock for the token acquisition
 
@@ -774,7 +703,6 @@ async def test_session_iterate_data_sources_integration(httpx_mock: HTTPXMock):
 async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.1234/source"
-    expected_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}"
 
     # Mock for the token acquisition
 
@@ -827,7 +755,6 @@ async def test_session_search_scholix_integration(httpx_mock: HTTPXMock):
 async def test_session_iterate_scholix_integration(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
     source_pid = "10.9876/iter_source"
-    base_url = f"{OPENAIRE_SCHOLIX_API_BASE_URL}/{SCHOLIX}"
 
     # Mock for the token acquisition
 
