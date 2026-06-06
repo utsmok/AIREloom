@@ -104,17 +104,17 @@ def _pub_to_row(p: ResearchProduct) -> dict:
     return {
         "id": p.id,
         "title": p.title[:500],
-        "doi": p.doi,
-        "type": p.type,
+        "doi": p.doi or "",
+        "type": str(p.type or ""),
         "publication_date": p.publicationDate or "",
-        "publication_year": p.publication_year,
+        "publication_year": p.publication_year or 0,
         "publisher": p.publisher,
         "language": p.language.code,
-        "is_open_access": p.is_open_access,
-        "open_access_url": p.open_access_url,
-        "citation_count": p.citation_count,
-        "journal_name": p.journal_name,
-        "license": p.license,
+        "is_open_access": p.is_open_access or False,
+        "open_access_url": p.open_access_url or "",
+        "citation_count": p.citation_count or 0,
+        "journal_name": p.journal_name or "",
+        "license": p.license or "",
         "author_names": "; ".join(p.author_names),
         "subjects": subjects,
         "keywords": "; ".join(p.keywords),
@@ -132,14 +132,14 @@ def _proj_to_row(pr: Project) -> dict:
         "acronym": pr.acronym,
         "start_date": pr.startDate or "",
         "end_date": pr.endDate or "",
-        "start_year": pr.start_year,
-        "end_year": pr.end_year,
+        "start_year": pr.start_year or 0,
+        "end_year": pr.end_year or 0,
         "summary": pr.summary[:1000],
-        "funder_name": pr.funder_name,
+        "funder_name": pr.funder_name or "",
         "funders": funders,
         "keywords": "; ".join(pr.keywords),
-        "oa_mandate_pub": pr.openAccessMandateForPublications,
-        "oa_mandate_data": pr.openAccessMandateForDataset,
+        "oa_mandate_pub": pr.openAccessMandateForPublications or False,
+        "oa_mandate_data": pr.openAccessMandateForDataset or False,
     }
 
 
@@ -172,7 +172,7 @@ def _store_scholix(
                 "target_doi": "; ".join(i.id_val for i in lk.target.identifier),
                 "target_type": lk.target.type,
                 "target_title": lk.target.title[:300],
-                "relationship": lk.relationship_type.name,
+                "relationship": str(lk.relationship_type.name),
                 "link_provider": "; ".join(
                     lp.name for lp in (lk.link_provider or []) if lp.name
                 ),
@@ -292,9 +292,10 @@ def run_analytics(con: duckdb.DuckDBPyConnection) -> dict:
     """).fetchall()
 
     r["top_authors"] = con.execute("""
-        SELECT unnest(string_split(author_names, '; ')) as author, count(*) as n
-        FROM publications WHERE author_names != ''
-        GROUP BY author ORDER BY n DESC LIMIT 15
+        SELECT t.author, count(*) as n
+        FROM publications, unnest(string_split(author_names, '; ')) as t(author)
+        WHERE t.author != ''
+        GROUP BY t.author ORDER BY n DESC LIMIT 15
     """).fetchall()
 
     oa = con.execute("""
@@ -307,11 +308,10 @@ def run_analytics(con: duckdb.DuckDBPyConnection) -> dict:
         SELECT title, doi, citation_count, publication_year FROM publications
         WHERE citation_count IS NOT NULL ORDER BY citation_count DESC LIMIT 10
     """).fetchall()
-
     r["top_keywords"] = con.execute("""
-        SELECT lower(trim(kw)) as keyword, count(*) as n
-        FROM publications, unnest(string_split(keywords, '; ')) as kw
-        WHERE keywords != '' GROUP BY keyword ORDER BY n DESC LIMIT 20
+        SELECT lower(trim(t.kw)) as keyword, count(*) as n
+        FROM publications, unnest(string_split(keywords, '; ')) as t(kw)
+        WHERE t.kw != '' GROUP BY keyword ORDER BY n DESC LIMIT 20
     """).fetchall()
 
     r["project_status"] = con.execute("""
