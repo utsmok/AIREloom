@@ -331,7 +331,7 @@ async def citing_works(
     Returns:
         List of ScholixRelationship instances.
     """
-    filter_kwargs: dict = {"targetPid": doi, "relation": "References"}
+    filter_kwargs: dict = {"targetPid": doi}
     if source_type:
         filter_kwargs["sourceType"] = source_type
 

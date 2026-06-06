@@ -406,7 +406,9 @@ class TestCitingWorks:
         await citing_works(session, "10.1234/test")
         call_kwargs = session.scholix.collect.call_args[1]
         assert call_kwargs["filters"].targetPid == "10.1234/test"
-        assert call_kwargs["filters"].relation == "References"
+        assert (
+            call_kwargs["filters"].relation is None
+        )  # No relation filter — Scholix uses IsRelatedTo
 
     @pytest.mark.asyncio
     async def test_with_source_type(self, session):

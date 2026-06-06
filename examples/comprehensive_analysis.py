@@ -97,7 +97,9 @@ def _init_db(con: duckdb.DuckDBPyConnection) -> None:
 
 def _pub_to_row(p: ResearchProduct) -> dict:
     subjects = "; ".join(
-        " ".join(s.subject.values()) if isinstance(s.subject, dict) else ""
+        s.subject.get("value", "")
+        if isinstance(s.subject, dict)
+        else str(s.subject or "")
         for s in p.subjects
         if s.subject
     )
@@ -117,7 +119,7 @@ def _pub_to_row(p: ResearchProduct) -> dict:
         "license": p.license or "",
         "author_names": "; ".join(p.author_names),
         "subjects": subjects,
-        "keywords": "; ".join(p.keywords),
+        "keywords": subjects,  # Alias: API provides subjects, not a separate keywords field
     }
 
 
@@ -154,7 +156,8 @@ def _store_batch(
     df = pl.DataFrame(rows)
     if clear:
         con.execute(f"DELETE FROM {table}")
-    con.execute(f"INSERT INTO {table} SELECT * FROM df")
+    cols = ", ".join(df.columns)
+    con.execute(f"INSERT INTO {table}({cols}) SELECT * FROM df")
 
 
 def _store_scholix(
@@ -164,12 +167,18 @@ def _store_scholix(
 ) -> None:
     rows = []
     for lk in links:
+        source_dois = "; ".join(
+            i.id_val for i in lk.source.identifier if i.id_scheme == "doi"
+        )
+        target_dois = "; ".join(
+            i.id_val for i in lk.target.identifier if i.id_scheme == "doi"
+        )
         rows.append(
             {
-                "source_doi": "; ".join(i.id_val for i in lk.source.identifier),
+                "source_doi": source_dois,
                 "source_type": lk.source.type,
                 "source_title": lk.source.title[:300],
-                "target_doi": "; ".join(i.id_val for i in lk.target.identifier),
+                "target_doi": target_dois,
                 "target_type": lk.target.type,
                 "target_title": lk.target.title[:300],
                 "relationship": str(lk.relationship_type.name),

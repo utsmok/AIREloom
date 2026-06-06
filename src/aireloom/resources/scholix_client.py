@@ -233,3 +233,27 @@ class ScholixClient(BaseResourceClient):
                     f"Failed during iteration of {self._entity_path} on page {current_page}: {e}"
                 ) from e
         logger.debug("Scholix iteration finished.")
+
+    # ── Standard-name aliases for BaseResourceClient.collect/count/first ──
+
+    async def search(
+        self,
+        page: int = 0,
+        page_size: int = DEFAULT_PAGE_SIZE,
+        filters: ScholixFilters | None = None,
+        sort_by: str | None = None,
+        search: str | None = None,  # noqa: ARG002 — Scholix doesn't support free-text search
+    ) -> ScholixResponse:
+        """Alias for ``search_links`` so ``collect``/``count`` can find it."""
+        return await self.search_links(page=page, page_size=page_size, filters=filters)
+
+    async def iterate(
+        self,
+        page_size: int = DEFAULT_PAGE_SIZE,
+        filters: ScholixFilters | None = None,
+        sort_by: str | None = None,
+        search: str | None = None,  # noqa: ARG002
+    ) -> AsyncIterator[ScholixRelationship]:
+        """Alias for ``iterate_links`` so ``collect``/``count`` can find it."""
+        async for link in self.iterate_links(page_size=page_size, filters=filters):
+            yield link
