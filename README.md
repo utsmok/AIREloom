@@ -1,589 +1,219 @@
-# AIREloom: Asynchronous python client for the OpenAIRE API
+# AIREloom: Asynchronous Python client for the OpenAIRE API
+
 <p align="center"><img src="https://github.com/user-attachments/assets/54a7de2e-9469-4d81-ba33-788a5a0aa753" alt="AIREloom logo" height="393" width="500" /></p>
 
-*Samuel Mok // s.mok@utwente.nl // 2025*
+*Samuel Mok · s.mok@utwente.nl · 2025–2026*
 
-AIREloom provides a modern, asynchronous interface to interact with the OpenAIRE Graph API and Scholexplorer API. It is built upon the `bibliofabric` generic client framework, leveraging `httpx` and `pydantic` for robust and efficient data retrieval.
+AIREloom is an async Python client for the [OpenAIRE Graph API](https://graph.openaire.eu/) and [Scholexplorer API](https://scholexplorer.openaire.eu/), built on [bibliofabric](https://github.com/utsmok/bibliofabric).
 
+**Docs:** [utsmok.github.io/AIREloom](https://utsmok.github.io/AIREloom/) · **PyPI:** [aireloom](https://pypi.org/project/aireloom/) · **License:** MIT
 
-*   Built on `bibliofabric`
-*   Asynchronous by design
-*   Comprehensive OpenAIRE API coverage:
-    *   **OpenAIRE Graph API**: All six endpoints — Research Products (v2), Projects, Organizations, Data Sources, Persons, and Research Product Links (v1).
-    *   **Scholexplorer API**: Full support for Scholix v3 parameters.
-*   Per-entity API version routing: Research Products automatically use the v2 endpoint for enriched responses (includes related projects, organizations, communities), while other entities use v1.
-*   Flexible authentication:
-    *   Automatic detection based on environment variables or `.env` files.
-    *   Supports all OpenAIRE auth methods, including using no auth at all.
-*   Pydantic models validate all input and output, and provide clear type hints for constructing filters/requests and accessing response data.
-*   Efficient data retrieval by using specific functions depending on the use case:
-    *   `get()` for single entity retrieval
-    *   `search()` for paginated retrieval
-    *   `iterate()` for cursor-based retrieval (Graph API) or page-based auto-pagination (Scholix/Links)
-    *   `search_links()` / `iterate_links()` for relation discovery between research products
-*   The `bibliofabric` framework also provides:
-    *   Timeouts, retries, backoff factors through `bibliofabric.config.BaseApiSettings` and `aireloom.config.ApiSettings`.
-    *   Optional client-side caching for GET requests.
-    *   Rate limiting awareness and handling (parsing `Retry-After` headers).
-    *   Basic hook system (pre/post-request) for custom logic.
-## API Docs
+## Features
 
-Detailed API docs can be found on the docs page: [utsmok.github.io/AIREloom](https://utsmok.github.io/AIREloom/).
-
+- **Full API coverage** — Research Products (v2), Projects, Organizations, Data Sources, Persons, Research Product Links (v1), Scholexplorer (v3)
+- **Async by design** — built on `httpx` + `asyncio` with proper connection pooling
+- **Typed throughout** — Pydantic models for all inputs/outputs, PEP 561 `py.typed` marker
+- **Ergonomics layer** — computed properties, SafeStr/SafeList defaults, convenience queries, iterator helpers
+- **Flexible auth** — auto-detection from env vars, static tokens, OAuth2 client credentials, or no auth
+- **Resilient** — retries with backoff, rate-limit handling (`Retry-After`), optional client-side caching, hook system
 
 ## Installation
 
-AIREloom is built on top of the `bibliofabric` framework, which contains most dependencies. Use `uv` to install the package from PyPI:
 ```bash
-> uv install aireloom
+uv add aireloom
 ```
 
-If you do not have `uv` installed, check out the [uv documentation](https://docs.astral.sh/uv/getting-started/installation/) for installation instructions, or just paste one of the following oneliners into your terminal to install uv:
+Or with pip: `pip install aireloom`. Requires Python ≥3.12.
 
-*for Linux/macOS:*
-```bash
-> curl -LsSf https://astral.sh/uv/install.sh | sh
-or
-> wget -qO- https://astral.sh/uv/install.sh | sh
-```
-*for Windows:*
-```powershell
-> powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-```
-
-followed by:
-```bash
-> uv init
-> uv add aireloom //or aireloom[analysis] if you want to run the example scripts
-> uv run your_script.py
-```
-
-## Example scripts
-
-This repository includes several example scripts in the `examples/` directory:
-
-*   `examples/simple_example.py`: Demonstrates the three main retrieval methods (get/search/iterate) for research products.
-*   `examples/02_scholix_link_discovery.py`: Discover relationships between research products via Scholexplorer.
-*   `examples/03_research_product_analysis.py`: Detailed research product retrieval with filtering and analysis.
-*   `examples/04_organization_projects.py`: Explore organizations and their related projects.
-*   `examples/05_advanced_filtering.py`: Advanced filter combinations with `logicalOperator`.
-*   `examples/06_persons_discovery.py`: Search and browse persons in the OpenAIRE Graph.
-*   `examples/comprehensive_analysis.py`: Full analysis pipeline — retrieves data from multiple endpoints, processes with `polars`, stores in `DuckDB`, and generates a report with visualizations.
-
-Make sure to install the extra dependencies to properly execute them:
-
-```bash
-> uv install aireloom[analysis]
-> uv run examples/simple_example.py
-```
-
-## OpenAIRE Authentication
-
-AIREloom automatically detects the authentication method based on your configuration (environment variables or `.env` file) unless you explicitly provide an `auth_strategy` during init. For more information on authentication, see the OpenAIRE docs [on authentication](https://graph.openaire.eu/docs/apis/authentication).
-
-**Environment Variables / `.env` file:**
-
-Create a `.env` or `secrets.env` file in your project root. Prefix environment variables with `AIRELOOM_`.
-
-*   **Static Token:** Set `AIRELOOM_OPENAIRE_API_TOKEN`.
-    ```dotenv
-    AIRELOOM_OPENAIRE_API_TOKEN="your_static_api_token_here"
-    ```
-*   **Client Credentials:** Set `AIRELOOM_OPENAIRE_CLIENT_ID` and `AIRELOOM_OPENAIRE_CLIENT_SECRET`. The token URL defaults to the standard OpenAIRE one but can be overridden with `AIRELOOM_OPENAIRE_TOKEN_URL`.
-    ```dotenv
-    AIRELOOM_OPENAIRE_CLIENT_ID="your_client_id_here"
-    AIRELOOM_OPENAIRE_CLIENT_SECRET="your_client_secret_here"
-    # AIRELOOM_OPENAIRE_TOKEN_URL="https://custom.token.url/oauth/token" # Optional override
-    ```
-
-**Explicit Strategy:**
-
-You can pass an authentication strategy instance directly when creating `AireloomSession`.
+## Quick Start
 
 ```python
 import asyncio
 from aireloom import AireloomSession
-from bibliofabric.auth import NoAuth, StaticTokenAuth, ClientCredentialsAuth
-
-# 1. No Authentication
-no_auth_session = AireloomSession(auth_strategy=NoAuth())
-
-# 2. Static Token
-token_auth_session = AireloomSession(auth_strategy=StaticTokenAuth(token="your_token"))
-
-# 3. Client Credentials (reads ID/Secret/URL from env unless provided)
-# Ensure AIRELOOM_OPENAIRE_CLIENT_ID and AIRELOOM_OPENAIRE_CLIENT_SECRET are set
-cc_auth_session = AireloomSession(
-    auth_strategy=ClientCredentialsAuth(
-        client_id=None, # Provide directly, or reads from AIRELOOM_OPENAIRE_CLIENT_ID
-        client_secret=None, # Provide directly, or reads from AIRELOOM_OPENAIRE_CLIENT_SECRET
-        token_url=None # Provide directly, or reads from AIRELOOM_OPENAIRE_TOKEN_URL (defaults to OpenAIRE's)
-    )
-)
-
-# If no strategy is provided, it defaults based on environment variables:
-default_session = AireloomSession() # Will use CC if ID/Secret found, then Token, then NoAuth
 
 async def main():
-    # Use the session within an async context
-    async with default_session as session:
-        # ... make API calls ...
-        print("Session created with default auth.")
-        # Example: access research products client
-        # products = await session.research_products.search(page_size=1)
-        pass
+    async with AireloomSession() as session:
+        # Search publications
+        response = await session.research_products.search(
+            type="article", mainTitle="climate change",
+            fromPublicationDate="2024-01-01", page_size=5,
+            sortBy="publicationDate desc",
+        )
+        for product in response.results:
+            print(f"{product.title} — DOI: {product.doi or 'N/A'}")
 
-# Example of running the main function
-if __name__ == "__main__":
-    asyncio.run(main())
+        # Iterate all results (cursor-based auto-pagination)
+        async for product in session.research_products.iterate(
+            type="dataset", countryCode="NL", page_size=50,
+        ):
+            print(product.title)
+            break  # stop when you want
+
+        # Get a single entity
+        product = await session.research_products.get("doi:10.1038/s41586-021-03964-9")
+        print(product.title, product.doi)
+
+        # Convenience queries
+        citations = await session.queries.citing_works("doi:10.1038/s41586-021-03964-9")
+        print(f"{len(citations)} citations")
+
+asyncio.run(main())
 ```
 
-## Basic Usage: `AireloomSession`
+No authentication required — the OpenAIRE API works without it. For higher rate limits, see [Authentication](#authentication).
 
-The primary way to interact with the APIs is through `AireloomSession`. It provides access to specific resource clients (e.g., `research_products`, `organizations`).
+## Core API
+
+### Retrieval methods
+
+Every resource client (`session.research_products`, `session.organizations`, etc.) provides:
+
+| Method | Description |
+|--------|-------------|
+| `get(id)` | Retrieve a single entity by ID |
+| `search(filters, page, page_size, sortBy)` | Paginated search |
+| `iterate(filters, page_size, sortBy)` | Auto-paginate all results (cursor-based) |
+| `collect(limit, ...)` | Collect results into a list |
+| `count(filters)` | Count matching entities |
+| `first(filters)` | Get first matching entity or `None` |
+
+### Resource clients
+
+| Client | API | Notes |
+|--------|-----|-------|
+| `session.research_products` | Graph API v2 | Enriched responses with related entities |
+| `session.projects` | Graph API v1 | |
+| `session.organizations` | Graph API v1 | |
+| `session.data_sources` | Graph API v1 | |
+| `session.persons` | Graph API v1 | `givenName`/`lastName` filters cause 500s (upstream bug) |
+| `session.scholix` | Scholix v3 | `search_links()` / `iterate_links()` |
+
+### Ergonomics
+
+**Computed properties** on models — derived fields that don't exist in the raw API response:
 
 ```python
-import asyncio
-from aireloom import AireloomSession
-from bibliofabric.auth import NoAuth # Or other auth strategies
-from bibliofabric.exceptions import BibliofabricError
-
-async def run_example():
-    # Initialize with desired auth strategy (or let it auto-detect)
-    # Use async with for proper client setup and teardown
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        # Example: Get a specific research product
-        try:
-            # Use a known OpenAIRE ID for a research product (replace with a real one for testing)
-            product_id = "openaire____::doi:10.5281/zenodo.7664304" # Example, use a real ID
-            print(f"Attempting to fetch product with ID: {product_id}")
-            product = await session.research_products.get(product_id)
-            print(f"Fetched Product: {product.title}")
-            # Accessing the DOI from the pids list structure
-            doi_value = None
-            if product.pids:
-                for pid in product.pids:
-                    if pid.id and pid.id.scheme == "doi":
-                        doi_value = pid.id.value
-                        break
-            print(f"  DOI: {doi_value if doi_value else 'Not available'}")
-            # Accessing nested Pydantic model data safely
-            print(f"  Type: {product.type if product.type else 'N/A'}")
-            print(f"  Publication Date: {product.publicationDate if product.publicationDate else 'N/A'}")
-
-        except BibliofabricError as e:
-            print(f"An API or client error occurred: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(run_example())
+product.doi              # → "10.1234/example" (extracted from pids)
+product.year             # → 2024 (from publicationDate)
+product.is_open_access   # → True (from bestAccessRight)
+org.ror_id               # → "https://ror.org/..." (from rorId)
+project.funder_name      # → "EC" (from funding array)
 ```
 
-## Retrieving Single Entities
-
-Use the `get` method on the specific resource client (e.g., `session.research_products.get(...)`).
+**SafeStr/SafeList** — `None` is never returned for string/list fields; you get `""` or `[]` instead:
 
 ```python
-import asyncio
-from aireloom import AireloomSession
-from bibliofabric.auth import NoAuth
-from bibliofabric.exceptions import BibliofabricError, NotFoundError
-
-async def get_entities():
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        try:
-            # Get Research Product by OpenAIRE ID (replace with a real one for testing)
-            product_id = "openaire____::doi:10.5281/zenodo.7664304" # Example, use a real ID
-            print(f"\nFetching Product ID: {product_id}")
-            product = await session.research_products.get(product_id)
-            # Extract DOI from pids structure
-            doi_value = None
-            if product.pids:
-                for pid in product.pids:
-                    if pid.id and pid.id.scheme == "doi":
-                        doi_value = pid.id.value
-                        break
-            print(f"-> Product '{product.title}' fetched. DOI: {doi_value if doi_value else 'Not available'}")
-
-            # Get Organization by OpenAIRE ID
-            org_id = "openaire____::orgID:grid.5522.e" # Example: University of Twente (using a GRID ID format)
-            print(f"\nFetching Organization ID: {org_id}")
-            org = await session.organizations.get(org_id)
-            print(f"-> Organization '{org.legalName}' fetched.")
-
-            # Get Project by OpenAIRE ID (replace with a real one for testing)
-            project_id = "corda_h2020::269f7314d3149ba797a079979839581b" # Example H2020 project ID format
-            print(f"\nFetching Project ID: {project_id}")
-            project = await session.projects.get(project_id)
-            print(f"-> Project '{project.title}' fetched.")
-
-            # Get Data Source by OpenAIRE ID
-            source_id = "openaire____::datasourceId:doaj" # Example: Directory of Open Access Journals
-            print(f"\nFetching Data Source ID: {source_id}")
-            source = await session.data_sources.get(source_id)
-            print(f"-> Data Source '{source.officialName}' fetched.")
-
-        except NotFoundError as e:
-            print(f"Error: Entity not found. {e}")
-        except BibliofabricError as e:
-            # Specific handling for other API errors
-            print(f"Error fetching entity: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Status Code: {e.response.status_code}")
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(get_entities())
+product.subjects  # [] instead of None
+product.title     # "" instead of None
 ```
 
-## Searching Entities
-
-Use the `search` method on the specific resource client. These support pagination, sorting, and filtering using Pydantic filter models.
+**Convenience queries** via `session.queries`:
 
 ```python
-import asyncio
-from aireloom import AireloomSession, NoAuth
-from bibliofabric.exceptions import BibliofabricError, ValidationError
-from aireloom.endpoints import ResearchProductsFilters, ProjectsFilters # Import filter models
-
-async def search_entities():
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        try:
-            # Search Research Products (publications) with filters and sorting
-            print("\nSearching Research Products...")
-            rp_filters = ResearchProductsFilters( # Create filter model instance
-                type="article",
-                mainTitle="climate modelling", # Filter field name is mainTitle
-                fromPublicationDate="2023-01-01",
-                toPublicationDate="2023-12-31",
-                # countryCode="NL", # Example country filter
-            )
-            search_response = await session.research_products.search(
-                filters=rp_filters,
-                page=1, # API is 1-indexed for page number in search
-                page_size=5,
-                sortBy="publicationDate desc" # Sort by publication date, newest first
-            )
-
-            print(f"Found {search_response.header.numFound} products matching criteria.")
-            print(f"Showing page {search_response.header.pageNumber} of {search_response.header.totalPages} (page size {search_response.header.pageSize}):")
-            if search_response.results:
-                for product in search_response.results:
-                    pub_date_str = product.publicationDate if product.publicationDate else "N/A"
-                    # Extract DOI from pids structure
-                    doi_value = None
-                    if product.pids:
-                        for pid in product.pids:
-                            if pid.id and pid.id.scheme == "doi":
-                                doi_value = pid.id.value
-                                break
-                    print(f"- {product.title} ({pub_date_str}) - DOI: {doi_value if doi_value else 'Not available'}")
-            else:
-                print("No products found for this page/filter combination.")
-
-            # Search Projects
-            print("\nSearching Projects...")
-            proj_filters = ProjectsFilters(keywords=["artificial intelligence"], fundingShortName="EC") # Filter by keyword(s) and funder short name
-            project_response = await session.projects.search(
-                filters=proj_filters,
-                page=1,
-                page_size=3,
-                sortBy="endDate desc" # Sort by end date, newest first
-            )
-            print(f"Found {project_response.header.numFound} projects.")
-            if project_response.results:
-                for project in project_response.results:
-                    print(f"- {project.title} (Acronym: {project.acronym}, ID: {project.id})")
-            else:
-                print("No projects found.")
-
-        except ValidationError as e:
-            print(f"Invalid search parameters: {e}")
-        except BibliofabricError as e:
-            print(f"API Error during search: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred during search: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(search_entities())
+session.queries.publications_by_doi("10.1234/example")
+session.queries.citing_works("doi:10.1234/example")
+session.queries.datasets_by_organization("openaire____::orgID:grid.5522.e")
+session.queries.projects_by_funder("EC")
 ```
 
-**Filtering:** Instantiate the appropriate Pydantic filter model (e.g., `ResearchProductsFilters` from `aireloom.endpoints`) and pass it to the `filters` parameter of the `search` method. Valid filter fields are defined in these models.
+See [Ergonomics docs](https://utsmok.github.io/AIREloom/ergonomics/) for the full list.
 
-**Sorting:** Use the `sortBy` parameter with the format `"field_name asc"` or `"field_name desc"`. Valid sort fields depend on the entity type (e.g., `publicationDate` for research products, `endDate` for projects). An invalid sort field raises a `ValidationError`.
+### Filters & Sorting
 
-**Pagination:** Use the `page` (1-indexed for Graph API) and `page_size` parameters. The response object (`<EntityType>Response`) contains a `header` attribute with pagination information (`pageNumber`, `pageSize`, `numFound` results, `totalPages`, `nextCursor`, etc.).
-
-## Iterating Through All Results
-
-For retrieving all results matching criteria without manual pagination, use the `iterate` method on the specific resource client. These use efficient cursor-based pagination provided by the API for Graph API endpoints.
+Filters are Pydantic models — import from `aireloom.endpoints`:
 
 ```python
-import asyncio
-from aireloom import AireloomSession, NoAuth
-from bibliofabric.exceptions import BibliofabricError, ValidationError
-from aireloom.endpoints import ResearchProductsFilters # Import filter model
+from aireloom.endpoints import ResearchProductsFilters, ProjectsFilters
 
-async def iterate_all_results():
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        print("\nIterating through recent Peer Reviewed articles from NL...")
-        count = 0
-        max_results_to_fetch = 15 # Limit for example purposes
-        try:
-            # Iterate through publications from the Netherlands, newest first
-            rp_filters = ResearchProductsFilters(
-                countryCode="NL",
-                type="article",
-                fromPublicationDate="2023-01-01",
-                toPublicationDate="2023-12-31",
-                isPeerReviewed=True
-            )
-            async for product in session.research_products.iterate(
-                filters=rp_filters,
-                page_size=5, # How many to fetch per underlying API call (adjust as needed)
-                sortBy="publicationDate desc" # Get newest first
-            ):
-                count += 1
-                pub_date_str = product.publicationDate if product.publicationDate else "N/A"
-                print(f"#{count}: {product.title} ({pub_date_str})")
-                if count >= max_results_to_fetch:
-                    print(f"\nStopping iteration early after fetching {max_results_to_fetch} results.")
-                    break
-            print(f"\nFinished iterating. Total fetched in this run: {count}")
-
-        except ValidationError as e:
-            print(f"Invalid parameters for iteration: {e}")
-        except BibliofabricError as e:
-            print(f"API Error during iteration: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred during iteration: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(iterate_all_results())
+filters = ResearchProductsFilters(
+    type="article",
+    mainTitle="machine learning",
+    fromPublicationDate="2024-01-01",
+    countryCode="NL",
+)
 ```
 
-**Note:** Iteration fetches results in batches (`page_size`) using the API's cursor mechanism (for Graph API) or page-based mechanism (for Scholix) until all matching entities are retrieved or the iteration is explicitly broken.
+Sort with `sortBy="field asc"` or `sortBy="field desc"`. Valid fields depend on the endpoint (see [`ENDPOINT_DEFINITIONS`](src/aireloom/endpoints.py)).
 
-## Working with Scholexplorer (Scholix Links)
+## Authentication
 
-Use `session.scholix.search_links` or `session.scholix.iterate_links` to find relationships (links) between research products.
+AIREloom auto-detects auth from environment variables or `.env` files (prefixed with `AIRELOOM_`). No auth is the default if nothing is configured.
 
-**Important:** You *must* provide either `sourcePid` or `targetPid` in the `ScholixFilters` model for Scholix searches. PIDs should typically be DOIs or other persistent identifiers recognized by Scholexplorer, prefixed with their scheme (e.g., `doi:10.5281/zenodo.xxxxxx`).
+```dotenv
+# Option 1: Static token
+AIRELOOM_OPENAIRE_API_TOKEN=your_token
+
+# Option 2: OAuth2 client credentials
+AIRELOOM_OPENAIRE_CLIENT_ID=your_id
+AIRELOOM_OPENAIRE_CLIENT_SECRET=your_secret
+```
+
+Or pass explicitly:
 
 ```python
-import asyncio
-from aireloom import AireloomSession, NoAuth
-from bibliofabric.exceptions import BibliofabricError, ValidationError
-from aireloom.endpoints import ScholixFilters # Import filter model
+from bibliofabric.auth import NoAuth, StaticTokenAuth, ClientCredentialsAuth
 
-async def search_scholix():
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        print("\nSearching Scholix links...")
-        try:
-            # Find links where a specific DOI is the source
-            source_doi_val = "10.1038/s41586-021-03964-9" # Example Nature paper DOI
-            print(f"Searching for links originating from PID: doi:{source_doi_val}")
-
-            s_filters_source = ScholixFilters(
-                sourcePid=f"doi:{source_doi_val}", # Ensure PID is prefixed with scheme
-                # targetType="Dataset", # Example additional filter
-                relation="References" # Example: source references target
-            )
-            scholix_response = await session.scholix.search_links(
-                filters=s_filters_source,
-                page=0, # Scholexplorer uses 0-based pagination for 'page'
-                page_size=10 # Corresponds to 'size' parameter in Scholexplorer v3
-            )
-
-            print(f"Found {scholix_response.total_links} links originating from PID: doi:{source_doi_val} (showing page {scholix_response.current_page + 1} of {scholix_response.total_pages}).")
-            if scholix_response.result:
-                for link in scholix_response.result:
-                    target_id = link.target.identifier[0].id_val if link.target.identifier else 'N/A'
-                    target_type = link.target.type if link.target else 'N/A'
-                    print(f"- Relation: {link.relationship_type.name if link.relationship_type else 'N/A'} -> Target: {target_id} ({target_type})")
-            else:
-                print("No links found for this source PID on this page.")
-
-            # Example: Find links targeting a specific PID
-            target_doi_val = "10.5281/zenodo.3937230" # Example Zenodo dataset DOI
-            print(f"\nSearching for links targeting PID: doi:{target_doi_val}")
-            s_filters_target = ScholixFilters(targetPid=f"doi:{target_doi_val}")
-            scholix_target_response = await session.scholix.search_links(
-                filters=s_filters_target,
-                page_size=5
-            )
-            print(f"Found {scholix_target_response.total_links} links targeting doi:{target_doi_val}.")
-            if scholix_target_response.result:
-                 for link in scholix_target_response.result:
-                    source_id = link.source.identifier[0].id_val if link.source.identifier else 'N/A'
-                    source_type = link.source.type if link.source else 'N/A'
-                    print(f"- Source: {source_id} ({source_type}) -> Relation: {link.relationship_type.name if link.relationship_type else 'N/A'}")
-            else:
-                print("No links found targeting this PID.")
-
-
-        except ValueError as ve: # e.g., missing sourcePid/targetPid
-             print(f"Validation Error: {ve}")
-        except ValidationError as ve: # Pydantic validation error
-             print(f"Invalid Scholix filter parameter: {ve}")
-        except BibliofabricError as e:
-            print(f"API Error searching Scholix: {e}")
-        except Exception as e:
-            print(f"An unexpected error occurred searching Scholix: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(search_scholix())
+session = AireloomSession(auth_strategy=StaticTokenAuth(token="..."))
 ```
+
+See [Authentication docs](https://utsmok.github.io/AIREloom/authentication/) for details.
 
 ## Error Handling
 
-AIREloom raises specific exceptions found in `bibliofabric.exceptions`:
-
-*   `BibliofabricError`: Base exception for the library.
-*   `APIError`: For non-success HTTP status codes (4xx, 5xx) from the API after retries. Contains the `response` and `request` objects.
-*   `NotFoundError`: Subclass of `APIError` for 404 status codes.
-*   `RateLimitError`: Subclass of `APIError` specifically for 429 status codes.
-*   `TimeoutError`: For request timeouts after retries. Contains the `request` object.
-*   `NetworkError`: For connection errors after retries. Contains the `request` object.
-*   `AuthError`: For authentication failures (e.g., invalid credentials, token fetch failure).
-*   `ConfigurationError`: For missing required configuration (e.g., missing token for `StaticTokenAuth`).
-*   `ValidationError`: For invalid filter/sort parameters provided by the user, or Pydantic model validation failures.
-
-Wrap API calls in `try...except` blocks to handle potential issues gracefully.
-
 ```python
-import asyncio
-from aireloom import AireloomSession, NoAuth
 from bibliofabric.exceptions import (
-    BibliofabricError, APIError, NotFoundError, RateLimitError, TimeoutError, NetworkError, AuthError, ValidationError
+    BibliofabricError, APIError, NotFoundError, RateLimitError,
+    TimeoutError, NetworkError, AuthError, ValidationError,
 )
-from aireloom.endpoints import ResearchProductsFilters
-
-async def error_handling_example():
-    async with AireloomSession(auth_strategy=NoAuth()) as session:
-        try:
-            # Intentionally use an invalid filter key by trying to pass it directly
-            # This will now be caught by Pydantic in ResearchProductsFilters if not a valid field
-            print("\nAttempting search with invalid filter structure (should be caught by Pydantic)...")
-            # Correct way is to use the Pydantic model:
-            # rp_filters = ResearchProductsFilters(some_invalid_filter_key="some_value") # This would fail at Pydantic model creation
-            # await session.research_products.search(filters=rp_filters)
-            # Forcing an error by passing an invalid type to filters:
-            await session.research_products.search(filters="this is not a filter model") # type: ignore
-        except TypeError as e: # Pydantic model_dump or validation might raise TypeError or ValidationError
-            print(f"Caught expected error due to invalid filter type: {e}")
-        except ValidationError as e: # If filters was a dict with invalid keys for the Pydantic model
-            print(f"Caught expected validation error for filters: {e}")
-        except Exception as e:
-            print(f"Caught unexpected error during invalid search: {e}")
-
-        try:
-            # Intentionally use a non-existent ID
-            print("\nAttempting to fetch non-existent ID...")
-            await session.research_products.get("openaire____::doi:10.xxxx/nonexistent")
-        except NotFoundError as e:
-            print(f"Caught expected NotFoundError: {e}")
-        except APIError as e:
-            print(f"Caught other API error: Status {e.response.status_code if e.response else 'N/A'}")
-        except BibliofabricError as e:
-            print(f"Caught other Aireloom error: {e}")
-        except Exception as e:
-            print(f"Caught unexpected error: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(error_handling_example())
 ```
 
-## Advanced Usage
+See [Error Handling docs](https://utsmok.github.io/AIREloom/advanced/error_handling/) for the full hierarchy.
 
-*   **Custom `httpx.AsyncClient`:** While `AireloomSession` manages its own internal `AireloomClient` (which in turn manages an `httpx.AsyncClient`), you can instantiate `AireloomClient` directly if you need to pass a pre-configured `httpx.AsyncClient` for fine-grained control over transport, proxies, event hooks, etc.
-*   **Override Settings:** You can configure client behavior (timeout, retries) via environment variables (see Authentication section) or by passing an `ApiSettings` instance when creating an `AireloomClient`.
-*   **Direct Client Use:** You can use `AireloomClient` directly for making requests. This gives you the raw `httpx.Response` object. You would be responsible for parsing the JSON response and potentially validating it against Pydantic models yourself. The resource clients (e.g., `client.research_products`) are available on the `AireloomClient` instance.
+## Examples
 
-```python
-import asyncio
-import httpx
-from aireloom.client import AireloomClient
-from bibliofabric.auth import NoAuth
-from aireloom.config import ApiSettings
-from aireloom.endpoints import ResearchProductsFilters
+All examples in [`examples/`](examples/) are dual-purpose — run as scripts or as interactive [marimo](https://marimo.io) notebooks:
 
-# Example: Using a custom httpx client via AireloomClient
-async def use_direct_client_with_custom_httpx():
-    # Configure custom httpx settings
-    limits = httpx.Limits(max_connections=10, max_keepalive_connections=5)
-    custom_http_client = httpx.AsyncClient(limits=limits, timeout=45.0)
+```bash
+# As a script
+uv run examples/simple_example.py
 
-    # Create AireloomClient, passing the custom httpx client
-    custom_settings = ApiSettings(request_timeout=45.0) # Match timeout if desired
-    async with AireloomClient(
-        auth_strategy=NoAuth(),
-        http_client=custom_http_client,
-        settings=custom_settings
-    ) as client: # client is an AireloomClient instance
-        try:
-            print("\nMaking request with direct client's resource client and custom httpx client...")
-            # Access resource client from AireloomClient instance
-            rp_filters = ResearchProductsFilters(type="dataset", mainTitle="soil data")
-            response_model = await client.research_products.search(filters=rp_filters, page_size=1) # page defaults to 1
-            print(f"Direct client (via resource client) response: Found {response_model.header.numFound} datasets.")
-            if response_model.results:
-                print(f"First dataset: {response_model.results[0].title}")
-
-            # Example of using client.request directly (less common for end-users, returns raw httpx.Response or parsed model)
-            # raw_response_or_model = await client.request("GET", "researchProducts", params={"pageSize": 1, "type": "dataset"})
-            # print(f"Raw response status: {raw_response.status_code}")
-
-        except Exception as e:
-            print(f"Error using direct client: {e}")
-    # Remember to close the client you created manually if you passed it in
-    # AireloomClient will close httpx.AsyncClient instances it creates itself.
-    # If you pass an external client, you are responsible for its lifecycle.
-    if not custom_http_client.is_closed:
-        await custom_http_client.aclose()
-        print("Manually closed custom httpx client.")
-
-if __name__ == "__main__":
-    asyncio.run(use_direct_client_with_custom_httpx())
-
+# As an interactive notebook
+uv run marimo edit examples/simple_example.py
 ```
 
-*   **Hook System:** AIREloom includes a basic hook system allowing you to execute custom functions before a request is sent (pre-request hooks) and after a response is received (post-request hooks). This can be used for custom logging, modifying request parameters/headers, or reacting to responses. For more details, see the AIREloom API docs: [utsmok.github.io/AIREloom/api/hooks](https://utsmok.github.io/AIREloom/advanced/hooks).
+| Script | Description |
+|--------|-------------|
+| `simple_example.py` | Search, iterate, get research products |
+| `02_scholix_link_discovery.py` | Discover publication–dataset links via Scholexplorer |
+| `03_research_product_analysis.py` | Deep-dive into product metadata |
+| `04_organization_projects.py` | Organizations and their projects |
+| `05_advanced_filtering.py` | Complex filter combinations |
+| `06_persons_discovery.py` | Person search and co-authorship |
+| `07_ergonomics_showcase.py` | Before/after: raw API vs ergonomics layer |
+| `08_iterator_helpers.py` | `collect()`, `count()`, `first()` |
+| `09_computed_fields_and_safe_types.py` | Computed properties and SafeStr/SafeList |
+| `10_convenience_queries.py` | All convenience query functions |
 
+See [`examples/README.md`](examples/README.md) for marimo embedding and WASM details.
 
 ## Known OpenAIRE API Issues
 
-The upstream OpenAIRE APIs have several documented bugs and inconsistencies discovered during testing. AIREloom works around these where possible. The full bug report with reproduction steps is in [`OPENAIRE_BUG_REPORT.md`](OPENAIRE_BUG_REPORT.md).
+Full bug report with reproduction steps: [`OPENAIRE_BUG_REPORT.md`](OPENAIRE_BUG_REPORT.md).
 
-### Server errors (500s from documented parameters)
-
-- **Persons `givenName` / `lastName` filters** cause HTTP 500 despite being in the OpenAPI spec. AIREloom includes them in `PersonsFilters` for forward compatibility, but they are marked with a `CAUTION` note in the docstring. Use `search` or `id` instead.
-
-### Silent failures
-
-- **`pageSize=100`** on the links endpoint and Scholix silently falls back to 10 results. Use `pageSize=99` or lower to avoid this.
-
-### Documentation gaps
-
-- The **Persons** endpoint has no filtering documentation page (404) on the OpenAIRE docs site.
-- The **Links** endpoint (`/v1/researchProducts/links`) is entirely undocumented on the OpenAIRE docs site.
-- `logicalOperator` and `rorId` parameters work but are absent from the docs website.
-- The API version numbering is confusing: OpenAPI specs are at `/graph/v3/api-docs/`, endpoints use `/v1/` and `/v2/`, and V2 only covers research products.
-
-### Sort field discrepancies
-
-- **Persons** `sortBy` accepts only `relevance` in practice; `startDate`/`endDate` are in the spec but rejected by the server. AIREloom defines valid sort fields per endpoint in `ENDPOINT_DEFINITIONS` to document what should work, and the API will return a clear error for unsupported fields.
-- **Data sources** error messages incorrectly say "organizations" (copy-paste bug in the API).
-- **Research products** error messages omit `popularity` as a valid sort field.
+- **Persons `givenName`/`lastName` filters** — cause HTTP 500 despite being in the spec
+- **`pageSize=100`** on Links/Scholix — silently falls back to 10. Use `pageSize ≤ 99`
+- **Undocumented endpoints** — Persons has no filtering docs; Links (`/v1/researchProducts/links`) is entirely undocumented
+- **Sort field issues** — Persons only accepts `relevance`; Data Sources error messages say "organizations"
 
 ## Development
-run tests with `uv pytest`, format / lint with `uvx ruff format .` and `uvx ruff check --fix .`.
 
+```bash
+uv sync                  # install dev deps
+uv run pytest -x -q      # run tests
+uvx ruff check src/      # lint
+uvx ty check src/        # type check
+```
 
-Contributions are welcome! Please follow standard practices like creating issues for bugs or feature requests, submitting pull requests with relevant tests, and adhering to the coding style enforced by Ruff (use `uvx ruff format .` and `uvx ruff check --fix .`).
+Pre-commit hooks for ruff format + lint are configured in `.pre-commit-config.yaml`.
 
-## License
-
-This project is licensed under the MIT License.
+Contributions welcome — see [Contributing](https://utsmok.github.io/AIREloom/contributing/).
