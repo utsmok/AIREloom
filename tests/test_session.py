@@ -1179,3 +1179,42 @@ async def test_search_scholix_ignored_invalid_filter_key(httpx_mock: HTTPXMock):
 
     assert "someMadeUpFilterKey" in str(excinfo.value)
     assert "Extra inputs are not permitted" in str(excinfo.value)
+
+
+# --- Coverage: _QueryAccessor, __getattr__, __dir__ ---
+
+
+@pytest.mark.asyncio
+async def test_session_queries_accessor():
+    """Cover _QueryAccessor.__init__ and __getattr__ (lines 36-43)."""
+    async with AireloomSession() as session:
+        # Access .queries property (line 138)
+        qa = session.queries
+        assert qa is not None
+        # __getattr__ delegates to the queries module
+        # Access a callable function — should return a partial
+        fn = qa.publications_by_doi
+        assert callable(fn)
+
+
+def test_session_dir():
+    """Cover __dir__ (line 146)."""
+    session = AireloomSession.__new__(AireloomSession)
+    # Manually set _api_client to avoid __init__ network calls
+    from aireloom.client import AireloomClient
+
+    session._api_client = AireloomClient.__new__(AireloomClient)
+    d = dir(session)
+    assert isinstance(d, list)
+    # Delegated clients should appear in dir
+    assert "research_products" in d or "projects" in d
+
+
+def test_session_getattr_missing():
+    """Cover __getattr__ AttributeError path (line 143)."""
+    session = AireloomSession.__new__(AireloomSession)
+    from aireloom.client import AireloomClient
+
+    session._api_client = AireloomClient.__new__(AireloomClient)
+    with pytest.raises(AttributeError, match="has no attribute"):
+        _ = session.nonexistent_attribute

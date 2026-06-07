@@ -144,7 +144,7 @@ async def test_search_organizations_with_filters_and_sort(
     filters_model = OrganizationsFilters(
         legalName="Specific University", countryCode="DE"
     )
-    sort_by = "relevance asc"
+    sort_by = "relevance ASC"
     page = 1
     page_size = 5
 
@@ -213,7 +213,7 @@ async def test_search_sort_field_passed_through(
     # Even a non-standard sort field is accepted client-side and passed to the API
     await organizations_client.search(sort_by="customField asc")
     call_args = mock_api_client_fixture.request.call_args
-    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField asc"
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField ASC"
 
 
 @pytest.mark.asyncio

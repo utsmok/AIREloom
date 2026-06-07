@@ -163,7 +163,7 @@ async def test_search_research_products_with_filters_and_sort(
         toPublicationDate=date(2023, 12, 31),
         type="publication",
     )
-    sort_by = "relevance desc"
+    sort_by = "relevance DESC"
     page = 2
     page_size = 20
 
@@ -232,7 +232,7 @@ async def test_search_sort_field_passed_through(
     # Even a non-standard sort field is accepted client-side and passed to the API
     await research_products_client.search(sort_by="customField asc")
     call_args = mock_api_client_fixture.request.call_args
-    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField asc"
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "customField ASC"
 
 
 @pytest.mark.asyncio

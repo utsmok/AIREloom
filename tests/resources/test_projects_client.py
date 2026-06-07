@@ -152,7 +152,7 @@ async def test_search_projects_with_filters_and_sort(
         code="CCR_EU",
     )
     # 'startDate' is a valid sort field for projects per API docs
-    sort_by = "startDate asc"
+    sort_by = "startDate ASC"
     page = 1
     page_size = 10
 
@@ -222,7 +222,7 @@ async def test_search_projects_sort_field_passed_through(
     # Even a non-standard sort field is accepted client-side and passed to the API
     await projects_client.search(sort_by="imaginaryField asc")
     call_args = mock_api_client_fixture.request.call_args
-    assert call_args.kwargs.get("params", {}).get("sortBy") == "imaginaryField asc"
+    assert call_args.kwargs.get("params", {}).get("sortBy") == "imaginaryField ASC"
 
 
 @pytest.mark.asyncio
