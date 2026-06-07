@@ -19,3 +19,7 @@ class OrganizationsClient(StandardResourceClient):
     _entity_path: str = ORGANIZATIONS
     _entity_model: type[Organization] = Organization
     _search_response_model: type[OrganizationResponse] = OrganizationResponse
+    _batch_fields: dict[str, str] = {
+        "pid": "pid",
+        "openaire_id": "id",
+    }

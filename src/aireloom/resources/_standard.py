@@ -1,5 +1,5 @@
 # aireloom/resources/_standard.py
-"""Base class for standard CRUD resource clients."""
+"""Base class for standard CRUD resource clients with batch support."""
 
 from bibliofabric import (
     BaseResourceClient,
@@ -9,9 +9,15 @@ from bibliofabric import (
 )
 from bibliofabric.log_config import logger
 
+from ._batch import BatchMixin
+
 
 class StandardResourceClient(
-    GettableMixin, SearchableMixin, CursorIterableMixin, BaseResourceClient
+    BatchMixin,
+    GettableMixin,
+    SearchableMixin,
+    CursorIterableMixin,
+    BaseResourceClient,
 ):
     """Base for simple CRUD resource clients that only differ in class attributes.
 
@@ -19,6 +25,9 @@ class StandardResourceClient(
         _entity_path (str): The API path for the resource.
         _entity_model: Pydantic model for a single entity.
         _search_response_model: Pydantic model for the search response envelope.
+
+    Subclasses may declare ``_batch_fields`` to auto-generate
+    ``batch_get_by_<name>()`` convenience methods.
     """
 
     def __init__(self, api_client):  # noqa: ANN001 – accept generic api_client from bibliofabric

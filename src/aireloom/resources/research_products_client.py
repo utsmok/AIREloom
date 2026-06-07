@@ -19,6 +19,8 @@ from bibliofabric.resources import (
     SearchableMixin,
 )
 
+from ._batch import BatchMixin
+
 if TYPE_CHECKING:
     from ..client import AireloomClient
 from ..constants import OPENAIRE_GRAPH_API_BASE_URL, OPENAIRE_GRAPH_API_V2_BASE_URL
@@ -27,7 +29,7 @@ from ..models import LinksResponse, Relation, ResearchProduct, ResearchProductRe
 
 
 class ResearchProductsClient(
-    GettableMixin, SearchableMixin, CursorIterableMixin, BaseResourceClient
+    BatchMixin, GettableMixin, SearchableMixin, CursorIterableMixin, BaseResourceClient
 ):
     """Client for the OpenAIRE Research Products API endpoint.
 
@@ -49,6 +51,11 @@ class ResearchProductsClient(
     _entity_path: str = RESEARCH_PRODUCTS
     _entity_model: type[ResearchProduct] = ResearchProduct
     _search_response_model: type[ResearchProductResponse] = ResearchProductResponse
+    _batch_fields: dict[str, str] = {
+        "doi": "pid",
+        "openaire_id": "id",
+        "original_id": "originalId",
+    }
 
     def __init__(self, api_client: "AireloomClient"):
         """Initializes the ResearchProductsClient.

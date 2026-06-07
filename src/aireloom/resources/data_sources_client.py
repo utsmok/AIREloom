@@ -19,3 +19,7 @@ class DataSourcesClient(StandardResourceClient):
     _entity_path: str = DATA_SOURCES
     _entity_model: type[DataSource] = DataSource
     _search_response_model: type[DataSourceResponse] = DataSourceResponse
+    _batch_fields: dict[str, str] = {
+        "pid": "pid",
+        "openaire_id": "id",
+    }

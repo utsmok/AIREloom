@@ -19,3 +19,7 @@ class ProjectsClient(StandardResourceClient):
     _entity_path: str = PROJECTS
     _entity_model: type[Project] = Project
     _search_response_model: type[ProjectResponse] = ProjectResponse
+    _batch_fields: dict[str, str] = {
+        "code": "code",
+        "openaire_id": "id",
+    }
