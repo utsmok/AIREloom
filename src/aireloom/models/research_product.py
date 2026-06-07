@@ -512,7 +512,7 @@ class ResearchProduct(BaseEntity):
     authors: SafeList[Author] = Field(default_factory=list)
     bestAccessRight: SafeBestAccessRight = Field(default_factory=BestAccessRight)
     country: SafeResultCountry = Field(default_factory=ResultCountry)
-    countries: list | None = None
+    countries: SafeList[SafeResultCountry] = Field(default_factory=list)
     description: SafeStr = ""
     descriptions: SafeList[str] = Field(default_factory=list)
     publicationDate: str | None = None
@@ -531,7 +531,7 @@ class ResearchProduct(BaseEntity):
     container: SafeContainer = Field(default_factory=Container)
     keywords: SafeList[str] = Field(default_factory=list)
     geoLocation: SafeGeoLocation = Field(default_factory=GeoLocation)
-    geoLocations: list | None = None
+    geoLocations: SafeList[SafeGeoLocation] = Field(default_factory=list)
 
     # Open Access fields
     isGreen: bool | None = None
