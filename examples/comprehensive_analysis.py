@@ -103,7 +103,7 @@ def _init_db(con: duckdb.DuckDBPyConnection) -> None:
 
 def _pub_to_row(p: ResearchProduct) -> dict:
     subjects = "; ".join(
-        s.subject.get("value", "")
+        "; ".join(s.subject.values())
         if isinstance(s.subject, dict)
         else str(s.subject or "")
         for s in p.subjects
@@ -190,7 +190,7 @@ def _store_scholix(
                 "target_doi": target_dois,
                 "target_type": lk.target.type,
                 "target_title": lk.target.title[:300],
-                "relationship": str(lk.relationship_type.name),
+                "relationship": (lk.relationship_type.name or ""),
                 "link_provider": "; ".join(
                     lp.name for lp in (lk.link_provider or []) if lp.name
                 ),
@@ -289,6 +289,8 @@ async def fetch_data(con: duckdb.DuckDBPyConnection) -> dict:
 
             sem = asyncio.Semaphore(SCHOLIX_CONCURRENCY)
             all_scholix: list[ScholixRelationship] = []
+            con.execute("DELETE FROM scholix_links")
+            con.execute("ALTER SEQUENCE scholix_seq RESTART")
 
             async def _scholix_for_doi(doi: str) -> list[ScholixRelationship]:
                 async with sem:

@@ -49,7 +49,7 @@ def _normalize_id(raw: str) -> str:
     return key
 
 
-def _make_batch_getter(filter_param: str) -> Any:
+def _make_batch_getter(suffix: str, filter_param: str) -> Any:
     """Return an async method that delegates to :meth:`batch_get`."""
 
     async def _batch_get_by(
@@ -57,8 +57,8 @@ def _make_batch_getter(filter_param: str) -> Any:
     ) -> dict[str, Any]:
         return await self.batch_get(identifiers, filter_param=filter_param, **kwargs)
 
-    _batch_get_by.__name__ = f"batch_get_by_{filter_param}"
-    _batch_get_by.__qualname__ = f"batch_get_by_{filter_param}"
+    _batch_get_by.__name__ = f"batch_get_by_{suffix}"
+    _batch_get_by.__qualname__ = f"batch_get_by_{suffix}"
     return _batch_get_by
 
 
@@ -79,7 +79,7 @@ class BatchMixin:
         for suffix, filter_param in getattr(cls, "_batch_fields", {}).items():
             method_name = f"batch_get_by_{suffix}"
             if not hasattr(cls, method_name):
-                setattr(cls, method_name, _make_batch_getter(filter_param))
+                setattr(cls, method_name, _make_batch_getter(suffix, filter_param))
 
     async def batch_get(
         self,

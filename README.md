@@ -30,21 +30,25 @@ Or with pip: `pip install aireloom`. Requires Python ≥3.12.
 ```python
 import asyncio
 from aireloom import AireloomSession
+from aireloom.endpoints import ResearchProductsFilters
 
 async def main():
     async with AireloomSession() as session:
         # Search publications
-        response = await session.research_products.search(
+        filters = ResearchProductsFilters(
             type="article", mainTitle="climate change",
-            fromPublicationDate="2024-01-01", page_size=5,
-            sortBy="publicationDate desc",
+            fromPublicationDate="2024-01-01",
+        )
+        response = await session.research_products.search(
+            filters=filters, page_size=5, sortBy="publicationDate desc",
         )
         for product in response.results:
             print(f"{product.title} — DOI: {product.doi or 'N/A'}")
 
         # Iterate all results (cursor-based auto-pagination)
+        filters2 = ResearchProductsFilters(type="dataset", countryCode="NL")
         async for product in session.research_products.iterate(
-            type="dataset", countryCode="NL", page_size=50,
+            filters=filters2, page_size=50,
         ):
             print(product.title)
             break  # stop when you want
@@ -94,7 +98,7 @@ Every resource client (`session.research_products`, `session.organizations`, etc
 
 ```python
 product.doi              # → "10.1234/example" (extracted from pids)
-product.year             # → 2024 (from publicationDate)
+product.publication_year  # → 2024 (from publicationDate)
 product.is_open_access   # → True (from bestAccessRight)
 org.ror_id               # → "https://ror.org/..." (from rorId)
 project.funder_name      # → "EC" (from funding array)
