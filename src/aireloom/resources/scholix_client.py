@@ -19,8 +19,9 @@ if TYPE_CHECKING:
 from bibliofabric.exceptions import BibliofabricError, ValidationError
 from bibliofabric.resources import BaseResourceClient
 
-from ..constants import (  # SCHOLIX is now in endpoints
+from ..constants import (
     DEFAULT_PAGE_SIZE,
+    MAX_LINK_PAGE_SIZE,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
 from ..endpoints import ENDPOINT_DEFINITIONS, SCHOLIX, ScholixFilters  # Import model
@@ -106,7 +107,8 @@ class ScholixClient(BaseResourceClient):
 
         Args:
             page: The page number to retrieve (0-indexed).
-            page_size: The number of results per page.
+            page_size: The number of results per page (max 99; values >=100 are
+                silently truncated to 10 by V3).
             filters: An instance of ScholixFilters with filter criteria.
                        `sourcePid` or `targetPid` is typically required within the model.
 
@@ -128,6 +130,14 @@ class ScholixClient(BaseResourceClient):
             raise ValueError(
                 "Either sourcePid or targetPid must be provided for Scholix search within the filters."
             )
+        if page_size > MAX_LINK_PAGE_SIZE:
+            logger.warning(
+                "Scholix page_size=%d exceeds the V3 maximum of %d "
+                "(values >=100 are silently truncated to 10); clamping.",
+                page_size,
+                MAX_LINK_PAGE_SIZE,
+            )
+            page_size = MAX_LINK_PAGE_SIZE
 
         # Pydantic model validation happens at instantiation or via .model_validate()
 

@@ -24,6 +24,7 @@ from ._standard import GraphV3FilterSerializationMixin
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
+from ..constants import MAX_LINK_PAGE_SIZE
 from ..endpoints import LINKS, RESEARCH_PRODUCTS, LinksFilters
 from ..models import LinksResponse, Relation, ResearchProduct, ResearchProductResponse
 
@@ -73,14 +74,14 @@ class ResearchProductsClient(
     # Mixin-provided methods: get, search, iterate
 
     # ------------------------------------------------------------------
-    # Links (v1-only endpoint)
+    # Links sub-endpoint (V3, 0-indexed page-based pagination)
     # ------------------------------------------------------------------
 
     async def search_links(
         self,
         *,
         filters: LinksFilters | None = None,
-        page: int = 1,
+        page: int = 0,
         page_size: int = 20,
     ) -> LinksResponse:
         """Search for relation links between research products.
@@ -89,15 +90,24 @@ class ResearchProductsClient(
 
         Args:
             filters: Optional :class:`LinksFilters` with filter criteria.
-            page: 1-indexed page number.
-            page_size: Number of results per page (max 100).
+            page: 0-indexed page number.
+            page_size: Number of results per page (max 99; values >=100 are silently
+                truncated to 10 by V3).
 
         Returns:
             A :class:`LinksResponse` containing the matching relations.
         """
+        if page_size > MAX_LINK_PAGE_SIZE:
+            logger.warning(
+                "page_size=%d exceeds the V3 links maximum of %d "
+                "(values >=100 are silently truncated to 10); clamping.",
+                page_size,
+                MAX_LINK_PAGE_SIZE,
+            )
+            page_size = MAX_LINK_PAGE_SIZE
         params: dict[str, Any] = {"page": page, "pageSize": page_size}
         if filters is not None:
-            params.update(filters.model_dump(exclude_none=True))
+            params.update(self._serialize_filters(filters))
 
         response = await self._api_client.request(
             method="GET",
@@ -110,7 +120,7 @@ class ResearchProductsClient(
         self,
         *,
         filters: LinksFilters | None = None,
-        page_size: int = 100,
+        page_size: int = MAX_LINK_PAGE_SIZE,
     ) -> AsyncIterator[Relation]:
         """Iterate through all relation links matching *filters*.
 
@@ -119,15 +129,15 @@ class ResearchProductsClient(
 
         Args:
             filters: Optional :class:`LinksFilters` with filter criteria.
-            page_size: Number of results per page.
+            page_size: Number of results per page (max 99; see :meth:`search_links`).
 
         Yields:
             :class:`Relation` objects.
         """
-        current_page = 1
+        current_page = 0
         total_pages = 1
 
-        while current_page <= total_pages:
+        while current_page < total_pages:
             response = await self.search_links(
                 filters=filters, page=current_page, page_size=page_size
             )
@@ -138,7 +148,7 @@ class ResearchProductsClient(
             for rel in response.results:
                 yield rel
 
-            if current_page == 1 and response.header is not None:
+            if current_page == 0 and response.header is not None:
                 total_pages = response.header.totalPages or 1
                 if total_pages == 0:
                     break

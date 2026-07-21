@@ -17,6 +17,8 @@ DEFAULT_PAGE_SIZE: int = 20  # Default number of results per page for standard s
 ITERATE_PAGE_SIZE: int = (
     100  # Default number of results per page for iteration (using cursor)
 )
+# V3 page-based endpoints (Graph links, Scholix) silently truncate pageSize/size >= 100 to 10.
+MAX_LINK_PAGE_SIZE: int = 99
 
 try:
     __version__: str = _get_version("aireloom")

@@ -299,6 +299,63 @@ class TestSearchLinks:
         assert isinstance(result, LinksResponse)
         assert isinstance(result.results[0], Relation)
 
+    @pytest.mark.asyncio
+    async def test_search_links_default_page_is_zero(
+        self,
+        research_products_client: ResearchProductsClient,
+        mock_api_client_fixture: AsyncMock,
+    ):
+        """V3 links are 0-indexed: the default page must be 0, not 1 (regression guard)."""
+        mock_http = AsyncMock(spec=httpx.Response)
+        mock_http.status_code = 200
+        mock_http.json.return_value = _mock_links_response()
+        mock_api_client_fixture.request.return_value = mock_http
+
+        await research_products_client.search_links(
+            filters=LinksFilters(sourcePid="10.1234/test")
+        )
+
+        params = mock_api_client_fixture.request.call_args.kwargs.get("params", {})
+        assert params.get("page") == 0
+
+    @pytest.mark.asyncio
+    async def test_search_links_clamps_page_size_to_99(
+        self,
+        research_products_client: ResearchProductsClient,
+        mock_api_client_fixture: AsyncMock,
+    ):
+        """pageSize >= 100 is silently truncated to 10 by V3; must be clamped to 99."""
+        mock_http = AsyncMock(spec=httpx.Response)
+        mock_http.status_code = 200
+        mock_http.json.return_value = _mock_links_response()
+        mock_api_client_fixture.request.return_value = mock_http
+
+        await research_products_client.search_links(
+            filters=LinksFilters(sourcePid="10.1234/test"), page_size=150
+        )
+
+        params = mock_api_client_fixture.request.call_args.kwargs.get("params", {})
+        assert params.get("pageSize") == 99
+
+    @pytest.mark.asyncio
+    async def test_search_links_quotes_spaced_publisher(
+        self,
+        research_products_client: ResearchProductsClient,
+        mock_api_client_fixture: AsyncMock,
+    ):
+        """Free-text link filters with spaces must be V3-quoted (via _serialize_filters)."""
+        mock_http = AsyncMock(spec=httpx.Response)
+        mock_http.status_code = 200
+        mock_http.json.return_value = _mock_links_response()
+        mock_api_client_fixture.request.return_value = mock_http
+
+        await research_products_client.search_links(
+            filters=LinksFilters(sourcePublisher="Elsevier BV")
+        )
+
+        params = mock_api_client_fixture.request.call_args.kwargs.get("params", {})
+        assert params.get("sourcePublisher") == '"Elsevier BV"'
+
 
 # ===========================================================================
 # 3. iterate_links pagination
@@ -389,6 +446,63 @@ class TestIterateLinks:
             )
         ]
         assert len(results) == 0
+
+    @pytest.mark.asyncio
+    async def test_iterate_links_starts_at_page_zero(
+        self,
+        research_products_client: ResearchProductsClient,
+        mock_api_client_fixture: AsyncMock,
+    ):
+        """First iteration request must target page 0 (0-indexed), not page 1."""
+        relation = _mock_relation_dict()
+        response_data = _mock_links_response(
+            relations=[relation], num_found=1, page=0, total_pages=1
+        )
+        mock_http = AsyncMock(spec=httpx.Response)
+        mock_http.status_code = 200
+        mock_http.json.return_value = response_data
+        mock_api_client_fixture.request.return_value = mock_http
+
+        results = [
+            rel
+            async for rel in research_products_client.iterate_links(
+                filters=LinksFilters(sourcePid="10.1234/test")
+            )
+        ]
+
+        assert len(results) == 1
+        first_params = mock_api_client_fixture.request.call_args_list[0].kwargs.get(
+            "params", {}
+        )
+        assert first_params.get("page") == 0
+
+    @pytest.mark.asyncio
+    async def test_iterate_links_default_page_size_is_99(
+        self,
+        research_products_client: ResearchProductsClient,
+        mock_api_client_fixture: AsyncMock,
+    ):
+        """Default iterate page_size must be 99 (100 is silently truncated to 10)."""
+        relation = _mock_relation_dict()
+        response_data = _mock_links_response(
+            relations=[relation], num_found=1, page=0, total_pages=1
+        )
+        mock_http = AsyncMock(spec=httpx.Response)
+        mock_http.status_code = 200
+        mock_http.json.return_value = response_data
+        mock_api_client_fixture.request.return_value = mock_http
+
+        _ = [
+            rel
+            async for rel in research_products_client.iterate_links(
+                filters=LinksFilters(sourcePid="10.1234/test")
+            )
+        ]
+
+        first_params = mock_api_client_fixture.request.call_args_list[0].kwargs.get(
+            "params", {}
+        )
+        assert first_params.get("pageSize") == 99
 
 
 # ===========================================================================

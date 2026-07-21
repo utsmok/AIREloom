@@ -21,6 +21,8 @@ from bibliofabric.log_config import logger
 from ._batch import BatchMixin
 
 # V3 quotes values containing whitespace, parentheses, or a bare logical operator.
+# Operators are matched case-sensitively (uppercase only): the live API accepts
+# OR/AND/NOT but not lowercase variants, so a bare lowercase "or" is left as-is.
 _V3_QUOTE_TRIGGER = re.compile(r"\b(OR|AND|NOT)\b|[\s()]")
 # Filter keys that are meta/operators, not content values — never quoted.
 _V3_META_FILTER_KEYS = frozenset({"logicalOperator"})
