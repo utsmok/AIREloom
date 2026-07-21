@@ -194,7 +194,7 @@ class TestResearchProducts:
 
         raw_data = await get_raw_data(
             aireloom_session.research_products._api_client._base_url
-            + "/researchProducts",
+            + "/research-products",
             params=params,
         )
 
@@ -278,7 +278,7 @@ class TestRelatedEndpoints:
         params = filters.model_dump(exclude_none=True)
         params["pageSize"] = 4
         raw_data = await get_raw_data(
-            aireloom_session.data_sources._api_client._base_url + "/dataSources",
+            aireloom_session.data_sources._api_client._base_url + "/datasources",
             params=params,
         )
         compare_models_with_raw(ds_response, raw_data)

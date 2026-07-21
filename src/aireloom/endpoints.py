@@ -14,13 +14,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-RESEARCH_PRODUCTS = "researchProducts"
+RESEARCH_PRODUCTS = "research-products"
 ORGANIZATIONS = "organizations"
-DATA_SOURCES = "dataSources"
+DATA_SOURCES = "datasources"
 PROJECTS = "projects"
 PERSONS = "persons"
 SCHOLIX = "Links"
-LINKS = "researchProducts/links"
+LINKS = "research-products/links"
 
 
 class ResearchProductsFilters(BaseModel):
@@ -264,7 +264,7 @@ class LinksFilters(BaseModel):
     which is separate from the Scholix API. Parameters accept singular string values
     (unlike other Graph API filters which accept arrays).
 
-    Reference: https://api.openaire.eu/graph/v1/researchProducts/links
+    Reference: https://api.openaire.eu/graph/v3/research-products/links
     """
 
     sourcePid: str | None = Field(

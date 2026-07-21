@@ -413,6 +413,6 @@ def test_persons_filters_forbid_extra():
         PersonsFilters(unknownField="value")
 
 
-def test_persons_client_routes_to_v1(persons_client):
-    """PersonsClient should NOT have a v2 base URL override — persons is v1-only."""
+def test_persons_client_routes_to_v3(persons_client):
+    """PersonsClient has no base URL override — it inherits the default V3 Graph base."""
     assert persons_client._base_url_override is None

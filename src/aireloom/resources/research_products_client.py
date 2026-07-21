@@ -23,7 +23,6 @@ from ._batch import BatchMixin
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
-from ..constants import OPENAIRE_GRAPH_API_BASE_URL, OPENAIRE_GRAPH_API_V2_BASE_URL
 from ..endpoints import LINKS, RESEARCH_PRODUCTS, LinksFilters
 from ..models import LinksResponse, Relation, ResearchProduct, ResearchProductResponse
 
@@ -47,7 +46,6 @@ class ResearchProductsClient(
                                                                 search response envelope.
     """
 
-    _base_url_override: str | None = OPENAIRE_GRAPH_API_V2_BASE_URL
     _entity_path: str = RESEARCH_PRODUCTS
     _entity_model: type[ResearchProduct] = ResearchProduct
     _search_response_model: type[ResearchProductResponse] = ResearchProductResponse
@@ -83,7 +81,7 @@ class ResearchProductsClient(
     ) -> LinksResponse:
         """Search for relation links between research products.
 
-        Uses the v1 ``/researchProducts/links`` endpoint (NOT the Scholix API).
+        Uses the V3 ``/research-products/links`` endpoint (NOT the Scholix API).
 
         Args:
             filters: Optional :class:`LinksFilters` with filter criteria.
@@ -101,7 +99,6 @@ class ResearchProductsClient(
             method="GET",
             path=LINKS,
             params=params,
-            base_url_override=OPENAIRE_GRAPH_API_BASE_URL,
         )
         return LinksResponse.model_validate(response.json())
 
@@ -150,7 +147,7 @@ class ResearchProductsClient(
     async def get_relations_info(self) -> list[dict[str, Any]]:
         """Retrieve available relation types from the links endpoint.
 
-        Uses the v1 ``/researchProducts/links/relations-info`` endpoint.
+        Uses the V3 ``/research-products/links/relations-info`` endpoint.
 
         Returns:
             A list of dicts describing relation types (name, inverse, description).
@@ -159,7 +156,6 @@ class ResearchProductsClient(
             method="GET",
             path=f"{LINKS}/relations-info",
             params={},
-            base_url_override=OPENAIRE_GRAPH_API_BASE_URL,
         )
         data = response.json()
         if isinstance(data, list):

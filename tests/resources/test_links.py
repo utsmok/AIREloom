@@ -16,7 +16,6 @@ import pytest
 from pydantic import ValidationError
 
 from aireloom.client import AireloomClient
-from aireloom.constants import OPENAIRE_GRAPH_API_BASE_URL
 from aireloom.endpoints import LinksFilters
 from aireloom.models import (
     EntityRef,
@@ -278,7 +277,7 @@ class TestSearchLinks:
         await research_products_client.search_links()
 
         call_args = mock_api_client_fixture.request.call_args
-        assert call_args.kwargs.get("base_url_override") == OPENAIRE_GRAPH_API_BASE_URL
+        assert call_args.kwargs.get("base_url_override") is None
 
     @pytest.mark.asyncio
     async def test_search_links_response_model_validation(

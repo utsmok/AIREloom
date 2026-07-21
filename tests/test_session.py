@@ -16,7 +16,7 @@ from pytest_httpx import HTTPXMock
 
 from aireloom import AireloomSession
 from aireloom.constants import (
-    OPENAIRE_GRAPH_API_V2_BASE_URL,
+    OPENAIRE_GRAPH_API_BASE_URL,
     OPENAIRE_SCHOLIX_API_BASE_URL,
 )
 from aireloom.endpoints import (
@@ -848,7 +848,7 @@ async def test_get_research_product_success(httpx_mock: HTTPXMock):
         "publicationDate": "2023-01-01",
     }
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/researchProducts?id={product_id}&pageSize=1",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/research-products?id={product_id}&pageSize=1",
         method="GET",
         json={
             "results": [mock_product_response],
@@ -883,7 +883,7 @@ async def test_get_research_product_not_found(httpx_mock: HTTPXMock):
     )
 
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/researchProducts?id={product_id}&pageSize=1",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/research-products?id={product_id}&pageSize=1",
         method="GET",
         status_code=404,
         json={"message": "Not Found"},
@@ -930,7 +930,7 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
     }
     _params_tsrps = {"mainTitle": "Open Science", "pageSize": "5", "page": "1"}
     httpx_mock.add_response(
-        url=f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/researchProducts?{urllib.parse.urlencode(_params_tsrps)}",
+        url=f"{OPENAIRE_GRAPH_API_BASE_URL}/research-products?{urllib.parse.urlencode(_params_tsrps)}",
         method="GET",
         json=mock_api_response_json,
     )
@@ -954,7 +954,7 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
 @pytest.mark.asyncio
 async def test_iterate_research_products(httpx_mock: HTTPXMock):
     token_url = "https://aai.openaire.eu/oidc/token"
-    base_url = f"{OPENAIRE_GRAPH_API_V2_BASE_URL}/researchProducts"
+    base_url = f"{OPENAIRE_GRAPH_API_BASE_URL}/research-products"
 
     # Mock for the token acquisition
     httpx_mock.add_response(
