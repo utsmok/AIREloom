@@ -2,6 +2,34 @@
 
 All notable changes to AIREloom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0a1] - 2026-07-21
+
+AIREloom now targets the OpenAIRE Graph API **v3** (v1/v2 deprecated by OpenAIRE). This is a **breaking** release; see [Migration to v3](migration-to-v3.md).
+
+### Added
+
+- V3 Graph API support: single base URL `https://api.openaire.eu/graph/v3` for all entities (kebab-case paths)
+- 41 new filter parameters across Research Products (+20), Projects (+13), Data Sources (+8)
+- `logicalOperator` accepts `AND`/`OR`/`NOT` on all Graph filter models
+- Typed response fields: `eoscIfGuidelines`, `publiclyFunded`, `isGreen`, `isInDiamondJournal`, `openAccessRoute`, `conferencePlace`/`conferenceDate`, organizational `fundings`/`collectedFrom`/`originalIds`, project `funding`/`links`, data source `eoscdatasourcetype`/`jurisdiction`/`odlanguages`/`links`, `Subject.provenance`
+- Auto-quoting of filter values containing spaces/operators/parentheses (`GraphV3FilterSerializationMixin`)
+- `popularity` sort field for Research Products
+- Migration guide (`docs/migration-to-v3.md`)
+
+### Changed
+
+- **BREAKING:** filter renames — `authorOrcid`→`authorId`, `bestOpenAccessRightLabel`→`accessRightLabel`, `sdg`→`sdgLabel`
+- **BREAKING:** `sdg: list[str]` → `sdgLabel: str` (use inline OR for multiple)
+- **BREAKING:** Projects date filters (`fromStartDate`/`toStartDate`/`fromEndDate`/`toEndDate`) are now `str` (accept bare years like `"2022"`)
+- **BREAKING:** Links endpoint is 0-indexed (first page `page=0`); page size silently capped at 99 by the server (library clamps + warns)
+- Data source `accessRights`/`uploadRights`/`databaseAccessRestriction` relaxed from `Literal` to `str` per v3 spec
+
+### Removed
+
+- **BREAKING:** `grantID` filter (Projects) — dropped by v3
+- Persons `startDate`/`endDate` sort fields — rejected by v3 validation
+- Per-entity v1/v2 base URL routing (`_base_url_override` on Graph resource clients)
+
 ## [0.3.0] - 2025-06-04
 
 ### Added

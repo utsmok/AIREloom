@@ -13,11 +13,11 @@ Built on top of **bibliofabric** — a generic async API client framework provid
 ```
 AireloomSession          # User-facing async context manager (session.py)
  └─ AireloomClient       # Core HTTP client, auth resolution, resource orchestration (client.py)
-     ├─ ResearchProductsClient   # v2, mixin-based (bibliofabric)
-     ├─ ProjectsClient           # v1, mixin-based (bibliofabric)
-     ├─ OrganizationsClient      # v1, mixin-based (bibliofabric)
-     ├─ DataSourcesClient        # v1, mixin-based (bibliofabric)
-     ├─ PersonsClient            # v1, mixin-based (bibliofabric) — NEW
+     ├─ ResearchProductsClient   # v3, mixin-based (bibliofabric)
+     ├─ ProjectsClient           # v3, mixin-based (bibliofabric)
+     ├─ OrganizationsClient      # v3, mixin-based (bibliofabric)
+     ├─ DataSourcesClient        # v3, mixin-based (bibliofabric)
+     ├─ PersonsClient            # v3, mixin-based (bibliofabric)
      └─ ScholixClient            # v3, custom methods (different base URL, 0-indexed pagination)
 ```
 
@@ -36,9 +36,8 @@ AireloomSession          # User-facing async context manager (session.py)
 
 
 ### API Version Routing
-- **Research Products**: `api.openaire.eu/graph/v2` — via `_base_url_override` on `ResearchProductsClient`
-- **All other Graph entities** (projects, organizations, data sources, persons): `api.openaire.eu/graph/v1` — default base URL
-- **Scholix API**: `api.scholexplorer.openaire.eu/v3` — via `_base_url_override` on `ScholixClient`. Page-based, 0-indexed pagination. Requires either `sourcePid` or `targetPid` filter.
+- **All Graph entities** (research products, projects, organizations, data sources, persons): `api.openaire.eu/graph/v3` — single base URL, kebab-case paths. V1/V2 are deprecated by OpenAIRE.
+- **Scholix API**: `api.scholexplorer.openaire.eu/v3` — different base URL, 0-indexed page-based pagination (`size` param). Requires either `sourcePid` or `targetPid` filter.
 
 ### Auth
 
@@ -124,14 +123,14 @@ uv run mkdocs serve                       # Local docs
 - **Pydantic filter models** are passed to `search()` and `iterate()`. They serialize to query params. `extra="forbid"` on filters prevents typos.
 - **Sort validation** happens via overridable `_validate_sort_field()` in `bibliofabric.BaseResourceClient`. Default is no-op; AIREloom consumers can override to check against `ENDPOINT_DEFINITIONS`.
 - **Models use `extra="allow"`** everywhere to tolerate API field additions without breaking.
-- **Resource clients:** All inherit from `bibliofabric.resources.BaseResourceClient`. Graph API clients use mixins (~58 lines each). `ResearchProductsClient` routes to v2; others use default v1. `ScholixClient` has custom methods due to 0-indexed pagination and `size` param.
+- **Resource clients:** All inherit from `bibliofabric.resources.BaseResourceClient`. Graph API clients use mixins (~58 lines each) and share the single v3 base URL. `ScholixClient` has custom methods due to 0-indexed pagination and `size` param. Filter values with spaces/operators are auto-quoted via `GraphV3FilterSerializationMixin`.
 
 ## Known Issues & Gaps
 
 - **Cursor pagination ordering**: Solr's cursorMark uses deterministic internal ordering that ignores `sortBy`. The first pages of cursor results may surface records without PIDs even when filtering for DOI-rich records. Not a library issue — use page-based pagination (`search()`) when PIDs matter.
-- **Graph API v3**: OpenAIRE Graph API v3 uses kebab-case URLs and string-based filters. Not yet supported — stick with v1/v2. (Scholix v3 is fully supported and is not a beta.)
 - **No sub-endpoints**: The API does NOT support `/{entity}/{id}/related*`, `/{entity}/{id}/links`, or `/{entity}/count` — all return 405/404. Verified by live testing.
-- **Person filter bug**: `givenName` and `lastName` are accepted API parameters but cause HTTP 500 from the server. Only `search`, `id`, `originalId` work reliably.
+- **Links & Scholix page-size cap**: the server silently caps page size at 99 (requesting 100 returns only 10). The library clamps to 99 and warns. Affects `/research-products/links` and Scholix. Links pagination is also **0-indexed** (first page `page=0`).
+- **`funder` filter (Projects)**: returns 0 results for all known values as of 2026-07; prefer `fundingShortName`. Kept for forward-compat.
 - **Sort format**: `sortBy` takes `"fieldname ASC|DESC"` as a single string (e.g. `sortBy="relevance ASC"`). No separate `sortOrder` param exists.
 ## Resolved Issues
 
@@ -153,3 +152,6 @@ uv run mkdocs serve                       # Local docs
 - ~~`popularity` sort field~~ — Removed from RP sort fields. Not a valid sort field (API returns 400).
 - ~~Persons sort fields~~ — Added `startDate`, `endDate` (matching API validation).
 - ~~Person model incomplete~~ — Added `originalId`, `alternativeNames` fields, typed `consent` as `bool`, typed list elements.
+- ~~Person filter bug~~ — Fixed in v3: `givenName`/`lastName`/`familyName` now return 200 (no more HTTP 500).
+- ~~Graph API v3 not supported~~ — v3 is now the sole supported Graph API version (v1/v2 deprecated by OpenAIRE).
+- ~~V3 migration~~ — single v3 base URL + kebab-case paths; 41 new filters; auto-quoting of spaced/operator filter values; additive response-model fields; 0-indexed links pagination fix + page-size clamp.

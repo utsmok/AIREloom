@@ -2,8 +2,6 @@
 
 Individual researcher profiles in the OpenAIRE Graph — names, ORCID identifiers, co-authors, and research indicators.
 
-!!! info "v1-only endpoint"
-    This endpoint is only available on the v1 API. AIREloom routes it automatically.
 
 ## Access
 
@@ -23,8 +21,6 @@ async with AireloomSession() as session:
 | `lastName` | `str` | Family (last) name |
 | `logicalOperator` | `str` | `AND` or `OR` (default `AND`) |
 
-!!! warning "API limitation"
-    The `givenName` and `lastName` filters currently cause HTTP 500 errors. Use `search` for name-based queries until this is resolved.
 
 See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
 

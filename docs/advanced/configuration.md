@@ -64,7 +64,7 @@ See [Request Hooks](hooks.md) for details.
 
 Base URLs are hardcoded in `aireloom.constants` and cannot be overridden via settings:
 
-- Graph API: `https://api.openaire.eu/v1/`
+- Graph API: `https://api.openaire.eu/graph/v3`
 - Scholexplorer: `https://api-beta.scholexplorer.openaire.eu/v3/`
 
 ## Using `.env` Files

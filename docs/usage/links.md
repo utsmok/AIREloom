@@ -2,8 +2,9 @@
 
 Discover **relationships between research products** within the OpenAIRE Graph — citations, supplements, versions, and more.
 
-!!! info "v1-only endpoint"
-    This endpoint is only available on the v1 API. AIREloom routes it automatically.
+
+!!! note "Pagination"
+    The Links endpoint uses **0-indexed pagination** (first page is `page=0`). Page size is silently capped at **99** by the server — AIREloom clamps requests to 99 automatically.
 
 ## Access
 

@@ -1,7 +1,10 @@
 # Links
 
 The Links endpoint provides access to relation links between research products
-via the OpenAIRE Graph API (`/researchProducts/links`).
+via the OpenAIRE Graph API V3 (`/research-products/links`).
+
+!!! note "Pagination"
+    This endpoint uses **0-indexed pagination** (first page is `page=0`). The server silently caps page size at **99** (requesting 100 returns only 10 results). AIREloom handles this transparently by clamping to 99.
 
 Unlike other endpoints, there is no standalone `LinksClient`. Link operations are
 accessed through the **ResearchProductsClient**:

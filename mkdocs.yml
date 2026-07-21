@@ -21,6 +21,8 @@ plugins:
         python:
           paths: [src]
 
+not_in_nav: |
+  v3-migration/*.md
 nav:
   - Home: index.md
   - Getting Started: getting_started.md
@@ -52,6 +54,7 @@ nav:
   - API Reference: api_reference.md
   - Authentication: authentication.md
   - Changelog: changelog.md
+  - Migration to v3: migration-to-v3.md
   - Contributing: contributing.md
 watch:
   - src/aireloom
