@@ -421,14 +421,14 @@ async def test_session_search_projects_integration(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tsp_int = {"grantID": "H2020", "page": "1", "pageSize": "1"}
+    _params_tsp_int = {"code": "H2020", "page": "1", "pageSize": "1"}
     auth_strategy = ClientCredentialsAuth(
         client_id="test_id",
         client_secret="test_secret",
         token_url=token_url,
     )
     async with AireloomSession(auth_strategy=auth_strategy) as session:
-        filters = ProjectsFilters(grantID="H2020")
+        filters = ProjectsFilters(code="H2020")
         with patch(
             "bibliofabric.client.BaseApiClient._request_with_retry",
             new_callable=AsyncMock,

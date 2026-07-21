@@ -156,7 +156,7 @@ async def initial_research_products(
     source for other tests.
     """
     filters = ResearchProductsFilters(
-        authorOrcid="0000-0003-0581-2668",
+        authorId="0000-0003-0581-2668",
         fromPublicationDate=datetime(2020, 1, 1).date(),
     )
 
@@ -182,7 +182,7 @@ class TestResearchProducts:
         Compares the client's output for research products with raw data from httpx.
         """
         filters = ResearchProductsFilters(
-            authorOrcid="0000-0003-0581-2668",
+            authorId="0000-0003-0581-2668",
             fromPublicationDate=datetime(2020, 1, 1).date(),
         )
 

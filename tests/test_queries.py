@@ -99,7 +99,7 @@ class TestPublicationsByOrganization:
     async def test_with_open_access(self, session):
         await publications_by_organization(session, "MIT", open_access_only=True)
         call_kwargs = session.research_products.collect.call_args[1]
-        assert call_kwargs["filters"].bestOpenAccessRightLabel == "OPEN"
+        assert call_kwargs["filters"].accessRightLabel == "Open Access"
 
     @pytest.mark.asyncio
     async def test_with_date_range(self, session):
@@ -181,7 +181,7 @@ class TestPublicationsByAuthor:
     async def test_by_orcid(self, session):
         await publications_by_author(session, "0000-0001-2345-6789", search_on="orcid")
         call_kwargs = session.research_products.collect.call_args[1]
-        assert call_kwargs["filters"].authorOrcid == "0000-0001-2345-6789"
+        assert call_kwargs["filters"].authorId == "0000-0001-2345-6789"
 
     @pytest.mark.asyncio
     async def test_with_type_filter(self, session):
@@ -221,7 +221,7 @@ class TestPublicationsByAuthor:
         )
         await publications_by_author(session, person, search_on="orcid")
         call_kwargs = session.research_products.collect.call_args[1]
-        assert call_kwargs["filters"].authorOrcid == "0000-0001-2345-6789"
+        assert call_kwargs["filters"].authorId == "0000-0001-2345-6789"
 
     @pytest.mark.asyncio
     async def test_person_object_by_orcid_falls_back_to_name(self, session):
@@ -316,13 +316,13 @@ class TestCountPublications:
     async def test_count_open_access(self, session):
         await count_publications(session, open_access_only=True)
         call_kwargs = session.research_products.count.call_args[1]
-        assert call_kwargs["filters"].bestOpenAccessRightLabel == "OPEN"
+        assert call_kwargs["filters"].accessRightLabel == "Open Access"
 
     @pytest.mark.asyncio
     async def test_count_no_open_access_by_default(self, session):
         await count_publications(session)
         call_kwargs = session.research_products.count.call_args[1]
-        assert call_kwargs["filters"].bestOpenAccessRightLabel is None
+        assert call_kwargs["filters"].accessRightLabel is None
 
     @pytest.mark.asyncio
     async def test_count_with_search(self, session):
@@ -340,7 +340,7 @@ class TestCountPublications:
     async def test_count_with_author_orcid(self, session):
         await count_publications(session, author_orcid="0000-0001-2345-6789")
         call_kwargs = session.research_products.count.call_args[1]
-        assert call_kwargs["filters"].authorOrcid == "0000-0001-2345-6789"
+        assert call_kwargs["filters"].authorId == "0000-0001-2345-6789"
 
     @pytest.mark.asyncio
     async def test_count_with_org_id(self, session):

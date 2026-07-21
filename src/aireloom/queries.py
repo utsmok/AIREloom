@@ -109,7 +109,7 @@ async def publications_by_organization(
     if to_publication_date is not None:
         filter_kwargs["toPublicationDate"] = to_publication_date
     if open_access_only:
-        filter_kwargs["bestOpenAccessRightLabel"] = "OPEN"
+        filter_kwargs["accessRightLabel"] = "Open Access"
 
     filters = ResearchProductsFilters(**filter_kwargs)
     return await session.research_products.collect(
@@ -134,7 +134,7 @@ async def publications_by_author(
         session: Active AireloomSession.
         identifier: Author name or ORCID, or a Person object.
         search_on: ``"name"`` searches by ``authorFullName``,
-            ``"orcid"`` searches by ``authorOrcid``.
+            ``"orcid"`` searches by ``authorId``.
         type: Restrict to a specific product type.
         sort_by: Sort expression.
         limit: Maximum results.
@@ -147,7 +147,7 @@ async def publications_by_author(
         identifier,
         search_on,
         filter_kwargs,
-        str_map={"name": "authorFullName", "orcid": "authorOrcid"},
+        str_map={"name": "authorFullName", "orcid": "authorId"},
         obj_fields={"orcid": "orcid"},
         obj_name_field="full_name",
     )
@@ -253,10 +253,10 @@ async def count_publications(
         type=type,
         search=search,
         pid=pid,
-        authorOrcid=author_orcid,
+        authorId=author_orcid,
         relOrganizationId=rel_organization_id,
         relProjectId=rel_project_id,
-        bestOpenAccessRightLabel="OPEN" if open_access_only else None,
+        accessRightLabel="Open Access" if open_access_only else None,
     )
     return await session.research_products.count(filters=filters)
 
