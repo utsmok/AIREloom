@@ -20,6 +20,7 @@ from bibliofabric.resources import (
 )
 
 from ._batch import BatchMixin
+from ._standard import GraphV3FilterSerializationMixin
 
 if TYPE_CHECKING:
     from ..client import AireloomClient
@@ -28,18 +29,21 @@ from ..models import LinksResponse, Relation, ResearchProduct, ResearchProductRe
 
 
 class ResearchProductsClient(
-    BatchMixin, GettableMixin, SearchableMixin, CursorIterableMixin, BaseResourceClient
+    GraphV3FilterSerializationMixin,
+    BatchMixin,
+    GettableMixin,
+    SearchableMixin,
+    CursorIterableMixin,
+    BaseResourceClient,
 ):
     """Client for the OpenAIRE Research Products API endpoint.
 
     This client provides standardized methods (`get`, `search`, `iterate`) for
     accessing research product data, by inheriting from `bibliofabric` mixins.
     It also provides `search_links`, `iterate_links`, and `get_relations_info`
-    for the v1-only ``/researchProducts/links`` sub-endpoint.
+    for the V3 ``/research-products/links`` sub-endpoint.
 
     Attributes:
-        _base_url_override (str | None): Overrides the base URL to use the v2 Graph API,
-            since researchProducts is only available on v2.
         _entity_path (str): The API path for research products.
         _entity_model (type[ResearchProduct]): Pydantic model for a single research product.
         _search_response_model (type[ResearchProductResponse]): Pydantic model for the

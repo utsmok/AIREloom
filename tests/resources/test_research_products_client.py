@@ -192,7 +192,7 @@ async def test_search_research_products_with_filters_and_sort(
         "pageSize": page_size,
         "page": page,
         "sortBy": sort_by,
-        "mainTitle": "FAIR Data",
+        "mainTitle": '"FAIR Data"',
         "fromPublicationDate": date(
             2023, 1, 1
         ),  # Keep as date objects to match actual behavior

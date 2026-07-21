@@ -928,7 +928,7 @@ async def test_search_research_products_simple(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tsrps = {"mainTitle": "Open Science", "pageSize": "5", "page": "1"}
+    _params_tsrps = {"mainTitle": '"Open Science"', "pageSize": "5", "page": "1"}
     httpx_mock.add_response(
         url=f"{OPENAIRE_GRAPH_API_BASE_URL}/research-products?{urllib.parse.urlencode(_params_tsrps)}",
         method="GET",
@@ -996,14 +996,14 @@ async def test_iterate_research_products(httpx_mock: HTTPXMock):
             }
         ],
     }
-    _params_tirp_1 = {"mainTitle": "FAIR data", "pageSize": "1", "cursor": "*"}
+    _params_tirp_1 = {"mainTitle": '"FAIR data"', "pageSize": "1", "cursor": "*"}
     httpx_mock.add_response(
         url=f"{base_url}?{urllib.parse.urlencode(_params_tirp_1)}",
         method="GET",
         json=mock_response_page1,
     )
     _params_tirp_2 = {
-        "mainTitle": "FAIR data",
+        "mainTitle": '"FAIR data"',
         "pageSize": "1",
         "cursor": "cursor_legacy1",
     }

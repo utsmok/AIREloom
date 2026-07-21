@@ -176,7 +176,7 @@ async def test_search_organizations_with_filters_and_sort(
     )
 
     expected_params = {
-        "legalName": "Specific University",
+        "legalName": '"Specific University"',
         "countryCode": "DE",
         "sortBy": sort_by,
         "page": page,
@@ -302,7 +302,7 @@ async def test_iterate_organizations_no_results(
 
     assert count == 0
     expected_params = {
-        "legalName": "Imaginary Org",
+        "legalName": '"Imaginary Org"',
         "pageSize": page_size,
         "cursor": "*",
     }

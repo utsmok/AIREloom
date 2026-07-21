@@ -185,7 +185,7 @@ async def test_search_projects_with_filters_and_sort(
     )
 
     expected_params = {
-        "title": "Climate Change Research",
+        "title": '"Climate Change Research"',
         "fundingStreamId": "EU",  # Direct parameter name without alias
         "code": "CCR_EU",
         "sortBy": sort_by,
@@ -321,7 +321,7 @@ async def test_iterate_projects_no_results(
 
     assert count == 0
     expected_params = {
-        "title": "Unfunded Project Idea",
+        "title": '"Unfunded Project Idea"',
         "pageSize": page_size,
         "cursor": "*",
     }

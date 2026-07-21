@@ -189,7 +189,7 @@ async def test_search_data_sources_with_filters_and_sort(
     )
 
     expected_params = {
-        "officialName": "OpenAIRE Nexus",
+        "officialName": '"OpenAIRE Nexus"',
         "dataSourceTypeName": "aggregator",
         "contentTypes": ["publications"],
         "sortBy": sort_by,
@@ -328,7 +328,7 @@ async def test_iterate_data_sources_no_results(
 
     assert count == 0
     expected_params = {
-        "officialName": "NonExistent DS",
+        "officialName": '"NonExistent DS"',
         "pageSize": page_size,
         "cursor": "*",
     }
