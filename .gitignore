@@ -8,6 +8,7 @@ reference/
 
 # analysis results
 aireloom_analysis.db
+output/
 DEMO_SUMMARY.md
 *.png
 

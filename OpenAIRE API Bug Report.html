@@ -1,0 +1,557 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAIRE API Bug Report</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#summary-table">Summary Table</a></li>
+<li><a href="#version-numbering-confusion">Version Numbering Confusion</a></li>
+<li><a href="#server-errors-documented-parameters-that-cause-500-errors">1. Server Errors (Documented Parameters That Cause 500 Errors)</a>
+<ul>
+<li><a href="#bug-s1-givenname-filter-on-v1persons-returns-http-500">BUG-S1: givenName filter on /v1/persons returns HTTP 500</a></li>
+<li><a href="#bug-s2-lastname-filter-on-v1persons-returns-http-500">BUG-S2: lastName filter on /v1/persons returns HTTP 500</a></li>
+</ul>
+</li>
+<li><a href="#missing-or-wrong-documentation">2. Missing or Wrong Documentation</a>
+<ul>
+<li><a href="#bug-d1-debugquery-parameter-documented-on-website-but-does-not-exist">BUG-D1: debugQuery parameter documented on website but does not exist</a></li>
+<li><a href="#bug-d2-rorid-parameter-missing-from-documentation-website">BUG-D2: rorId parameter missing from documentation website</a></li>
+<li><a href="#bug-d3-logicaloperator-parameter-missing-from-documentation-website">BUG-D3: logicalOperator parameter missing from documentation website</a></li>
+<li><a href="#bug-d4-persons-endpoint-has-no-documentation-page">BUG-D4: Persons endpoint has no documentation page</a></li>
+<li><a href="#bug-d5-links-endpoint-has-no-documentation">BUG-D5: Links endpoint has no documentation</a></li>
+<li><a href="#bug-d6-data-sources-legalshortname-description-is-wrong">BUG-D6: Data sources legalShortName description is wrong</a></li>
+<li><a href="#bug-d7-scholix-openapi-spec-title-typo">BUG-D7: Scholix OpenAPI spec title typo</a></li>
+<li><a href="#bug-d8-scholix-page-parameter-marked-as-required-but-is-actually-optional">BUG-D8: Scholix page parameter marked as required but is actually optional</a></li>
+<li><a href="#bug-d9-data-sources-sortby-openapi-spec-description-says-organizations">BUG-D9: Data sources sortBy OpenAPI spec description says “organizations”</a></li>
+<li><a href="#bug-d10-persons-sortby-spec-documents-startdate-and-enddate-but-they-dont-work">BUG-D10: Persons sortBy spec documents startDate and endDate but they don’t work</a></li>
+<li><a href="#bug-d11-v2-api-is-not-documented-as-a-separate-version">BUG-D11: V2 API is not documented as a separate version</a></li>
+</ul>
+</li>
+<li><a href="#other-issues">3. Other Issues</a>
+<ul>
+<li><a href="#bug-o1-pagesize100-silently-returns-10-results-on-links-endpoint">BUG-O1: pageSize=100 silently returns 10 results on links endpoint</a></li>
+<li><a href="#bug-o2-size100-silently-returns-10-results-on-scholix">BUG-O2: size=100 silently returns 10 results on Scholix</a></li>
+<li><a href="#bug-o3-research-products-sortby-error-message-omits-popularity">BUG-O3: Research products sortBy error message omits popularity</a></li>
+<li><a href="#bug-o4-data-sources-sortby-error-message-says-organizations">BUG-O4: Data sources sortBy error message says “organizations”</a></li>
+<li><a href="#bug-o5-scholix-publisher-idurl-field-is-consistently-null">BUG-O5: Scholix Publisher IDURL field is consistently null</a></li>
+<li><a href="#bug-o6-links-endpoint-uses-different-response-header-format">BUG-O6: Links endpoint uses different response header format</a></li>
+<li><a href="#bug-o7-page-indexing-is-inconsistent-between-endpoints">BUG-O7: Page indexing is inconsistent between endpoints</a></li>
+<li><a href="#bug-o8-links-endpoint-default-pagesize-is-10-not-100-as-spec-claims">BUG-O8: Links endpoint default pageSize is 10, not 100 as spec claims</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <p><strong>OpenAIRE API Bug Report</strong><br>
+<strong>Date:</strong> 2026-06-04<br>
+<strong>Reporter:</strong> S. Mok, <a href="mailto:s.mok@utwente.nl">s.mok@utwente.nl</a><br>
+<strong>APIs tested:</strong> OpenAIRE Graph API v1/v2, Scholexplorer v3<br>
+<strong>Method:</strong> All bugs verified against live API endpoints using OAuth2 client credentials authentication, cross-referenced against OpenAPI specifications and official documentation at <a href="http://graph.openaire.eu/docs">graph.openaire.eu/docs</a>.</p>
+<p>This report starts with an overview of the bugs, then goes into detail for each. Lots of them seem to have the same root cause, but I chose to just report all issues I found separately, not making any assumptions.</p>
+<h1 id="summary-table">Summary Table</h1>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Severity</th>
+<th>Category</th>
+<th>Endpoint</th>
+<th>Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BUG-S1</td>
+<td><strong>Critical</strong></td>
+<td>Server Error</td>
+<td><code>/v1/persons</code></td>
+<td><code>givenName</code> filter → 500</td>
+</tr>
+<tr>
+<td>BUG-S2</td>
+<td><strong>Critical</strong></td>
+<td>Server Error</td>
+<td><code>/v1/persons</code></td>
+<td><code>lastName</code> filter → 500</td>
+</tr>
+<tr>
+<td>BUG-D1</td>
+<td>High</td>
+<td>Wrong Docs</td>
+<td>All entities</td>
+<td><code>debugQuery</code> documented but doesn’t exist</td>
+</tr>
+<tr>
+<td>BUG-D2</td>
+<td>Medium</td>
+<td>Missing Docs</td>
+<td>Research products</td>
+<td><code>rorId</code> works but not documented</td>
+</tr>
+<tr>
+<td>BUG-D3</td>
+<td>Medium</td>
+<td>Missing Docs</td>
+<td>All entities</td>
+<td><code>logicalOperator</code> works but not documented</td>
+</tr>
+<tr>
+<td>BUG-D4</td>
+<td>High</td>
+<td>Missing Docs</td>
+<td>Persons</td>
+<td>No filtering docs (404)</td>
+</tr>
+<tr>
+<td>BUG-D5</td>
+<td>High</td>
+<td>Missing Docs</td>
+<td>Links</td>
+<td>Entire endpoint undocumented</td>
+</tr>
+<tr>
+<td>BUG-D6</td>
+<td>Low</td>
+<td>Wrong Docs</td>
+<td>Data sources</td>
+<td><code>legalShortName</code> description says “organization”</td>
+</tr>
+<tr>
+<td>BUG-D7</td>
+<td>Low</td>
+<td>Wrong Docs</td>
+<td>Scholix spec</td>
+<td>Title typo “ScholeExplorer”, desc typo “TThe”</td>
+</tr>
+<tr>
+<td>BUG-D8</td>
+<td>Low</td>
+<td>Wrong Docs</td>
+<td>Scholix spec</td>
+<td><code>page</code> marked required but optional</td>
+</tr>
+<tr>
+<td>BUG-D9</td>
+<td>Low</td>
+<td>Wrong Docs</td>
+<td>Data sources spec</td>
+<td>sortBy description says “organizations”</td>
+</tr>
+<tr>
+<td>BUG-D10</td>
+<td>High</td>
+<td>Wrong Docs</td>
+<td>Persons spec</td>
+<td><code>sortBy</code> includes non-functional <code>startDate</code>/<code>endDate</code></td>
+</tr>
+<tr>
+<td>BUG-D11</td>
+<td>Medium</td>
+<td>Missing Docs</td>
+<td>V2 API</td>
+<td>V2 not documented as separate version</td>
+</tr>
+<tr>
+<td>BUG-O1</td>
+<td><strong>Critical</strong></td>
+<td>Behavior</td>
+<td><code>/v1/.../links</code></td>
+<td><code>pageSize=100</code> silently returns 10</td>
+</tr>
+<tr>
+<td>BUG-O2</td>
+<td><strong>Critical</strong></td>
+<td>Behavior</td>
+<td>Scholix</td>
+<td><code>size=100</code> silently returns 10</td>
+</tr>
+<tr>
+<td>BUG-O3</td>
+<td>Medium</td>
+<td>Behavior</td>
+<td>Research products</td>
+<td>Error message omits <code>popularity</code> sort field</td>
+</tr>
+<tr>
+<td>BUG-O4</td>
+<td>Low</td>
+<td>Behavior</td>
+<td>Data sources</td>
+<td>Error message says “organizations”</td>
+</tr>
+<tr>
+<td>BUG-O5</td>
+<td>Medium</td>
+<td>Data Quality</td>
+<td>Scholix</td>
+<td>Publisher <code>IDURL</code> always null</td>
+</tr>
+<tr>
+<td>BUG-O6</td>
+<td>Medium</td>
+<td>Consistency</td>
+<td>Links</td>
+<td>Different response header format</td>
+</tr>
+<tr>
+<td>BUG-O7</td>
+<td>High</td>
+<td>Consistency</td>
+<td>Graph API</td>
+<td>Inconsistent page indexing (0 vs 1)</td>
+</tr>
+<tr>
+<td>BUG-O8</td>
+<td>High</td>
+<td>Behavior</td>
+<td>Links</td>
+<td>Default pageSize=10, spec says 100</td>
+</tr>
+</tbody>
+</table><h1 id="version-numbering-confusion">Version Numbering Confusion</h1>
+<p>Before diving into the bugs, I also have a general remark that’s not really a bug: The OpenAIRE API ecosystem has a confusing version numbering scheme that makes it difficult for API consumers to understand what version they are (or should be!) using:</p>
+<ul>
+<li><strong>OpenAPI spec URLs</strong> live under <code>/graph/v3/api-docs/</code> — the <code>v3</code> here does <strong>not</strong> refer to the API version. It appears to be a documentation/Swagger UI version? Or the entire graph version?</li>
+<li><strong>Actual API paths</strong> use <code>/v1/</code> and <code>/v2/</code> (e.g., <code>/graph/v1/researchProducts</code>, <code>/graph/v2/researchProducts</code>).</li>
+<li>The <strong>Graph itself</strong> may have its own version. The spec server URL is <code>https://api.openaire.eu/graph</code> with no version, while the spec URL has <code>/v3/</code>.</li>
+<li><strong>Scholexplorer</strong> has its own separate versioning (<code>/v3/Links</code>) with no stated relationship to Graph API versions.</li>
+<li><strong>V2</strong> of the Graph API only covers <code>researchProducts</code> — no other entities. This is not clearly documented.</li>
+<li>None of the three OpenAPI specs include an <code>info.version</code> field.</li>
+<li>The documentation is not consistent in pointing towards specific versions, and also includes deprecated links: like the Scholexplorer v3 docs point towards a ‘beta’ URL.</li>
+</ul>
+<p><strong>Recommendation:</strong> Adopt a single, clear versioning scheme. Document which version covers which endpoints. Include <code>info.version</code> in all OpenAPI specs.</p>
+<h1 id="server-errors-documented-parameters-that-cause-500-errors">1. Server Errors (Documented Parameters That Cause 500 Errors)</h1>
+<h2 id="bug-s1-givenname-filter-on-v1persons-returns-http-500">BUG-S1: <code>givenName</code> filter on <code>/v1/persons</code> returns HTTP 500</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/persons</code><br>
+<strong>Parameter:</strong> <code>givenName</code><br>
+<strong>Expected:</strong> 200 with filtered results (parameter is documented in OpenAPI spec)<br>
+<strong>Actual:</strong> HTTP 500 — <code>"undefined field givenName"</code></p>
+<pre><code>GET https://api.openaire.eu/graph/v1/persons?givenName=John&amp;pageSize=1
+→ 500 {"message":"Error from server at [...]. undefined field givenName","error":"Internal Server Error","code":500}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/persons?givenName=John&amp;pageSize=1"</code><br>
+<strong>Spec reference:</strong> <code>givenName</code> is listed as a parameter in the <code>/v1/persons</code> OpenAPI spec with <code>type: string</code>.</p>
+<h2 id="bug-s2-lastname-filter-on-v1persons-returns-http-500">BUG-S2: <code>lastName</code> filter on <code>/v1/persons</code> returns HTTP 500</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/persons</code><br>
+<strong>Parameter:</strong> <code>lastName</code><br>
+<strong>Expected:</strong> 200 with filtered results (parameter is documented in OpenAPI spec)<br>
+<strong>Actual:</strong> HTTP 500 — <code>"undefined field lastName"</code></p>
+<pre><code>GET https://api.openaire.eu/graph/v1/persons?lastName=Smith&amp;pageSize=1
+→ 500 {"message":"Error from server at [...]. undefined field lastName","error":"Internal Server Error","code":500}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/persons?lastName=Smith&amp;pageSize=1"</code><br>
+<strong>Spec reference:</strong> <code>lastName</code> is listed as a parameter in the <code>/v1/persons</code> OpenAPI spec with <code>type: string</code>.</p>
+<h1 id="missing-or-wrong-documentation">2. Missing or Wrong Documentation</h1>
+<h2 id="bug-d1-debugquery-parameter-documented-on-website-but-does-not-exist">BUG-D1: <code>debugQuery</code> parameter documented on website but does not exist</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs/apis/graph-api/searching-entities/filtering-search-results</code><br>
+<strong>Affected entities:</strong> Research products, organizations, data sources, projects (all listed in the docs table)</p>
+<p>The documentation website lists <code>debugQuery</code> as a valid parameter with description “Retrieve debug information for the search query. (Boolean)”. However:</p>
+<ol>
+<li>The parameter is <strong>not in the OpenAPI spec</strong> for any endpoint.</li>
+<li>The live API <strong>rejects it</strong> with: <code>"Unknown parameter: debugQuery"</code></li>
+</ol>
+<pre><code>GET https://api.openaire.eu/graph/v1/researchProducts?debugQuery=true&amp;pageSize=1
+→ 400 {"message":"Unknown parameter: debugQuery; valid parameters are: [...]"}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/researchProducts?debugQuery=true&amp;pageSize=1"</code></p>
+<h2 id="bug-d2-rorid-parameter-missing-from-documentation-website">BUG-D2: <code>rorId</code> parameter missing from documentation website</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs/apis/graph-api/searching-entities/filtering-search-results</code><br>
+<strong>Section:</strong> Research products parameter table</p>
+<p>The <code>rorId</code> parameter is in the OpenAPI spec and works on the live API, but is <strong>not listed</strong> in the documentation website’s parameter table for research products.</p>
+<pre><code>GET https://api.openaire.eu/graph/v1/researchProducts?rorId=https://ror.org/0576by029&amp;pageSize=1
+→ 200 (returns results)
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/researchProducts?rorId=https://ror.org/0576by029&amp;pageSize=1"</code></p>
+<h2 id="bug-d3-logicaloperator-parameter-missing-from-documentation-website">BUG-D3: <code>logicalOperator</code> parameter missing from documentation website</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs/apis/graph-api/searching-entities/filtering-search-results</code></p>
+<p>The <code>logicalOperator</code> parameter is documented in the OpenAPI spec for <strong>all five entities</strong> (research products, projects, organizations, data sources, persons) and works on the live API, but is <strong>not mentioned</strong> in the documentation website’s parameter tables for any entity.</p>
+<p>The website has a “Using logical operators” section describing <code>AND</code>/<code>OR</code>/<code>NOT</code> syntax within filter values, but does not document the separate <code>logicalOperator</code> query parameter that controls how multiple filter parameters are combined.</p>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/researchProducts?search=covid&amp;logicalOperator=OR&amp;pageSize=1"</code></p>
+<h2 id="bug-d4-persons-endpoint-has-no-documentation-page">BUG-D4: Persons endpoint has no documentation page</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs/apis/graph-api/searching-entities/filtering-search-results/persons</code><br>
+<strong>Expected:</strong> Filtering documentation for the persons endpoint<br>
+<strong>Actual:</strong> HTTP 404</p>
+<p>The persons endpoint (<code>/v1/persons</code>) exists in the API and is fully documented in the OpenAPI spec, but the filtering documentation page returns 404. The main filtering page only has sections for research products, organizations, data sources, and projects — persons is completely absent.</p>
+<h2 id="bug-d5-links-endpoint-has-no-documentation">BUG-D5: Links endpoint has no documentation</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/researchProducts/links</code> and <code>GET /v1/researchProducts/links/relations-info</code></p>
+<p>Two endpoints exist in the OpenAPI spec and work on the live API, but are <strong>not documented anywhere</strong> on <code>graph.openaire.eu/docs</code>. There is no mention of the links endpoint or relations-info endpoint in the navigation, searching, or filtering documentation.</p>
+<h2 id="bug-d6-data-sources-legalshortname-description-is-wrong">BUG-D6: Data sources <code>legalShortName</code> description is wrong</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs/apis/graph-api/searching-entities/filtering-search-results</code> (Data sources section)</p>
+<p>The documentation describes <code>legalShortName</code> as: <em>“The legal name of the organization in short form.”</em> But this is a <strong>data source</strong> parameter — it should say “The legal name of the data source in short form.”</p>
+<p>This is a copy-paste error from the organizations section.</p>
+<h2 id="bug-d7-scholix-openapi-spec-title-typo">BUG-D7: Scholix OpenAPI spec title typo</h2>
+<p><strong>Location:</strong> Scholexplorer OpenAPI spec (<code>/api-docs/Scholexplorer%20API%20V3.0</code>)</p>
+<p>The spec title is <code>"ScholeExplorer APIs"</code> — should be <code>"ScholeXplorer APIs"</code> or <code>"Scholexplorer APIs"</code> (the correct name used elsewhere). Additionally, the spec description contains <code>"TThe Scholexplorer API"</code> — should be <code>"The Scholexplorer API"</code> (double ‘T’).</p>
+<h2 id="bug-d8-scholix-page-parameter-marked-as-required-but-is-actually-optional">BUG-D8: Scholix <code>page</code> parameter marked as required but is actually optional</h2>
+<p><strong>Location:</strong> Scholexplorer OpenAPI spec, <code>/v3/Links</code> endpoint</p>
+<p>The <code>page</code> parameter has <code>"required": true</code> in the spec, but the API works fine without it (returns page 0 by default).</p>
+<pre><code>GET https://api.scholexplorer.openaire.eu/v3/Links?sourcePid=10.1016/j.respol.2021.104226&amp;size=2
+→ 200 {"currentPage": 0, "totalLinks": 118, ...}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.scholexplorer.openaire.eu/v3/Links?sourcePid=10.1016/j.respol.2021.104226&amp;size=2"</code></p>
+<h2 id="bug-d9-data-sources-sortby-openapi-spec-description-says-organizations">BUG-D9: Data sources <code>sortBy</code> OpenAPI spec description says “organizations”</h2>
+<p><strong>Location:</strong> Graph API v1 OpenAPI spec, <code>/v1/dataSources</code> sortBy parameter</p>
+<p>The <code>sortBy</code> parameter description reads: <em>“The field should be in the format ‘fieldname ASC|DESC’, organizations can be only sorted by the ‘relevance’.”</em> This is a copy-paste error from the organizations endpoint. Should say “data sources” instead of “organizations”.</p>
+<h2 id="bug-d10-persons-sortby-spec-documents-startdate-and-enddate-but-they-dont-work">BUG-D10: Persons <code>sortBy</code> spec documents <code>startDate</code> and <code>endDate</code> but they don’t work</h2>
+<p><strong>Location:</strong> Graph API v1 OpenAPI spec, <code>/v1/persons</code> sortBy parameter</p>
+<p>The spec description and regex pattern both include <code>startDate</code> and <code>endDate</code> as valid sort fields:</p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"...fieldname is one of 'relevance', 'startDate', 'endDate'..."</span><span class="token punctuation">,</span>
+  <span class="token string">"schema"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"pattern"</span><span class="token punctuation">:</span> <span class="token string">"^((relevance|startDate|endDate)\\s+(ASC|DESC),?\\s*)+$"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>But the live API <strong>rejects both</strong> with 400:</p>
+<pre><code>GET /graph/v1/persons?sortBy=startDate+DESC&amp;pageSize=1
+→ 400 {"message":"Invalid field name in sortBy parameter: startDate"}
+
+GET /graph/v1/persons?sortBy=endDate+DESC&amp;pageSize=1
+→ 400 {"message":"Invalid field name in sortBy parameter: endDate"}
+</code></pre>
+<p>Only <code>relevance</code> actually works. This appears to be the projects sortBy spec copied to persons without adjusting the valid fields.</p>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/persons?sortBy=startDate+DESC&amp;pageSize=1"</code></p>
+<h2 id="bug-d11-v2-api-is-not-documented-as-a-separate-version">BUG-D11: V2 API is not documented as a separate version</h2>
+<p><strong>Location:</strong> <code>graph.openaire.eu/docs</code></p>
+<p>The Graph API V2 (<code>/v2/researchProducts</code>) provides enriched research product responses (includes <code>projects</code>, <code>organizations</code>, <code>communities</code>, <code>collectedFrom</code> fields not available in V1). However:</p>
+<ul>
+<li>The documentation website does not explain what V2 is or when to use it</li>
+<li>There is no changelog or migration guide between V1 and V2</li>
+<li>The filtering documentation uses V2 URLs in some examples but doesn’t explain why</li>
+<li>V2 only covers research products — this limitation is not documented</li>
+</ul>
+<h1 id="other-issues">3. Other Issues</h1>
+<h2 id="bug-o1-pagesize100-silently-returns-10-results-on-links-endpoint">BUG-O1: <code>pageSize=100</code> silently returns 10 results on links endpoint</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/researchProducts/links</code><br>
+<strong>Affected parameter:</strong> <code>pageSize</code></p>
+<p>Requesting <code>pageSize=100</code> (the documented maximum) silently falls back to 10 results. No error is returned. The <code>totalPages</code> value confirms the server is using <code>pageSize=10</code> internally.</p>
+
+<table>
+<thead>
+<tr>
+<th>pageSize</th>
+<th>Results returned</th>
+<th>totalPages</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>12</td>
+<td>12</td>
+</tr>
+<tr>
+<td>50</td>
+<td>50</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>99</td>
+<td>99</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>100</td>
+<td><strong>10</strong></td>
+<td><strong>12</strong></td>
+<td>2</td>
+</tr>
+</tbody>
+</table><p>The OpenAPI spec says default is 100, but the actual default is 10. And the documented maximum of 100 silently fails.</p>
+<pre><code>GET https://api.openaire.eu/graph/v1/researchProducts/links?sourcePid=10.1016/j.respol.2021.104226&amp;pageSize=100&amp;page=0
+→ 200 {"header":{"page":0,"totalPages":12,"totalLinks":118},"results":[...10 items...]}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/researchProducts/links?sourcePid=10.1016/j.respol.2021.104226&amp;pageSize=100&amp;page=0"</code></p>
+<p><strong>Effective maximum:</strong> 99</p>
+<h2 id="bug-o2-size100-silently-returns-10-results-on-scholix">BUG-O2: <code>size=100</code> silently returns 10 results on Scholix</h2>
+<p><strong>Endpoint:</strong> <code>GET /v3/Links</code> (Scholexplorer)<br>
+<strong>Affected parameter:</strong> <code>size</code></p>
+<p>Identical behavior to BUG-O1. Requesting <code>size=100</code> (the documented maximum: <em>“max is 100”</em>) silently returns 10 results.</p>
+
+<table>
+<thead>
+<tr>
+<th>size</th>
+<th>Results returned</th>
+<th>totalPages</th>
+<th>Expected</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50</td>
+<td>50</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>99</td>
+<td>99</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>100</td>
+<td><strong>10</strong></td>
+<td><strong>12</strong></td>
+<td>2</td>
+</tr>
+<tr>
+<td>200</td>
+<td><strong>10</strong></td>
+<td><strong>12</strong></td>
+<td>2</td>
+</tr>
+</tbody>
+</table><pre><code>GET https://api.scholexplorer.openaire.eu/v3/Links?sourcePid=10.1016/j.respol.2021.104226&amp;size=100
+→ 200 {"currentPage":0,"totalLinks":118,"totalPages":12,"result":[...10 items...]}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.scholexplorer.openaire.eu/v3/Links?sourcePid=10.1016/j.respol.2021.104226&amp;size=100"</code></p>
+<p><strong>Effective maximum:</strong> 99</p>
+<h2 id="bug-o3-research-products-sortby-error-message-omits-popularity">BUG-O3: Research products sortBy error message omits <code>popularity</code></h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/researchProducts</code> (also affects <code>/v2/researchProducts</code>)</p>
+<p>When providing an invalid <code>sortBy</code> value, the error message lists valid fields as:</p>
+<blockquote>
+<p><em>‘relevance’, ‘publicationDate’, ‘dateOfCollection’, ‘influence’, ‘citationCount’, ‘impulse’</em></p>
+</blockquote>
+<p>But <code>popularity</code> is also a valid sort field (confirmed working with <code>sortBy=popularity DESC</code>). The error message is missing <code>popularity</code>, which makes it appear invalid when users encounter it via the error message.</p>
+<pre><code>GET /graph/v1/researchProducts?sortBy=invalid+DESC&amp;pageSize=1
+→ 400 {"message":"...research products can be only sorted by the 'relevance', 'publicationDate', 'dateOfCollection', 'influence', 'citationCount', 'impulse'."}
+</code></pre>
+<p>Note: The OpenAPI spec correctly includes <code>popularity</code> in the regex pattern. Only the error message is wrong.</p>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/researchProducts?sortBy=invalid+DESC&amp;pageSize=1"</code></p>
+<h2 id="bug-o4-data-sources-sortby-error-message-says-organizations">BUG-O4: Data sources sortBy error message says “organizations”</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/dataSources</code></p>
+<p>When providing an invalid <code>sortBy</code> value, the error message reads:</p>
+<blockquote>
+<p><em>“organizations can be only sorted by the ‘relevance’”</em></p>
+</blockquote>
+<p>This is the data sources endpoint, not organizations. Copy-paste error in the error message.</p>
+<pre><code>GET /graph/v1/dataSources?sortBy=invalid+DESC&amp;pageSize=1
+→ 400 {"message":"...organizations can be only sorted by the 'relevance'."}
+</code></pre>
+<p><strong>Reproduction:</strong> <code>curl "https://api.openaire.eu/graph/v1/dataSources?sortBy=invalid+DESC&amp;pageSize=1"</code></p>
+<h2 id="bug-o5-scholix-publisher-idurl-field-is-consistently-null">BUG-O5: Scholix Publisher <code>IDURL</code> field is consistently <code>null</code></h2>
+<p><strong>Endpoint:</strong> <code>GET /v3/Links</code> (Scholexplorer)<br>
+<strong>Field:</strong> <code>source.Publisher[].identifier[].IDURL</code> and <code>target.Publisher[].identifier[].IDURL</code></p>
+<p>(Note: the bug below might only be due to testing on a limit set of items, and require verification).</p>
+<p>The OpenAPI spec describes <code>IDURL</code> as <em>“An internet resolvable form of the identifier”</em>. In practice, <strong>all</strong> Publisher identifier <code>IDURL</code> values are <code>null</code>. Source and target entity identifiers have valid URLs — only Publisher identifiers are affected.</p>
+<p>Test result from 100 links (sourcePid=10.1016/j.respol.2021.104226):</p>
+<ul>
+<li>Source entity <code>IDURL</code>: 85/85 non-null</li>
+<li>Target entity <code>IDURL</code>: 34/34 non-null</li>
+<li><strong>Publisher <code>IDURL</code>: 0/58 non-null (all null)</strong></li>
+</ul>
+<p>Example:</p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Research Policy"</span><span class="token punctuation">,</span>
+  <span class="token string">"identifier"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span>
+    <span class="token string">"ID"</span><span class="token punctuation">:</span> <span class="token string">"10|issn___print::a22009529648a2b4127d366f747e0391"</span><span class="token punctuation">,</span>
+    <span class="token string">"IDScheme"</span><span class="token punctuation">:</span> <span class="token string">"OpenAIRE Identifier"</span><span class="token punctuation">,</span>
+    <span class="token string">"IDURL"</span><span class="token punctuation">:</span> <span class="token keyword">null</span>
+  <span class="token punctuation">}</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2 id="bug-o6-links-endpoint-uses-different-response-header-format">BUG-O6: Links endpoint uses different response header format</h2>
+<p><strong>Endpoints:</strong> <code>GET /v1/researchProducts/links</code> vs all other Graph API endpoints</p>
+<p>The links endpoint returns a <strong>completely different header structure</strong> from other Graph API endpoints:</p>
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Regular endpoints</th>
+<th>Links endpoint</th>
+<th>Scholix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numFound</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>maxScore</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>queryTime</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>✅ (1-indexed)</td>
+<td>✅ (0-indexed)</td>
+<td>✅ (as <code>currentPage</code>, 0-indexed)</td>
+</tr>
+<tr>
+<td><code>pageSize</code></td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>totalPages</code></td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>totalLinks</code></td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>nextCursor</code></td>
+<td>✅ (with cursor param)</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table><p>The links endpoint also seems lacks cursor-based pagination support, despite being a Graph API endpoint.</p>
+<h2 id="bug-o7-page-indexing-is-inconsistent-between-endpoints">BUG-O7: Page indexing is inconsistent between endpoints</h2>
+<p><strong>Affected endpoints:</strong> All Graph API endpoints</p>
+<ul>
+<li><strong>Regular Graph API</strong> (<code>/v1/researchProducts</code>, <code>/v1/projects</code>, etc.): <strong>1-indexed</strong> (<code>page=1</code> is the first page, <code>page=0</code> returns 400)</li>
+<li><strong>Links endpoint</strong> (<code>/v1/researchProducts/links</code>): <strong>0-indexed</strong> (<code>page=0</code> is the first page)</li>
+<li><strong>Scholix</strong> (<code>/v3/Links</code>): <strong>0-indexed</strong> (<code>page=0</code> is the first page)</li>
+</ul>
+<p>This is particularly confusing because the links endpoint is a Graph API v1 endpoint but uses different indexing than other v1 endpoints.</p>
+<h2 id="bug-o8-links-endpoint-default-pagesize-is-10-not-100-as-spec-claims">BUG-O8: Links endpoint default <code>pageSize</code> is 10, not 100 as spec claims</h2>
+<p><strong>Endpoint:</strong> <code>GET /v1/researchProducts/links</code><br>
+<strong>Spec says:</strong> <code>"default": 100</code><br>
+<strong>Actual:</strong> Default is 10</p>
+<pre><code>GET /graph/v1/researchProducts/links?sourcePid=10.1016/j.respol.2021.104226&amp;page=0
+→ 200 {"header":{"page":0,"totalPages":12,...},"results":[...10 items...]}
+</code></pre>
+<p>With 118 total links and <code>totalPages=12</code>, the effective page size is 10. The spec claims the default is 100, which would produce <code>totalPages=2</code>.</p>
+
+    </div>
+  </div>
+</body>
+
+</html>
