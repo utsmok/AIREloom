@@ -61,6 +61,12 @@ class OpenAireUnwrapper(ResponseUnwrapper):
 
         results = response_json.get("results")
         if results is None:
+            # Future-proofing: some V3 paths wrap results under a singular "result" key.
+            result = response_json.get("result")
+            if isinstance(result, list):
+                return result
+            if isinstance(result, dict):
+                return [result]
             return []
         if not isinstance(results, list):
             raise ValueError(f"Expected results to be a list, got {type(results)}")

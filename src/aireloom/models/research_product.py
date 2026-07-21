@@ -59,6 +59,7 @@ class Author(BaseModel):
     """Represents an author of a research product.
 
     Attributes:
+        id: The author's persistent identifier (e.g., ORCID), if available (V3).
         fullName: The full name of the author.
         rank: The rank or order of the author in an author list.
         name: The given name(s) of the author.
@@ -68,6 +69,7 @@ class Author(BaseModel):
             which doesn't match the flat Pid model, so dict is used for flexibility.
     """
 
+    id: str | None = None
     fullName: SafeStr = ""
     rank: int | None = None
     name: SafeStr = ""
@@ -382,14 +384,15 @@ class Subject(BaseModel):
     Attributes:
         subject: A dictionary where keys are subject schemes and values are subject terms/codes.
                  Example: `{"fos": "Field of Science", "mesh": "D000001"}`
+        provenance: Provenance information for the subject (V3).
     """
 
     subject: dict[str, str] | None = None
+    provenance: dict | None = None
 
     model_config = ConfigDict(extra="allow")
 
 
-# Container for Publication
 class Container(BaseModel):
     """Represents the container of a publication (e.g., journal, book series).
 
@@ -403,6 +406,8 @@ class Container(BaseModel):
         sp: Start page of the item within the container.
         ep: End page of the item within the container.
         vol: Volume number of the container.
+        conferencePlace: The location of the associated conference (V3).
+        conferenceDate: The date of the associated conference (V3).
     """
 
     edition: str | None = None
@@ -414,6 +419,8 @@ class Container(BaseModel):
     sp: str | None = None
     ep: str | None = None
     vol: str | None = None
+    conferencePlace: str | None = None
+    conferenceDate: str | None = None
 
     model_config = ConfigDict(extra="allow")
 
@@ -441,6 +448,23 @@ class GeoLocation(BaseModel):
 
 SafeGeoLocation = Annotated[
     GeoLocation, BeforeValidator(lambda v: GeoLocation() if v is None else v)
+]
+
+
+class EoscIfGuideline(BaseModel):
+    """Represents an EOSC IF guideline code (V3).
+
+    Attributes:
+        code: The EOSC IF guideline code string.
+    """
+
+    code: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeEoscIfGuideline = Annotated[
+    EoscIfGuideline, BeforeValidator(lambda v: EoscIfGuideline() if v is None else v)
 ]
 
 
@@ -488,6 +512,7 @@ class ResearchProduct(BaseEntity):
         openAccessColor: The Open Access color (e.g., "bronze", "gold", "hybrid").
         isInDiamondJournal: Whether the product is in a diamond journal.
         publiclyFunded: Whether the product was publicly funded.
+        eoscIfGuidelines: A list of EOSC IF guideline codes (V3).
         codeRepositoryUrl: URL to the code repository (software products).
         documentationUrls: URLs to documentation (software products).
         programmingLanguage: The programming language (software products).
@@ -530,14 +555,12 @@ class ResearchProduct(BaseEntity):
     subjects: SafeList[Subject] = Field(default_factory=list)
     container: SafeContainer = Field(default_factory=Container)
     keywords: SafeList[str] = Field(default_factory=list)
-    geoLocation: SafeGeoLocation = Field(default_factory=GeoLocation)
-    geoLocations: SafeList[SafeGeoLocation] = Field(default_factory=list)
-
     # Open Access fields
     isGreen: bool | None = None
     openAccessColor: str | None = None
     isInDiamondJournal: bool | None = None
     publiclyFunded: bool | None = None
+    eoscIfGuidelines: SafeList[SafeEoscIfGuideline] = Field(default_factory=list)
 
     # Subtype-specific fields (Software)
     codeRepositoryUrl: str | None = None

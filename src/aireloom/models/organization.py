@@ -11,9 +11,57 @@ from typing import Annotated
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, computed_field
 
-# Import base classes
-from .base import ApiResponse, BaseEntity
+from .base import ApiResponse, BaseEntity, SafeCfHbKeyValue
 from .safe_types import SafeList, SafeStr
+
+
+class OrganizationFundingLevel(BaseModel):
+    """A funding hierarchy level (level0/1/2) in an Organization's funding record."""
+
+    id: SafeStr = ""
+    description: SafeStr = ""
+    name: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class OrganizationFundingJurisdiction(BaseModel):
+    """Jurisdiction within an Organization funding funder."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class OrganizationFundingFunder(BaseModel):
+    """The funder entity within an Organization's funding record."""
+
+    id: SafeStr = ""
+    shortname: SafeStr = ""
+    name: SafeStr = ""
+    jurisdiction: OrganizationFundingJurisdiction = Field(
+        default_factory=OrganizationFundingJurisdiction
+    )
+    # pid can be a dict or list; keep permissive for now
+    pid: SafeList[dict] | None = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
+class OrganizationFunding(BaseModel):
+    """Funding information attached to an Organization (V3 shape).
+
+    Distinct from ``project.Funding`` — this uses funder/level0/1/2
+    rather than fundingStream/jurisdiction/name/shortName.
+    """
+
+    funder: OrganizationFundingFunder | None = None
+    level0: OrganizationFundingLevel | None = None
+    level1: OrganizationFundingLevel | None = None
+    level2: OrganizationFundingLevel | None = None
+
+    model_config = ConfigDict(extra="allow")
 
 
 class Country(BaseModel):
@@ -65,6 +113,9 @@ class Organization(BaseEntity):
         country: A `Country` object representing the organization's country.
         pids: A list of `OrganizationPid` objects representing various PIDs
               associated with the organization.
+        originalIds: Array of original/source identifiers (V3).
+        collectedFrom: Datasource(s) the organization was collected from (V3).
+        fundings: Funding records attached to this organization (V3).
     """
 
     # id is inherited from BaseEntity
@@ -74,6 +125,9 @@ class Organization(BaseEntity):
     websiteUrl: str | None = None
     country: SafeCountry = Field(default_factory=Country)
     pids: SafeList[OrganizationPid] = Field(default_factory=list)
+    originalIds: SafeList[str] = Field(default_factory=list)
+    collectedFrom: SafeList[SafeCfHbKeyValue] = Field(default_factory=list)
+    fundings: SafeList[OrganizationFunding] = Field(default_factory=list)
 
     @computed_field
     @property

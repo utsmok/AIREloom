@@ -22,6 +22,119 @@ from .base import ApiResponse, BaseEntity
 from .safe_types import SafeList, SafeStr
 
 
+class FundingJurisdiction(BaseModel):
+    """Jurisdiction info within the hierarchical V3 ``funding`` field."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingJurisdiction = Annotated[
+    FundingJurisdiction,
+    BeforeValidator(lambda v: FundingJurisdiction() if v is None else v),
+]
+
+
+class FundingFunder(BaseModel):
+    """Funder details within the hierarchical V3 ``funding`` field."""
+
+    id: SafeStr = ""
+    shortname: SafeStr = ""
+    name: SafeStr = ""
+    jurisdiction: SafeFundingJurisdiction = Field(
+        default_factory=FundingJurisdiction,
+    )
+    pid: SafeStr | None = None
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingFunder = Annotated[
+    FundingFunder, BeforeValidator(lambda v: FundingFunder() if v is None else v)
+]
+
+
+class FundingLevel(BaseModel):
+    """A single hierarchy level (level0/level1/level2) in the V3 ``funding`` field."""
+
+    id: SafeStr = ""
+    description: SafeStr = ""
+    name: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingLevel = Annotated[
+    FundingLevel, BeforeValidator(lambda v: FundingLevel() if v is None else v)
+]
+
+
+class ProjectFunding(BaseModel):
+    """Hierarchical funding structure from V3 responses (``Project.funding``).
+
+    Distinct from the flat plural ``fundings: SafeList[Funding]`` — this carries
+    the full funder → level0 → level1 → level2 taxonomy tree.
+    """
+
+    funder: SafeFundingFunder = Field(default_factory=FundingFunder)
+    level0: SafeFundingLevel = Field(default_factory=FundingLevel)
+    level1: SafeFundingLevel = Field(default_factory=FundingLevel)
+    level2: SafeFundingLevel = Field(default_factory=FundingLevel)
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeProjectFunding = Annotated[
+    ProjectFunding, BeforeValidator(lambda v: ProjectFunding() if v is None else v)
+]
+
+
+class ProjectLinkHeader(BaseModel):
+    """Header inside a V3 ``Project.links[]`` entry."""
+
+    relationType: SafeStr = ""
+    relationClass: SafeStr = ""
+    relatedIdentifier: SafeStr = ""
+    relatedRecordType: SafeStr = ""
+    trust: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeProjectLinkHeader = Annotated[
+    ProjectLinkHeader,
+    BeforeValidator(lambda v: ProjectLinkHeader() if v is None else v),
+]
+
+
+class ProjectLinkCountry(BaseModel):
+    """Country code/label inside a V3 ``Project.links[]`` entry."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeProjectLinkCountry = Annotated[
+    ProjectLinkCountry,
+    BeforeValidator(lambda v: ProjectLinkCountry() if v is None else v),
+]
+
+
+class ProjectLink(BaseModel):
+    """A related-entity link entry from V3 ``Project.links`` (e.g. participant orgs)."""
+
+    header: SafeProjectLinkHeader = Field(default_factory=ProjectLinkHeader)
+    legalname: SafeStr = ""
+    pid: SafeList[str] = Field(default_factory=list)
+    country: SafeProjectLinkCountry = Field(default_factory=ProjectLinkCountry)
+
+    model_config = ConfigDict(extra="allow")
+
+
 class FundingStream(BaseModel):
     """Represents details about a specific funding stream for a project.
 
@@ -101,6 +214,9 @@ class Project(BaseEntity):
         title: The official title of the project.
         callIdentifier: Identifier for the funding call.
         fundings: A list of `Funding` objects detailing the project's funding sources.
+        funding: Hierarchical ``ProjectFunding`` object (V3) carrying the full
+                 funder → level0 → level1 → level2 taxonomy tree. Distinct from
+                 the flat plural ``fundings`` array.
         granted: A `Grant` object with information about the awarded grant amounts.
         h2020Programmes: A list of `H2020Programme` objects if the project is part of H2020.
         keywords: A list of keywords describing the project.
@@ -114,6 +230,8 @@ class Project(BaseEntity):
         subjects: A list of subject classifications for the project.
         summary: A summary or abstract of the project.
         websiteUrl: The URL of the project's official website.
+        links: V3 array of related-entity link entries (e.g. participating
+               organizations), each with header metadata and inline entity data.
     """
 
     # id is inherited from BaseEntity
@@ -122,6 +240,7 @@ class Project(BaseEntity):
     title: SafeStr = ""
     callIdentifier: str | None = None
     fundings: SafeList[Funding] = Field(default_factory=list)
+    funding: SafeProjectFunding = Field(default_factory=ProjectFunding)
     granted: SafeGrant = Field(default_factory=Grant)
     h2020Programmes: SafeList[H2020Programme] = Field(default_factory=list)
     # Keywords might be a single string or a delimited string. Attempt parsing.
@@ -135,6 +254,7 @@ class Project(BaseEntity):
     subjects: SafeList[str] = Field(default_factory=list)
     summary: SafeStr = ""
     websiteUrl: str | None = None
+    links: SafeList[ProjectLink] = Field(default_factory=list)
 
     @computed_field
     @property

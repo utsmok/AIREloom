@@ -7,10 +7,12 @@ These models provide data validation and a clear structure for API data.
 """
 
 import logging
-from typing import Any, TypeVar
+from typing import Annotated, Any, TypeVar
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator  # Added Field
+from pydantic import BaseModel, BeforeValidator, Field, HttpUrl, field_validator
 from pydantic.config import ConfigDict  # Added ConfigDict
+
+from .safe_types import SafeStr
 
 # Generic type for the entity contained within the response results
 EntityType = TypeVar("EntityType", bound="BaseEntity")
@@ -101,6 +103,25 @@ class BaseEntity(BaseModel):
         return f"{cls}({', '.join(parts)})"
 
     model_config = ConfigDict(extra="allow")
+
+
+class CfHbKeyValue(BaseModel):
+    """A key/value pair used for ``collectedFrom``-style fields.
+
+    OpenAIRE encodes these as ``{"key": "<dataSourceId>::<internalKey>",
+    "value": "<dataSourceName>"}``. Shared across entities that expose a
+    ``collectedFrom`` collection (organizations, data sources).
+    """
+
+    key: SafeStr = ""
+    value: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeCfHbKeyValue = Annotated[
+    CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
+]
 
 
 class ApiResponse[EntityType: "BaseEntity"](BaseModel):

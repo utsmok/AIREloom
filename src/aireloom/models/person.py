@@ -2,8 +2,8 @@
 """Pydantic models for representing OpenAIRE Person entities.
 
 This module defines the Pydantic model for an OpenAIRE Person,
-based on the OpenAIRE Graph API v1 persons endpoint.
-Reference: https://api.openaire.eu/graph/v1/persons
+based on the OpenAIRE Graph API v3 persons endpoint.
+Reference: https://api.openaire.eu/graph/v3/persons
 """
 
 from pydantic import ConfigDict, Field, computed_field
