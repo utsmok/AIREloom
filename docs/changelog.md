@@ -2,6 +2,27 @@
 
 All notable changes to AIREloom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-04
+
+Stable promotion of the v3 line: identical feature set and breaking changes as
+0.5.0a1 (see [Migration to v3](migration-to-v3.md)), plus the additions below.
+
+### Added
+
+- `ProjectLinkPid` model for PID entries inside V3 `Project.links[]` items
+  (`value`/`type`/`typeLabel`)
+- `Organization.fundings[].jurisdiction` tolerates `null` payloads (coerced to
+  an empty model instead of failing validation)
+- Documented live quirks: research-products `pageSize > 100` returns HTTP 400
+  in page and cursor modes; unsorted-page ordering/membership instability;
+  Scholix requires bare pids
+
+### Changed
+
+- `projects_by_organization(search_on="name")` uses full-text `search` —
+  organization names rarely appear in project text fields, so
+  `search_on="openaire_id"` is recommended for identifier lookups
+
 ## [0.5.0a1] - 2026-07-21
 
 AIREloom now targets the OpenAIRE Graph API **v3** (v1/v2 deprecated by OpenAIRE). This is a **breaking** release; see [Migration to v3](migration-to-v3.md).
