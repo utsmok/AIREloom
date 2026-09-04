@@ -16,6 +16,7 @@ from typing import Any
 
 import httpx
 import pytest
+from bibliofabric.exceptions import BibliofabricError
 from bibliofabric.log_config import configure_logging, logger
 
 pytestmark = pytest.mark.live_api
@@ -315,26 +316,41 @@ class TestRelatedEndpoints:
         assert dois, "No DOIs found in research products!"
 
         logger.info(f"Found {len(dois)} unique DOIs to test Scholix links.")
+        tried = False
         for doi in dois:
             try:
-                filters = ScholixFilters(sourcePid=f"doi:{doi}")
+                # Scholexplorer v3 silently returns 0 links for "doi:"-prefixed
+                # pids; use the bare DOI value.
+                filters = ScholixFilters(sourcePid=doi)
                 scholix_response = await aireloom_session.scholix.search_links(
                     filters=filters
                 )
 
-                assert (
-                    scholix_response is not None
-                    and scholix_response.results is not None
+                assert scholix_response is not None
+                assert scholix_response.result is not None, (
+                    "Scholix response has no result list"
                 )
 
-                # Compare with raw data
-                params = {"sourcePid": f"doi:{doi}"}
+                # Compare with raw data (Scholexplorer base URL, not Graph).
+                params = {"sourcePid": doi}
                 raw_data = await get_raw_data(
-                    aireloom_session.scholix._api_client._base_url + "/Links",
+                    aireloom_session.scholix._base_url_override + "/Links",
                     params=params,
                 )
-                compare_models_with_raw(scholix_response, raw_data)
+                raw_links = (
+                    raw_data["result"]
+                    if isinstance(raw_data, dict) and "result" in raw_data
+                    else raw_data
+                )
+                assert len(scholix_response.result) == len(raw_links), (
+                    f"Scholix count mismatch: {len(scholix_response.result)} "
+                    f"!= {len(raw_links)}"
+                )
+                tried = True
                 break  # Exit after the first successful DOI to avoid rate limits
-            except Exception as e:
+            except BibliofabricError as e:
+                # Try the next DOI only on API-level errors; assertion
+                # failures must fail the test.
                 logger.error(f"Error processing DOI {doi}: {e}")
                 continue
+        assert tried, "Every DOI failed at the Scholix API level"
