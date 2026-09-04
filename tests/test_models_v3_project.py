@@ -132,7 +132,7 @@ class TestV3LinksField:
         link = p.links[0]
         assert link.legalname == "UNIVERSITY OF STRATHCLYDE"
         assert link.country.code == "UNKNOWN"
-        assert link.pid == ["doi123"]
+        assert [p.value for p in link.pid] == ["doi123"]
 
     def test_empty_links_default(self) -> None:
         d = _v3_project_dict()

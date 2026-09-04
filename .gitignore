@@ -10,6 +10,9 @@ reference/
 aireloom_analysis.db
 output/
 DEMO_SUMMARY.md
+
+# utwente data pull (one-off datasets + scripts)
+data/
 *.png
 
 # C extensions

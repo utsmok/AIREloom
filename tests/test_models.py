@@ -1,6 +1,7 @@
 """Tests for model validators and edge cases."""
 
 from aireloom.models.base import ApiResponse, BaseEntity, Header
+from aireloom.models.organization import Organization
 from aireloom.models.project import Project
 from aireloom.models.research_product import ResearchProduct, UsageCounts
 
@@ -170,3 +171,90 @@ class TestResearchProductTitleAlias:
         """Model validator should handle non-dict data gracefully."""
         rp = ResearchProduct.model_validate({"id": "rp9", "title": "test"})
         assert rp.title == "test"
+
+
+# ── Organization funding null-tolerance ────────────────────────────────────
+
+
+class TestOrganizationFundingNulls:
+    """Cover Organization.fundings nested funder null handling (live API data)."""
+
+    def test_null_funder_jurisdiction_defaults_to_empty(self):
+        """OpenAIRE V3 responses emit funder.jurisdiction: null; this must parse."""
+        org = Organization.model_validate(
+            {
+                "id": "org__1",
+                "fundings": [
+                    {"funder": {"id": "ec__________::EC", "jurisdiction": None}}
+                ],
+            }
+        )
+        funder = org.fundings[0].funder
+        assert funder.id == "ec__________::EC"
+        assert funder.jurisdiction.code == ""
+        assert funder.jurisdiction.label == ""
+
+    def test_missing_funder_jurisdiction_uses_default(self):
+        org = Organization.model_validate(
+            {"id": "org__2", "fundings": [{"funder": {"id": "nwo"}}]}
+        )
+        assert org.fundings[0].funder.jurisdiction.code == ""
+
+    def test_jurisdiction_dict_round_trips(self):
+        org = Organization.model_validate(
+            {
+                "id": "org__3",
+                "fundings": [
+                    {
+                        "funder": {
+                            "id": "ec",
+                            "jurisdiction": {"code": "EU", "label": "European Union"},
+                        }
+                    }
+                ],
+            }
+        )
+        assert org.fundings[0].funder.jurisdiction.code == "EU"
+
+
+# ── Project link PID null/shape tolerance ──────────────────────────────────
+
+
+class TestProjectLinkPids:
+    """Cover Project.links[].pid handling of dict and string PID entries."""
+
+    def test_dict_pid_entries_parse(self):
+        """V3 live responses emit pid entries as {value, type, typeLabel} dicts."""
+        project = Project.model_validate(
+            {
+                "id": "pj__1",
+                "links": [
+                    {
+                        "legalname": "Partner org",
+                        "pid": [
+                            {"value": "https://ror.org/006hf6230", "typeLabel": "ROR"},
+                            {"value": "grid.48142.3b", "typeLabel": "GRID"},
+                        ],
+                    }
+                ],
+            }
+        )
+        pids = project.links[0].pid
+        assert pids[0].value == "https://ror.org/006hf6230"
+        assert pids[0].typeLabel == "ROR"
+        assert pids[1].value == "grid.48142.3b"
+
+    def test_string_pid_entries_normalized(self):
+        project = Project.model_validate(
+            {"id": "pj__2", "links": [{"pid": ["grid.1234.a"]}]}
+        )
+        assert project.links[0].pid[0].value == "grid.1234.a"
+
+    def test_null_elements_and_null_list_dropped(self):
+        project = Project.model_validate(
+            {"id": "pj__3", "links": [{"pid": [None, "keep-me"]}]}
+        )
+        assert [p.value for p in project.links[0].pid] == ["keep-me"]
+
+        project2 = Project.model_validate({"id": "pj__4", "links": [{"pid": None}]})
+        assert project2.links[0].pid == []

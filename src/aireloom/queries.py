@@ -279,7 +279,9 @@ async def projects_by_organization(
     Args:
         session: Active AireloomSession.
         identifier: Organization name, OpenAIRE ID, or Organization object.
-        search_on: ``"name"`` uses ``relOrganizationName``,
+        search_on: How to interpret *identifier* — ``"name"`` uses full-text
+            ``search`` (not ``relOrganizationName``; org names rarely appear
+            in project text fields, so ``"openaire_id"`` is recommended),
             ``"openaire_id"`` uses ``relOrganizationId``.
         sort_by: Sort expression.
         limit: Maximum results.

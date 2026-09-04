@@ -34,13 +34,19 @@ class OrganizationFundingJurisdiction(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeOrganizationFundingJurisdiction = Annotated[
+    OrganizationFundingJurisdiction,
+    BeforeValidator(lambda v: OrganizationFundingJurisdiction() if v is None else v),
+]
+
+
 class OrganizationFundingFunder(BaseModel):
     """The funder entity within an Organization's funding record."""
 
     id: SafeStr = ""
     shortname: SafeStr = ""
     name: SafeStr = ""
-    jurisdiction: OrganizationFundingJurisdiction = Field(
+    jurisdiction: SafeOrganizationFundingJurisdiction = Field(
         default_factory=OrganizationFundingJurisdiction
     )
     # pid can be a dict or list; keep permissive for now

@@ -124,12 +124,28 @@ SafeProjectLinkCountry = Annotated[
 ]
 
 
+class ProjectLinkPid(BaseModel):
+    """PID entry inside a V3 ``Project.links[]`` item (value + optional type)."""
+
+    value: SafeStr = ""
+    type: SafeStr = ""
+    typeLabel: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeProjectLinkPid = Annotated[
+    ProjectLinkPid,
+    BeforeValidator(lambda v: {"value": v} if isinstance(v, str) else v),
+]
+
+
 class ProjectLink(BaseModel):
     """A related-entity link entry from V3 ``Project.links`` (e.g. participant orgs)."""
 
     header: SafeProjectLinkHeader = Field(default_factory=ProjectLinkHeader)
     legalname: SafeStr = ""
-    pid: SafeList[str] = Field(default_factory=list)
+    pid: SafeList[SafeProjectLinkPid] = Field(default_factory=list)
     country: SafeProjectLinkCountry = Field(default_factory=ProjectLinkCountry)
 
     model_config = ConfigDict(extra="allow")
@@ -138,9 +154,8 @@ class ProjectLink(BaseModel):
 class FundingStream(BaseModel):
     """Represents details about a specific funding stream for a project.
 
-    Attributes:
-        description: A description of the funding stream.
-        id: The unique identifier of the funding stream.
+    description: A description of the funding stream.
+    id: The unique identifier of the funding stream.
     """
 
     description: SafeStr = ""
