@@ -323,7 +323,7 @@ class TestRelatedEndpoints:
                 # pids; use the bare DOI value.
                 filters = ScholixFilters(sourcePid=doi)
                 scholix_response = await aireloom_session.scholix.search_links(
-                    filters=filters
+                    filters=filters, page_size=25
                 )
 
                 assert scholix_response is not None
@@ -331,8 +331,9 @@ class TestRelatedEndpoints:
                     "Scholix response has no result list"
                 )
 
-                # Compare with raw data (Scholexplorer base URL, not Graph).
-                params = {"sourcePid": doi}
+                # Compare with raw data (Scholexplorer base URL, not Graph),
+                # same page size as the client request.
+                params = {"sourcePid": doi, "size": 25}
                 raw_data = await get_raw_data(
                     aireloom_session.scholix._base_url_override + "/Links",
                     params=params,
