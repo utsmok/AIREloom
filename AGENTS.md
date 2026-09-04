@@ -131,6 +131,7 @@ uv run mkdocs serve                       # Local docs
 - **No sub-endpoints**: The API does NOT support `/{entity}/{id}/related*`, `/{entity}/{id}/links`, or `/{entity}/count` — all return 405/404. Verified by live testing.
 - **Links & Scholix page-size cap**: the server silently caps page size at 99 (requesting 100 returns only 10). The library clamps to 99 and warns. Affects `/research-products/links` and Scholix. Links pagination is also **0-indexed** (first page `page=0`).
 - **`funder` filter (Projects)**: returns 0 results for all known values as of 2026-07; prefer `fundingShortName`. Kept for forward-compat.
+- **Unsorted page instability**: without `sortBy`, two back-to-back identical requests can return a page with different ordering *and membership* (observed on `/projects`, 2026-09). Pin `sortBy` when reproducible pages matter.
 - **Sort format**: `sortBy` takes `"fieldname ASC|DESC"` as a single string (e.g. `sortBy="relevance ASC"`). No separate `sortOrder` param exists.
 ## Resolved Issues
 
