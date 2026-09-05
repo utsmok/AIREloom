@@ -2,6 +2,24 @@
 
 All notable changes to AIREloom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-09-05
+
+Dependency alignment release; no API changes.
+
+### Changed
+
+- Widened the `bibliofabric` dependency to `>=0.5.1,<0.6.0`, picking up
+  bibliofabric 0.5.x: pluggable paging strategies (`page`/`offset` with
+  None-able parameter names), resumable cursor iteration (`cursor=` +
+  `on_page` checkpoints), explicit per-record parse-failure modes
+  (`on_error="skip"/"raise"` with a `failures` collector), bounded
+  concurrent page fetches (`concurrency=N`), and opt-in proactive rate
+  pacing from `X-RateLimit-*` headers (`rate_limit_pacing=True`).
+- Verified live against the OpenAIRE Graph v3 API: research-product
+  search/get with raw-vs-parsed field comparison, 3-page cursor
+  iteration with `on_page` checkpointing and no duplicate ids, and
+  project search.
+
 ## [0.5.0] - 2026-09-04
 
 Stable promotion of the v3 line: identical feature set and breaking changes as
