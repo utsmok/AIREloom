@@ -147,6 +147,43 @@ class TestResearchProductKeywords:
         rp = ResearchProduct(id="rp4", keywords="   ")
         assert rp.keywords == []
 
+    def test_list_input_is_preserved(self):
+        rp = ResearchProduct(id="rp10", keywords=["ai", "machine learning"])
+        assert rp.keywords == ["ai", "machine learning"]
+
+    def test_keyword_subjects_fill_missing_keywords(self):
+        rp = ResearchProduct.model_validate(
+            {
+                "id": "rp11",
+                "subjects": [
+                    {"subject": {"scheme": "keyword", "value": "  climate "}},
+                    {"subject": {"scheme": "fos", "value": "Earth sciences"}},
+                ],
+            }
+        )
+        assert rp.keywords == ["climate"]
+
+
+class TestResearchProductDescription:
+    def test_first_non_empty_description_fills_description(self):
+        rp = ResearchProduct.model_validate(
+            {
+                "id": "rp12",
+                "descriptions": ["", "  Abstract text  ", "Later text"],
+            }
+        )
+        assert rp.description == "Abstract text"
+
+    def test_explicit_description_is_preserved(self):
+        rp = ResearchProduct.model_validate(
+            {
+                "id": "rp13",
+                "description": "Canonical description",
+                "descriptions": ["Fallback description"],
+            }
+        )
+        assert rp.description == "Canonical description"
+
 
 class TestResearchProductTitleAlias:
     """Cover ResearchProduct.get_title_from_main_title branches (lines 477-483)."""
