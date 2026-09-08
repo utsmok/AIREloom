@@ -1,0 +1,1569 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/IMPLEMENTATION_PLAN/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>AIREloom V3 Migration — Consolidated Implementation Plan - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aireloom-v3-migration-consolidated-implementation-plan" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AIREloom V3 Migration — Consolidated Implementation Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-release-versioning-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Release &amp; Versioning Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Release & Versioning Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-recommendation-phased-clean-cutover-no-dual-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 Recommendation: phased clean cutover, no dual support
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-rejected-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 Rejected alternatives
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-version-numbering-rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 Version numbering rationale
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-branch-milestone-contingency-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 Branch, milestone &amp; contingency plan
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-scope-summary-from-the-8-research-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Scope Summary (from the 8 research reports)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-phased-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Phased Implementation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Phased Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-0-branch-version-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 0 — Branch &amp; version setup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-core-infrastructure-foundation-everything-depends-on-this" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1 — Core infrastructure (foundation; everything depends on this)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-filter-models-sort-dicts-endpointspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2 — Filter models &amp; sort dicts (endpoints.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-filter-value-serialization-quoting-new-v3-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3 — Filter-value serialization (quoting) [NEW V3 behavior]
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-resource-clients-pagination-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4 — Resource clients &amp; pagination fixes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-response-models-additive-unwrapper-hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 5 — Response models (additive) + unwrapper hardening
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-6-ergonomics-layer-queriespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 6 — Ergonomics layer (queries.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-7-tests-7-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 7 — Tests (7 files)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-8-docs-changelog-packaging-migration-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 8 — Docs, changelog, packaging, migration guide
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-9-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 9 — Verification
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-reconciliation-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Reconciliation Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-risk-register" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Risk Register
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-open-questions-resolved-where-noted" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Open Questions (resolved where noted)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="aireloom-v3-migration-consolidated-implementation-plan">AIREloom V3 Migration — Consolidated Implementation Plan</h1>
+<p><strong>Date:</strong> 2026-07-21 (rev 1.1 — incorporates independent review <code>PLAN_REVIEW.md</code>, verdict <em>SOUND WITH REVISIONS</em>)
+<strong>Status:</strong> Ready for execution
+<strong>Scope:</strong> Migrate AIREloom from the deprecated OpenAIRE Graph API V1/V2 to the unified V3 (<code>https://api.openaire.eu/graph/v3</code>), and align all models, filters, and clients with the live V3 API.
+<strong>Evidence base:</strong> Consolidates 8 per-endpoint/facet research reports (<code>docs/v3-migration/01–08-*.md</code>). Every behavioral claim was verified against the <strong>live V3 API</strong> (<code>reference/v3-investigation/v3_live.py</code>), the V3 OpenAPI spec, and the docs site, then independently re-verified by the plan reviewer (13/13 spot-checks passed). Supersedes the earlier <code>V3_MIGRATION_PLAN.md</code> at repo root.</p>
+<blockquote>
+<p><strong>Revision log (1.0 → 1.1):</strong> added explicit sort-dict actions to Phase 2 (C1); made the <code>Subject</code> model change concrete instead of "investigate" (C2); removed the stale "add py.typed" instruction — file already exists (I1); specified list-typed + logical-operator handling in the quoting helper (I2, I3); expanded the list→string serialization note to cover <code>keywords</code>/<code>fos</code> (I4); added a V1/V2-sunset contingency (I5); moved the low-priority unwrapper fallback out of Phase 1 (I6); added an explicit breaking-changes list for the migration guide (I7); fixed the new-filter count to a single definition (M1); distinguished the urgency of the two page-size clamps (M2); added notes on <code>funder</code> docstring (M4), re-verifying the batch comma-OR syntax (M5), and the Scholix <code>sort_by</code> no-op (M6); committed on the deprecation-shim question (M7).</p>
+<p><strong>Headline:</strong> OpenAIRE V3 serves all entities from one base URL with kebab-case paths, adds 41 new filter parameters, renames 3, removes <code>grantID</code>, and fixes the persons 500s. AIREloom's response models need only additive field changes. The single most important fix is a <strong>latent off-by-one bug in the links iteration</strong> (currently skips the first page → data loss). The migration is a clean cutover, released as a phased pre-release.</p>
+</blockquote>
+<hr />
+<h2 id="1-release-versioning-strategy">1. Release &amp; Versioning Strategy</h2>
+<p>This is a breaking change (renamed filters, removed <code>grantID</code>, new base URL, kebab-case paths, type changes). The library is currently <strong><code>0.4.0</code>, Development Status <code>3 - Alpha</code></strong> (<code>pyproject.toml</code>). The strategy below is the recommendation; alternatives and their rejection rationale follow.</p>
+<h3 id="11-recommendation-phased-clean-cutover-no-dual-support">1.1 Recommendation: phased clean cutover, no dual support</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dual support via runtime toggle (env param)?</td>
+<td><strong>No</strong> — rejected (§1.2)</td>
+</tr>
+<tr>
+<td>Separate repo branch + separate PyPI package?</td>
+<td><strong>No</strong> — rejected (§1.2)</td>
+</tr>
+<tr>
+<td>Phased cutover, deprecating the V1/V2 surface?</td>
+<td><strong>Yes</strong> — adopted</td>
+</tr>
+<tr>
+<td>Versioning</td>
+<td><code>0.5.0a1</code> → <code>0.5.0b1</code> → <code>0.5.0</code> (stable)</td>
+</tr>
+<tr>
+<td>Where the work happens</td>
+<td>A long-lived <code>v3</code> branch, merged to <code>main</code> at stable</td>
+</tr>
+<tr>
+<td>Fate of 0.4.0 (V1/V2)</td>
+<td>Remains on PyPI untouched; no backports. Dies naturally when OpenAIRE removes V1/V2 (~6 months).</td>
+</tr>
+<tr>
+<td>Deprecation shim for old filter names?</td>
+<td><strong>No.</strong> Rely on <code>extra="forbid"</code> validation errors + a clear migration guide. Good docs beat a shim for an alpha lib (see M7 resolution).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why a clean cutover (no V1/V2 retention):</strong> V1/V2 are deprecated and will be removed in ~6 months. The filter models are <em>incompatible</em> (3 renames, <code>grantID</code> removed, type changes, <code>extra="forbid"</code>), so retaining V1/V2 would mean maintaining two parallel, divergent filter-model sets — unjustifiable complexity for an alpha library with a small user base.</p>
+<p><strong>On the error UX (M7):</strong> with <code>extra="forbid"</code>, an old field name (e.g. <code>authorOrcid</code>) raises a Pydantic <code>ValidationError</code> listing all valid fields. That is workable, not elegant. Rather than build a deprecation shim, we ship a thorough <code>docs/migration-to-v3.md</code> (Phase 8) that enumerates every breaking change. This is the right trade-off for an alpha library.</p>
+<p><strong>Why pre-releases:</strong> PEP 440 pre-release versions (<code>0.5.0a1</code>, <code>0.5.0b1</code>) are <strong>not</strong> installed by default — <code>pip install aireloom</code> continues to resolve to <code>0.4.0</code> until <code>0.5.0</code> (stable) ships. This gives early adopters an opt-in runway (<code>pip install "aireloom&gt;=0.5.0a1"</code>) without surprising existing users.</p>
+<h3 id="12-rejected-alternatives">1.2 Rejected alternatives</h3>
+<ul>
+<li><strong>Runtime toggle (env var to switch v2↔v3):</strong> the two APIs differ in base URL, path casing, pagination indexing, and filter names. A toggle would require runtime branching in serialization, two filter-model families, and dual test fixtures — essentially two libraries fused. Toggles are for <em>feature flags</em>, not <em>whole-API generations</em>.</li>
+<li><strong>Separate package / permanent branch with its own PyPI release:</strong> fragments the user base, doubles maintenance, confuses discovery. Only warranted when a large installed base cannot migrate — not the case at <code>0.4.0</code> alpha.</li>
+</ul>
+<h3 id="13-version-numbering-rationale">1.3 Version numbering rationale</h3>
+<ul>
+<li><strong>Stay on <code>0.x</code></strong> (do not jump to <code>1.0.0</code>). The library is not yet at the feature-complete, API-stable milestone <code>1.0.0</code> signals. <code>0.5.0</code> marks the V3 cutover as a significant-but-expected (for 0.x) breaking change.</li>
+<li><strong>Reserve <code>1.0.0</code></strong> for after the surface stabilizes — plausibly once OpenAIRE's V4 "unified filters" leaves BETA and AIREloom adopts it.</li>
+<li><strong>Use PEP 440 pre-release suffixes</strong> (<code>a1</code>, <code>b1</code>, optional <code>rc1</code>). Recognized by pip/uv; excluded from default resolution.</li>
+<li><strong>Development Status classifier:</strong> bump <code>3 - Alpha</code> → <code>4 - Beta</code> at the <code>0.5.0b1</code> tag; hold through <code>0.5.0</code>; promote to <code>5 - Production/Stable</code> only at a future <code>1.0.0</code>.</li>
+</ul>
+<h3 id="14-branch-milestone-contingency-plan">1.4 Branch, milestone &amp; contingency plan</h3>
+<ol>
+<li>Cut branch <code>v3</code> from <code>main</code>.</li>
+<li>Implement phases 0–9 (§3) on <code>v3</code>. (Phase 5 is additive and may run in parallel with 2–4.)</li>
+<li>Tag <code>0.5.0a1</code> from <code>v3</code>; publish to TestPyPI first, then PyPI. Announce for early testing.</li>
+<li>Incorporate feedback; tag <code>0.5.0b1</code> (raise classifier to Beta).</li>
+<li>Tag <code>0.5.0</code> (stable); merge <code>v3</code> → <code>main</code>.</li>
+<li>Legacy: <code>0.4.0</code> remains the last V1/V2 release; documented to stop working when OpenAIRE removes V1/V2.</li>
+</ol>
+<p><strong>Contingency (I5) — V1/V2 sunset before 0.5.0 stable:</strong> "Time-box the migration" is not a fallback. If OpenAIRE announces a firm V1/V2 sunset date before <code>0.5.0b1</code> tags, cut an <strong>accelerated <code>0.5.0</code></strong> from whatever is complete at that moment — minimum viable = <strong>Phase 1 (core infra) + Phase 4 §1 (links off-by-one fix)</strong> — and ship without the additive model/filter work, which can follow in <code>0.5.1</code>. This guarantees users always have a working client against a live OpenAIRE.</p>
+<hr />
+<h2 id="2-scope-summary-from-the-8-research-reports">2. Scope Summary (from the 8 research reports)</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Headline</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base URL</td>
+<td>One V3 base serves all entities; remove the v1/v2 split + RP <code>_base_url_override</code></td>
+<td><code>07</code></td>
+</tr>
+<tr>
+<td>Paths</td>
+<td><strong>Kebab-case is a hard requirement</strong> — V3 returns <strong>405</strong> for camelCase. <code>researchProducts</code>→<code>research-products</code>, <code>dataSources</code>→<code>datasources</code>; <code>projects</code>/<code>persons</code>/<code>organizations</code> unchanged</td>
+<td><code>07</code></td>
+</tr>
+<tr>
+<td>Filters</td>
+<td>3 RP renames; <strong>41 new filter params</strong> (RP 20, Projects 13, DS 8 — <em>excluding</em> meta-params <code>page</code>/<code>pageSize</code>/<code>cursor</code>/<code>sortBy</code>/<code>logicalOperator</code>/<code>includeStats</code>); <code>grantID</code> removed; <code>logicalOperator</code> gains <code>NOT</code>; Projects date filters → <code>str</code></td>
+<td><code>01</code>,<code>03</code>,<code>04</code>,<code>08</code></td>
+</tr>
+<tr>
+<td>Sort</td>
+<td>RP: re-add <code>popularity</code> (it works); Persons: relevance-only (drop <code>startDate</code>/<code>endDate</code>)</td>
+<td><code>01</code>,<code>05</code></td>
+</tr>
+<tr>
+<td>Models</td>
+<td>Additive only (V3 uses same camelCase field names): RP (+<code>eoscIfGuidelines</code>, <code>green</code>, etc.), Org (+<code>fundings</code>,<code>originalIds</code>,<code>collectedFrom</code>), DS (+5–7 fields), Project (+<code>funding</code>,<code>links</code> nested)</td>
+<td><code>01</code>,<code>08</code>,<code>02</code>,<code>04</code>,<code>03</code></td>
+</tr>
+<tr>
+<td>Critical bug</td>
+<td><strong>Links iteration off-by-one</strong>: <code>search_links</code>/<code>iterate_links</code> start at <code>page=1</code> on a 0-indexed endpoint → silently skips the first page (data loss)</td>
+<td><code>06</code>,<code>07</code></td>
+</tr>
+<tr>
+<td>Behavior to keep</td>
+<td>Links &amp; Scholix: 0-indexed, silent <code>pageSize</code>/<code>size=100</code>→10 cap (clamp to 99), divergent envelope, no cursor</td>
+<td><code>06</code>,<code>07</code></td>
+</tr>
+<tr>
+<td>Filter serialization</td>
+<td>NEW: V3 requires double-quoting filter values with spaces/parens/operators; inline OR/AND/NOT supported</td>
+<td><code>01</code>,<code>08</code></td>
+</tr>
+<tr>
+<td>Persons</td>
+<td><code>givenName</code>/<code>lastName</code> 500s are <strong>fixed</strong>; remove CAUTION docstrings</td>
+<td><code>05</code></td>
+</tr>
+<tr>
+<td>Scholix</td>
+<td>Already correct (0-indexed, proper envelope); no code changes</td>
+<td><code>06</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Line-number caveat (M3):</strong> all <code>file:line</code> references are approximate (±3 lines, verified at planning time). The executor should grep for the named symbol, not trust the number verbatim.</p>
+</blockquote>
+<hr />
+<h2 id="3-phased-implementation">3. Phased Implementation</h2>
+<h3 id="phase-0-branch-version-setup">Phase 0 — Branch &amp; version setup</h3>
+<ul>
+<li>Cut <code>v3</code> branch. Bump <code>pyproject.toml</code> <code>version</code> → <code>"0.5.0a1.dev0"</code> (tag <code>0.5.0a1</code> at first release).</li>
+<li><strong><code>src/aireloom/py.typed</code> already exists</strong> (PEP 561 compliant) — no action. Just verify it ships in the wheel (<code>[tool.hatch.build.targets.wheel] packages = ["src/aireloom"]</code> already includes it). <em>(I1 — removed the stale "add py.typed" instruction.)</em></li>
+</ul>
+<h3 id="phase-1-core-infrastructure-foundation-everything-depends-on-this">Phase 1 — Core infrastructure (foundation; everything depends on this)</h3>
+<p>Implement first, alone. <strong>Phase 1 contains ONLY blocking work</strong>; non-blocking items are moved to later phases (I6).</p>
+<ol>
+<li><strong><code>src/aireloom/constants.py</code></strong> — replace the two Graph base-URL constants with one:
+   <code>python
+   OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v3"</code>
+   Delete <code>OPENAIRE_GRAPH_API_V2_BASE_URL</code>. Keep <code>OPENAIRE_SCHOLIX_API_BASE_URL</code> unchanged. (<code>07</code>-R1)</li>
+<li><strong><code>src/aireloom/endpoints.py</code></strong> — kebab-case path constants (HARD requirement; V3 returns 405 for camelCase):</li>
+<li><code>RESEARCH_PRODUCTS = "research-products"</code></li>
+<li><code>DATA_SOURCES = "datasources"</code></li>
+<li><code>LINKS = "research-products/links"</code></li>
+<li>(<code>projects</code>, <code>persons</code>, <code>organizations</code>, <code>SCHOLIX</code> unchanged) (<code>07</code>-R5)</li>
+<li><strong><code>src/aireloom/resources/research_products_client.py</code></strong> — <strong>remove</strong> <code>_base_url_override = OPENAIRE_GRAPH_API_V2_BASE_URL</code> (around line 47–50). With one V3 base, RP inherits the default like every other entity. Drop the now-unused import. (<code>07</code>-R2, <code>01</code>-§6)</li>
+<li><strong>Reconciliation (decided):</strong> the Projects research report (<code>03</code>-R7) suggested <em>adding</em> a <code>_base_url_override</code> to <code>ProjectsClient</code>. <strong>Wrong for V3</strong> — no client overrides; the single default base is V3 and <code>ProjectsClient</code>/<code>OrganizationsClient</code>/etc. inherit it automatically. Verified by <code>07</code> and reviewer.</li>
+<li><strong><code>src/aireloom/resources/research_products_client.py</code></strong> — the links methods pass <code>base_url_override=OPENAIRE_GRAPH_API_BASE_URL</code> (around lines 104, 162). After §1 this resolves to V3; <strong>remove the explicit override</strong> since the inherited base is already V3. (<code>07</code>-R4)</li>
+<li><strong><code>src/aireloom/models/base.py</code> Header model</strong> — no structural change; all-optional + <code>extra="allow"</code> already tolerates the three envelope shapes. (<code>07</code>-R7)</li>
+</ol>
+<p><strong>Acceptance:</strong> <code>async with AireloomSession() as s: await s.research_products.search(...)</code> and each other entity hits <code>/graph/v3/&lt;kebab-path&gt;</code> and returns 200.</p>
+<h3 id="phase-2-filter-models-sort-dicts-endpointspy">Phase 2 — Filter models &amp; sort dicts (<code>endpoints.py</code>)</h3>
+<ol>
+<li><strong>Research Products renames</strong> (<code>01</code>-§1, <code>08</code>-R4): <code>authorOrcid</code>→<code>authorId</code>, <code>bestOpenAccessRightLabel</code>→<code>accessRightLabel</code>, <code>sdg</code>→<code>sdgLabel</code>. Note: <code>sdg</code> was <code>list[str]</code>; <code>sdgLabel</code> is a single <code>str</code> (V3 supports inline OR within the value) — <strong>a cardinality break to document</strong> (see Phase 8).</li>
+<li><strong>Research Products new params</strong> (<code>01</code>-§2c, <code>08</code>-R7): add the 20 new V3 filter fields (<code>accessRightLabel</code>, <code>authorId</code>, <code>sdgLabel</code>, <code>eoscIfGuidelines</code>, <code>excludePubDateRange: bool</code>, <code>fromPublicationYear: int</code>, <code>toPublicationYear: int</code>, <code>publicationYear: str</code>, <code>hasLicense: bool</code>, <code>language</code>, <code>relCommunityName</code>, <code>relFunder</code>, <code>relFundingLevel0Id/1Id/2Id</code>, <code>relHostingDataSource</code>, <code>relOrganization</code>, <code>relProject</code>, <code>source</code>, <code>subCommunity</code>, <code>toPublicationYear</code>).</li>
+<li><strong>Projects</strong> (<code>03</code>-R1,R2,R3): add 13 new fields (<code>activeYear</code>, <code>startYear</code>, <code>endYear</code>, <code>fromStartYear</code>, <code>toStartYear</code>, <code>fromEndYear</code>, <code>toEndYear</code>, <code>country</code>, <code>funder</code>, <code>fundinglevel0Id</code>, <code>fundinglevel1Id</code>, <code>fundinglevel2Id</code>, <code>projectOAMandatePublications</code>); <strong>remove <code>grantID</code></strong>; change <code>fromStartDate</code>/<code>toStartDate</code>/<code>fromEndDate</code>/<code>toEndDate</code> from <code>date | None</code> → <code>str | None</code> (V3 accepts bare years — <strong>a type break to document</strong>, see Phase 8).</li>
+<li><strong><code>funder</code> caveat (M4):</strong> returns 0 results for all tested values as of 2026-07; <code>fundingShortName</code> works. Add a docstring note: <em>"returns 0 results for all known values as of 2026-07; prefer <code>fundingShortName</code>. Kept for forward-compat."</em> Do not block the migration on it.</li>
+<li><strong>Data Sources</strong> (<code>04</code>-R2): add 8 new fields (<code>collectedFromName</code>, <code>compatibilityId</code>, <code>compatibilityName</code>, <code>country</code>, <code>eoscdatasourcetype</code>, <code>jurisdiction</code>, <code>odLanguages</code>, <code>thematic: bool</code>).</li>
+<li><strong>All entities</strong> (<code>02</code>,<code>05</code>,<code>08</code>): widen <code>logicalOperator</code> to <code>Literal["AND", "OR", "NOT"]</code>. Document that <code>NOT</code> is primarily an inline operator within filter values (top-level <code>NOT</code> is accepted but near-no-op).</li>
+<li><strong>Persons</strong> (<code>05</code>-R1): remove the CAUTION docstrings on <code>givenName</code>/<code>lastName</code> — both now return 200.</li>
+<li><strong>Sort dicts (C1 — previously missing action):</strong></li>
+<li><code>ENDPOINT_DEFINITIONS[RESEARCH_PRODUCTS]["sort"]</code>: <strong>add <code>"popularity": {}</code></strong> (live-verified working on V3).</li>
+<li><code>ENDPOINT_DEFINITIONS[PERSONS]["sort"]</code>: <strong>remove <code>"startDate": {}</code> and <code>"endDate": {}</code></strong> (both return 400 on V3; relevance-only).</li>
+</ol>
+<p><strong>Acceptance:</strong> <code>ResearchProductsFilters(authorId=..., accessRightLabel=..., sdgLabel=...)</code> validates; old names raise a validation error (<code>extra="forbid"</code>); <code>popularity</code> is a declared RP sort; persons sort is relevance-only.</p>
+<h3 id="phase-3-filter-value-serialization-quoting-new-v3-behavior">Phase 3 — Filter-value serialization (quoting) [NEW V3 behavior]</h3>
+<p>V3 requires filter values containing spaces/parens/<strong>logical operators</strong> to be <strong>double-quoted</strong>, and supports inline <code>OR/AND/NOT</code>. Currently <code>model_dump(exclude_none=True)</code> sends raw values → 400 for multi-word values (<code>08</code>-§4, <code>01</code>-§1).</p>
+<ol>
+<li>Add a serialization helper that quotes a value <strong>iff</strong> it matches the server's own trigger rule. Trigger = contains whitespace, a parenthesis, <strong>or a bare logical-operator token</strong> (regex <code>\b(OR|AND|NOT)\b|[\s()]</code>), and the value does <strong>not</strong> already start with <code>"</code> or <code>(</code> (so power-user expressions like <code>("US" OR "GB") AND NOT "DE"</code> pass through untouched). <em>(I3 — trigger now matches the V3 error message exactly.)</em></li>
+<li><strong>List-typed fields (I2):</strong> apply the quoting rule <strong>element-wise</strong> to each string item of list-valued filters (<code>subjects</code>, <code>contentTypes</code>, <code>keywords</code>, <code>fos</code>); leave non-string items (bool, int) untouched.</li>
+<li><strong>List→string serialization (I4):</strong> V3 specs <code>subjects</code>/<code>contentTypes</code> (ResearchProducts) and <code>keywords</code> (Projects) and <code>fos</code> (ResearchProducts) as comma-separated strings while the models use <code>list[str]</code>. <strong>Verify</strong> how <code>bibliofabric</code> serializes list fields (repeated key <code>subjects=a&amp;subjects=b</code> vs <code>subjects=a,b</code>). If repeated-key, either switch those fields to <code>str | None</code> or add a join serializer. All four affected fields are in scope.</li>
+<li>Apply the quoting at the filter→query-param boundary. AIREloom's standard clients serialize via <code>bibliofabric.BaseResourceClient</code>; the links path dumps filters directly (<code>research_products_client.py:98</code>). Implement as a thin AIREloom-side override of param-building <strong>or</strong> a <code>field_serializer</code> on the filter base model.</li>
+<li>Affects <strong>Graph V3 filters only</strong> — Scholix/links filters do not use this syntax.</li>
+</ol>
+<p><strong>Acceptance:</strong> <code>ResearchProductsFilters(accessRightLabel="Open Access")</code> serializes to <code>accessRightLabel="Open Access"</code> and returns 200; <code>subjects=["Open Access Research"]</code> round-trips correctly.</p>
+<h3 id="phase-4-resource-clients-pagination-fixes">Phase 4 — Resource clients &amp; pagination fixes</h3>
+<ol>
+<li><strong>CRITICAL — links off-by-one fix</strong> (<code>06</code>-§2, <code>07</code>-R3): <code>research_products_client.py</code> — change <code>search_links</code> default <code>page: int = 1</code> → <code>0</code>; change <code>iterate_links</code> <code>current_page = 1</code> → <code>0</code>; fix docstrings to "0-indexed". This is a <strong>data-loss bug</strong> (currently skips the first page).</li>
+<li><strong>Clamp page size (M2 — differentiated urgency):</strong></li>
+<li><strong>Graph links (urgent):</strong> default <code>page_size</code> <code>100</code> → <code>99</code>; add a clamp so values &gt;99 become 99. The default of 100 is silently truncated to 10 today.</li>
+<li><strong>Scholix (defensive only):</strong> clamp <code>size</code> to 99. Scholix's default is <code>DEFAULT_PAGE_SIZE = 20</code> (<code>constants.py:14</code>), so users only hit the cap if they explicitly pass ≥100. Clamp protects against silent truncation regardless.</li>
+<li><strong>Scholix client</strong> — <strong>no changes</strong> (already 0-indexed, correct envelope). (<code>06</code>-§6)</li>
+<li><strong><code>_batch.py</code></strong> — <code>page=1</code> is <strong>correct</strong> for regular 1-indexed endpoints; leave as-is. <strong>(M5) Re-verify</strong> during Phase 9 that V3 still honors the <code>pid=a,b,c</code> comma-separated OR syntax the docstring claims.</li>
+<li><strong>(M6, future cleanup — not blocking):</strong> <code>queries.py</code> <code>citing_works</code>/<code>related_datasets</code>/<code>all_links</code> forward a <code>sort_by</code> to <code>session.scholix.collect()</code>, but Scholix has no sort support (<code>06</code>-§6.4). File a follow-up; do not block the migration.</li>
+</ol>
+<p><strong>Acceptance:</strong> <code>iterate_links(sourcePid=...)</code> yields relations starting from the first page; page=0 and page=1 return different (correct, ordered) records; no path silently returns 10 results when 99 were requested.</p>
+<h3 id="phase-5-response-models-additive-unwrapper-hardening">Phase 5 — Response models (additive) + unwrapper hardening</h3>
+<p>V3 uses the same camelCase field names as V2; <code>extra="allow"</code> already absorbs new fields without data loss. Declare useful new fields explicitly for type access (<code>01</code>-§5, <code>08</code>-R1/R2/R3, <code>02</code>, <code>04</code>):</p>
+<ul>
+<li><strong><code>models/research_product.py</code></strong> (<code>ResearchProduct</code>): add <code>eoscIfGuidelines</code>, <code>green</code>, <code>inDiamondJournal</code>, <code>isGreen</code>, <code>isInDiamondJournal</code>, <code>publiclyFunded</code>. Nested: add <code>id</code> to <code>Author</code>; add <code>openAccessRoute</code> to <code>Instance.accessRight</code>; add <code>conferencePlace</code>/<code>conferenceDate</code> to <code>Container</code>.</li>
+<li><strong><code>Subject</code> model (C2 — concrete decision, no longer "investigate"):</strong> V3 returns <code>{"subject": {"scheme": "FOS", "value": "..."}, "provenance": null}</code> (verified live), which is incompatible with the current <code>Subject.subject: dict[str,str] | None</code>. Reshape <code>Subject</code> to typed fields:
+  <code>python
+  class SubjectV3(BaseModel):
+      subject: dict[str, str] | None = None   # {scheme, value}
+      provenance: dict | None = None
+      model_config = ConfigDict(extra="allow")</code>
+  (or equivalent). The current model degrades gracefully today (no data loss), so this is not a runtime break — but ship a typed model so users get <code>.subject["scheme"]</code> access safely.</li>
+<li><strong><code>models/organization.py</code></strong>: add <code>originalIds: list[str]</code>, <code>fundings: list[Funding]</code>, <code>collectedFrom: list[CfHbKeyValue]</code>.</li>
+<li><strong><code>models/data_source.py</code></strong>: add <code>collectedFrom</code>, <code>thematic</code>, <code>eoscdatasourcetype</code> (CodeLabel), <code>jurisdiction</code> (CodeLabel), <code>odlanguages</code>, <code>openaireCompatibilityId</code>, <code>links</code>. Consider <code>CodeLabel</code>/<code>CfHbKeyValue</code> helper models. Optionally relax 3 overly-restrictive <code>Literal</code> types to <code>str | None</code> per V3 spec.</li>
+<li><strong><code>models/project.py</code></strong>: add <code>funding</code> (hierarchical ProjectFunding) and <code>links</code> (inline related entities). Model <code>links</code> as raw <code>list | None</code> initially (dedicated relation endpoints exist).</li>
+<li><strong><code>models/person.py</code></strong> — no structural change; update the module docstring's v1 reference. (<code>05</code>-R4)</li>
+<li><strong><code>unwrapper.py</code> (moved here from Phase 1 — I6):</strong> low-priority, add a <code>result</code> fallback in <code>unwrap_results()</code> for future-proofing (Scholix currently bypasses the unwrapper). Not blocking.</li>
+</ul>
+<p><strong>Acceptance:</strong> <code>model_validate(&lt;live v3 response&gt;)</code> succeeds for every entity; new fields (incl. the reshaped <code>Subject</code>) are typed.</p>
+<h3 id="phase-6-ergonomics-layer-queriespy">Phase 6 — Ergonomics layer (<code>queries.py</code>)</h3>
+<p>Rename filter references (4 lines, <code>08</code>-§3, R5, <code>01</code>-§7): <code>authorOrcid</code>→<code>authorId</code>; <code>bestOpenAccessRightLabel</code>→<code>accessRightLabel</code>; value <code>"OPEN"</code>→<code>"Open Access"</code> (V3 enum); <code>sdg</code>→<code>sdgLabel</code>.</p>
+<p><strong>Acceptance:</strong> <code>publications_by_author(..., search_on="orcid", ...)</code> works against V3.</p>
+<h3 id="phase-7-tests-7-files">Phase 7 — Tests (7 files)</h3>
+<p>Update v1/v2 URL constants and camelCase path assertions (per <code>07</code>):
+- <code>tests/test_config.py</code>, <code>tests/test_session.py</code>, <code>tests/test_actual_data.py</code> (v2 URLs → v3, camelCase → kebab-case paths), <code>tests/resources/test_research_products_client.py</code> (remove v2 override assertions), <code>tests/resources/test_links.py</code> (0-indexed expectations, path), <code>tests/resources/test_persons_client.py</code> (rename v1 test, assert V3 default).
+- Add tests for: renamed filters, <code>popularity</code> sort, persons <code>givenName</code>/<code>lastName</code> 200, filter-value auto-quoting (incl. list-typed), <code>iterate_links</code> starting at page 0, the reshaped <code>Subject</code>, new DS/Org/Project fields.
+- Keep the <code>live_api</code> marker pattern; add live smoke tests (skipped in CI) exercising V3 endpoints.</p>
+<p><strong>Acceptance:</strong> <code>uv run pytest tests/</code> green; <code>--cov=aireloom</code> ≥ 95%.</p>
+<h3 id="phase-8-docs-changelog-packaging-migration-guide">Phase 8 — Docs, changelog, packaging, migration guide</h3>
+<ul>
+<li><strong>New <code>docs/migration-to-v3.md</code> (I7) — explicit breaking-changes list</strong> for 0.4.0→0.5.0 users:</li>
+<li>Filter renames: <code>authorOrcid</code>→<code>authorId</code>, <code>bestOpenAccessRightLabel</code>→<code>accessRightLabel</code>, <code>sdg</code>→<code>sdgLabel</code>.</li>
+<li><strong>Cardinality change:</strong> <code>sdg: list[str]</code> → <code>sdgLabel: str</code> (use inline OR for multiple).</li>
+<li><strong>Type change:</strong> Projects <code>fromStartDate</code>/<code>toStartDate</code>/<code>fromEndDate</code>/<code>toEndDate</code> now <code>str</code> (accepts bare years like <code>"2022"</code>); passing <code>date(...)</code> objects no longer works.</li>
+<li>Removed: <code>grantID</code> (Projects); <code>startDate</code>/<code>endDate</code> persons sorts.</li>
+<li>Base URL/path change; default <code>popularity</code> sort now declared.</li>
+<li><code>AGENTS.md</code>: rewrite API Version Routing for V3; remove "Graph API v3: Not yet supported"; update Known Issues (drop fixed items; document retained server bugs: links/Scholix page-size cap, 0-indexed links, envelope divergence).</li>
+<li><code>docs/advanced/configuration.md</code> (base URL), <code>docs/usage/links.md</code> &amp; <code>persons.md</code> (remove "v1-only" admonitions), <code>docs/endpoints/links.md</code> (path), <code>docs/changelog.md</code> (V3 entry).</li>
+<li><code>pyproject.toml</code>: bump version per §1.4; bump classifier to <code>4 - Beta</code> at the <code>b1</code> tag; confirm <code>py.typed</code> ships in the wheel.</li>
+</ul>
+<h3 id="phase-9-verification">Phase 9 — Verification</h3>
+<ol>
+<li><code>uv run ruff check src/ &amp;&amp; uv run ruff format src/ &amp;&amp; uvx ty check src/</code>.</li>
+<li><code>uv run pytest tests/</code> green, coverage ≥ 95%.</li>
+<li>Live smoke test against <code>/graph/v3</code>: every entity search; renamed filters + quoting; <code>popularity</code> sort; persons <code>givenName</code>; <code>iterate_links</code> yields from page 0; <code>_batch_get</code> correctness; <strong>re-verify the <code>pid=a,b,c</code> comma-OR syntax</strong> (M5).</li>
+<li>Confirm the tagged pre-release resolves correctly (excluded from default until stable).</li>
+</ol>
+<hr />
+<h2 id="4-reconciliation-notes">4. Reconciliation Notes</h2>
+<ul>
+<li><strong>Per-client <code>_base_url_override</code> (decided):</strong> <code>03</code>-R7 (add override to ProjectsClient) vs <code>07</code>-R2 (remove RP override). <strong><code>07</code> is correct</strong> — V3 is one base; no client overrides. Phase 1 §3.</li>
+<li><strong>List-vs-string filter serialization (expanded, I4):</strong> V3 specs <code>subjects</code>, <code>contentTypes</code>, <code>keywords</code>, <code>fos</code> as comma-separated <code>string</code>; current code uses <code>list[str]</code>. <strong>Must verify</strong> how <code>bibliofabric</code> serializes list fields (repeated key vs comma-join) — Phase 3 §3 covers all four.</li>
+<li><strong><code>Subject</code> model shape (decided, C2):</strong> V3 returns <code>{subject:{scheme,value}, provenance}</code> — reshape the model in Phase 5; not a runtime break today.</li>
+<li><strong><code>funder</code> filter returns 0 results:</strong> documented but non-functional; <code>fundingShortName</code> works. Document preference; do not block (Phase 2 §3, M4).</li>
+</ul>
+<h2 id="5-risk-register">5. Risk Register</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Links/Scholix silent page-size cap changes upstream</td>
+<td>Med</td>
+<td>Low (clamp isolates us)</td>
+<td>Clamp to 99 (Phase 4)</td>
+</tr>
+<tr>
+<td>Filter quoting breaks power-user expressions</td>
+<td>Low</td>
+<td>Med</td>
+<td>Pass through values already starting with <code>"</code>/<code>(</code>; trigger matches server rule (Phase 3)</td>
+</tr>
+<tr>
+<td>List-filter serialization mismatch with V3</td>
+<td>Med</td>
+<td>Med</td>
+<td>Verify in Phase 3 §3; add join serializer if needed</td>
+</tr>
+<tr>
+<td><code>Subject</code>/nested model shape drift</td>
+<td>Med</td>
+<td>Low</td>
+<td><code>extra="allow"</code> prevents data loss; typed fixes in Phase 5</td>
+</tr>
+<tr>
+<td><strong>OpenAIRE removes V1/V2 before 0.5.0 stable</strong></td>
+<td>Low</td>
+<td>Med</td>
+<td><strong>Accelerated 0.5.0 from Phase 1 + Phase 4 §1 (§1.4 contingency)</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-open-questions-resolved-where-noted">6. Open Questions (resolved where noted)</h2>
+<ol>
+<li>Versioning: <code>0.5.0a1/b1/0.5.0</code> cadence adopted (§1.3). <em>(Could go straight to <code>0.5.0</code> given alpha maturity — but pre-releases give a safer opt-in runway; recommend keeping them.)</em></li>
+<li><code>links</code>/<code>projects.links</code> nested structures: model <code>links</code> as <code>list | None</code> for 0.5.0 (dedicated relation endpoints exist); promote to full models on demand.</li>
+<li>Branch: <code>v3</code> branch preferred over direct-to-<code>main</code> for a clean reviewable diff; merged at stable.</li>
+<li>Deprecation shim: <strong>no</strong> (M7) — rely on <code>extra="forbid"</code> errors + the migration guide.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>

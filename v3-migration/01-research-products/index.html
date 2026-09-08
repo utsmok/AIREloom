@@ -1,0 +1,2828 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/01-research-products/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Research Products Endpoint - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-research-products-endpoint" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Research Products Endpoint
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-renamed-filters-confirmed" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Renamed Filters (CONFIRMED)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Renamed Filters (CONFIRMED)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enumerated-values-from-live-400-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Enumerated Values (from live 400 error messages)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-complete-filter-parameter-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Complete Filter Parameter Inventory
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Complete Filter Parameter Inventory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2a-existing-fields-unchanged-name-matches-v3" class="md-nav__link">
+    <span class="md-ellipsis">
+      2a. Existing Fields — Unchanged (name matches V3)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2b-fields-requiring-rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      2b. Fields Requiring Rename
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2c-new-parameters-in-v3-not-in-current-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      2c. NEW Parameters in V3 (not in current code)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2d-parameters-in-spec-that-need-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      2d. Parameters in Spec That Need Verification
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-sort-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Sort Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-pagination-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Pagination Behavior
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-response-model-field-level-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Response Model — Field-Level Comparison
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Response Model — Field-Level Comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5a-top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      5a. Top-Level Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5b-nested-model-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      5b. Nested Model Changes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-resource-client-_base_url_override" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Resource Client — _base_url_override
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-convenience-query-impact-queriespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Convenience Query Impact (queries.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification Log
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification Log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renamed-filter-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Renamed Filter Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-filter-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      New Filter Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-field-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort Field Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pagination-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pagination Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-response-capture-for-model-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Full Response Capture (for model comparison)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#priority-1-breaking-changes-must-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority 1: Breaking Changes (Must Fix)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-2-add-missing-fields-to-filters-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority 2: Add Missing Fields to Filters Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-3-response-model-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority 3: Response Model Updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-4-sort-dict-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority 4: Sort Dict Update
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#priority-5-path-constant" class="md-nav__link">
+    <span class="md-ellipsis">
+      Priority 5: Path Constant
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-research-products-endpoint">V3 Migration Research — Research Products Endpoint</h1>
+<h2 id="scope">Scope</h2>
+<p>The <code>/v3/research-products</code> endpoint: <strong>filter parameters</strong> (renamed, new, removed), <strong>sort fields</strong>, <strong>response model</strong> (field-level diff), <strong>resource client</strong> (<code>_base_url_override</code> removal), and <strong>convenience-query references</strong> in <code>queries.py</code>. Covers the search/list endpoint, not the links sub-endpoint (covered separately).</p>
+<h2 id="method">Method</h2>
+<ol>
+<li>Parsed <code>graph_v3_openapi.json</code> → extracted all 60 GET parameters for <code>/v3/research-products</code></li>
+<li>Ran 20+ live API calls via <code>reference/v3-investigation/v3_live.py</code> against <code>https://api.openaire.eu/graph/v3</code></li>
+<li>Compared live responses field-by-field against current <code>ResearchProduct</code> model (<code>src/aireloom/models/research_product.py</code>)</li>
+<li>Audited current <code>ResearchProductsFilters</code> (<code>src/aireloom/endpoints.py:26-112</code>) and sort dict (<code>endpoints.py:331-338</code>)</li>
+<li>Traced filter usage in convenience queries (<code>src/aireloom/queries.py</code>)</li>
+</ol>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-renamed-filters-confirmed">1. Renamed Filters (CONFIRMED)</h3>
+<p>Three filters were renamed from V2 to V3. Each old name returns HTTP 400 <code>"Unknown parameter"</code>; each new name returns HTTP 200.</p>
+<table>
+<thead>
+<tr>
+<th>Old Name (V1/V2)</th>
+<th>New Name (V3)</th>
+<th>Live Test — Old Name</th>
+<th>Live Test — New Name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authorOrcid</code></td>
+<td><code>authorId</code></td>
+<td>400: <code>Unknown parameter: authorOrcid</code></td>
+<td>200: <code>numFound: 0</code> (valid ORCID tested)</td>
+</tr>
+<tr>
+<td><code>bestOpenAccessRightLabel</code></td>
+<td><code>accessRightLabel</code></td>
+<td>400: <code>Unknown parameter: bestOpenAccessRightLabel</code></td>
+<td>200: <code>numFound: 139770230</code> (for "Open Access")</td>
+</tr>
+<tr>
+<td><code>sdg</code></td>
+<td><code>sdgLabel</code></td>
+<td>400: <code>Unknown parameter: sdg</code></td>
+<td>400: <code>Invalid value: '1'</code> (expects full label string)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="enumerated-values-from-live-400-error-messages">Enumerated Values (from live 400 error messages)</h4>
+<p><strong>accessRightLabel</strong> allowed values:</p>
+<pre><code>['Open Access', 'Closed Access', 'Restricted', 'Open Source', 'Embargo', 'Unknown']
+</code></pre>
+<p><strong>sdgLabel</strong> allowed values (17 SDG goals):</p>
+<pre><code>['1. No poverty', '2. Zero hunger', '3. Good health', '4. Education',
+ '5. Gender equality', '6. Clean water', '7. Clean energy',
+ '8. Economic growth', '9. Industry and infrastructure',
+ '10. No inequality', '11. Sustainability', '12. Responsible consumption',
+ '13. Climate action', '14. Life underwater', '15. Life on land',
+ '16. Peace &amp; justice', '17. Partnership']
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> <code>sdgLabel</code> values are <strong>full label strings</strong>, not numeric. The V2 <code>sdg</code> filter accepted numeric codes; V3 requires the full label (spaces must be URL-encoded: <code>sdgLabel=%22Good+health%22</code>).</p>
+</blockquote>
+<hr />
+<h3 id="2-complete-filter-parameter-inventory">2. Complete Filter Parameter Inventory</h3>
+<p>Current <code>ResearchProductsFilters</code> has <strong>38 fields</strong> (lines 73-110 of endpoints.py). The V3 API has <strong>60 parameters</strong> (from OpenAPI spec + live verification). Below is the full mapping.</p>
+<h4 id="2a-existing-fields-unchanged-name-matches-v3">2a. Existing Fields — Unchanged (name matches V3)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Param</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td><code>search</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>mainTitle</code></td>
+<td><code>mainTitle</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>description</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td><code>pid</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>originalId</code></td>
+<td><code>originalId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>fromPublicationDate</code></td>
+<td><code>fromPublicationDate</code></td>
+<td>date/string</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>toPublicationDate</code></td>
+<td><code>toPublicationDate</code></td>
+<td>date/string</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>countryCode</code></td>
+<td><code>countryCode</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>authorFullName</code></td>
+<td><code>authorFullName</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>publisher</code></td>
+<td><code>publisher</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>influenceClass</code></td>
+<td><code>influenceClass</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>impulseClass</code></td>
+<td><code>impulseClass</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>popularityClass</code></td>
+<td><code>popularityClass</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>citationCountClass</code></td>
+<td><code>citationCountClass</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>instanceType</code></td>
+<td><code>instanceType</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>fos</code></td>
+<td><code>fos</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>isPeerReviewed</code></td>
+<td><code>isPeerReviewed</code></td>
+<td>bool</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>isInDiamondJournal</code></td>
+<td><code>isInDiamondJournal</code></td>
+<td>bool</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>isPubliclyFunded</code></td>
+<td><code>isPubliclyFunded</code></td>
+<td>bool</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>isGreen</code></td>
+<td><code>isGreen</code></td>
+<td>bool</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>openAccessColor</code></td>
+<td><code>openAccessColor</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relOrganizationId</code></td>
+<td><code>relOrganizationId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relCommunityId</code></td>
+<td><code>relCommunityId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relProjectId</code></td>
+<td><code>relProjectId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relProjectCode</code></td>
+<td><code>relProjectCode</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>hasProjectRel</code></td>
+<td><code>hasProjectRel</code></td>
+<td>bool</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relProjectFundingShortName</code></td>
+<td><code>relProjectFundingShortName</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relProjectFundingStreamId</code></td>
+<td><code>relProjectFundingStreamId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relHostingDataSourceId</code></td>
+<td><code>relHostingDataSourceId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>relCollectedFromDatasourceId</code></td>
+<td><code>relCollectedFromDatasourceId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>rorId</code></td>
+<td><code>rorId</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>logicalOperator</code></td>
+<td><code>logicalOperator</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><code>subjects</code></td>
+<td>str</td>
+<td>OK</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total unchanged: 35</strong></p>
+<h4 id="2b-fields-requiring-rename">2b. Fields Requiring Rename</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Param</th>
+<th>Action Needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authorOrcid</code></td>
+<td><code>authorId</code></td>
+<td><strong>Rename field</strong></td>
+</tr>
+<tr>
+<td><code>bestOpenAccessRightLabel</code></td>
+<td><code>accessRightLabel</code></td>
+<td><strong>Rename field</strong></td>
+</tr>
+<tr>
+<td><code>sdg</code></td>
+<td><code>sdgLabel</code></td>
+<td><strong>Rename field</strong>, change type to <code>str</code> (was <code>list[str]</code>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Breaking change impact:</strong> <code>sdg</code> was <code>list[str]</code> in V2 (accepting multiple SDGs); V3's <code>sdgLabel</code> is a single string but supports inline OR: <code>sdgLabel=(%22Good+health%22+OR+%22Education%22)</code>.</p>
+</blockquote>
+<h4 id="2c-new-parameters-in-v3-not-in-current-code">2c. NEW Parameters in V3 (not in current code)</h4>
+<p>These 22 parameters exist in V3 but have no corresponding field in <code>ResearchProductsFilters</code>:</p>
+<table>
+<thead>
+<tr>
+<th>V3 Parameter</th>
+<th>Type</th>
+<th>Live Verified?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authorId</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Replaces authorOrcid</td>
+</tr>
+<tr>
+<td><code>accessRightLabel</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Enumerated (6 values)</td>
+</tr>
+<tr>
+<td><code>sdgLabel</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Enumerated (17 values)</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Language code</td>
+</tr>
+<tr>
+<td><code>publicationYear</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Year or range</td>
+</tr>
+<tr>
+<td><code>fromPublicationYear</code></td>
+<td>int</td>
+<td>YES (200)</td>
+<td>Year lower bound</td>
+</tr>
+<tr>
+<td><code>toPublicationYear</code></td>
+<td>int</td>
+<td>YES (200)</td>
+<td>Year upper bound</td>
+</tr>
+<tr>
+<td><code>hasLicense</code></td>
+<td>bool</td>
+<td>YES (200)</td>
+<td>Has license filter</td>
+</tr>
+<tr>
+<td><code>relProject</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Project by name/title</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Data source name</td>
+</tr>
+<tr>
+<td><code>eoscIfGuidelines</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>EOSC IF guideline</td>
+</tr>
+<tr>
+<td><code>relFunder</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Funder short name</td>
+</tr>
+<tr>
+<td><code>subCommunity</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Sub-community name</td>
+</tr>
+<tr>
+<td><code>relCommunityName</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Community name search</td>
+</tr>
+<tr>
+<td><code>relFundingLevel0Id</code></td>
+<td>str</td>
+<td>Not tested</td>
+<td>Funding level 0 ID</td>
+</tr>
+<tr>
+<td><code>relFundingLevel1Id</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>e.g., EC::H2020</td>
+</tr>
+<tr>
+<td><code>relFundingLevel2Id</code></td>
+<td>str</td>
+<td>Not tested</td>
+<td>Funding level 2 ID</td>
+</tr>
+<tr>
+<td><code>relOrganization</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Organization name search</td>
+</tr>
+<tr>
+<td><code>relHostingDataSource</code></td>
+<td>str</td>
+<td>Not tested</td>
+<td>Hosting DS name</td>
+</tr>
+<tr>
+<td><code>excludePubDateRange</code></td>
+<td>bool</td>
+<td>YES (400 validation works)</td>
+<td>Negates date range</td>
+</tr>
+<tr>
+<td><code>cursor</code></td>
+<td>str</td>
+<td>YES (200)</td>
+<td>Cursor pagination token</td>
+</tr>
+<tr>
+<td><code>includeStats</code></td>
+<td>bool</td>
+<td>YES (200)</td>
+<td>Adds stats to header</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total new: 22</strong></p>
+<h4 id="2d-parameters-in-spec-that-need-verification">2d. Parameters in Spec That Need Verification</h4>
+<p>A few parameters from the spec were not individually tested due to low priority but appear in the valid-params list from error messages:
+- <code>page</code>, <code>pageSize</code> — verified separately (pagination section)
+- <code>sortBy</code> — verified separately (sort section)
+- <code>relFundingLevel0Id</code>, <code>relFundingLevel2Id</code>, <code>relHostingDataSource</code> — present in valid-params list</p>
+<hr />
+<h3 id="3-sort-fields">3. Sort Fields</h3>
+<p>V3 spec lists these sort fields (via regex pattern): <code>relevance</code>, <code>publicationDate</code>, <code>dateOfCollection</code>, <code>influence</code>, <code>popularity</code>, <code>citationCount</code>, <code>impulse</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Sort Field</th>
+<th>Current Code Has It?</th>
+<th>Live Test Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>relevance</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td><code>publicationDate</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td><code>dateOfCollection</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td><code>influence</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td><strong><code>popularity</code></strong></td>
+<td><strong>NO — missing</strong></td>
+<td><strong>200 OK (WORKS)</strong></td>
+</tr>
+<tr>
+<td><code>citationCount</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+<tr>
+<td><code>impulse</code></td>
+<td>YES</td>
+<td>200 OK</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Key finding:</strong> Contrary to the hypothesis that <code>popularity</code> would be omitted from the error message, <strong><code>popularity</code> works fine</strong> as a sort field on the live API. The current sort dict at <code>endpoints.py:331-338</code> omits it — this should be added.</p>
+</blockquote>
+<hr />
+<h3 id="4-pagination-behavior">4. Pagination Behavior</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Expected</th>
+<th>Actual</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pageSize=100</code></td>
+<td>Returns 100 results</td>
+<td><code>HEADER: ... "pageSize": 100</code>, <code>RESULTS: 100</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>pageSize=200</code></td>
+<td>400 rejection</td>
+<td>400: <code>Page size must be at most 100</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>page=0</code></td>
+<td>400 (1-indexed)</td>
+<td>Not explicitly tested (known from context)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>cursor=*</code></td>
+<td>Returns nextCursor</td>
+<td>200 with <code>nextCursor: "AoM/DzAwMDY0..."</code></td>
+<td>OK</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cursor pagination confirmed working.</strong> The response header includes <code>nextCursor</code> when <code>cursor=*</code> is passed.</p>
+<p><strong>Note on <code>includeStats</code>:</strong> When <code>includeStats=true</code>, the header gains two extra fields:</p>
+<pre><code class="language-json">{&quot;totalCitationsCount&quot;: 2137519997, &quot;countsByType&quot;: {&quot;publication&quot;: 231901563, &quot;dataset&quot;: 106122854, &quot;other&quot;: 41426170, &quot;software&quot;: 936970}}
+</code></pre>
+<p>This is a new V3 feature not currently modeled.</p>
+<hr />
+<h3 id="5-response-model-field-level-comparison">5. Response Model — Field-Level Comparison</h3>
+<p>Fetched a <strong>publication-type</strong> research product with <code>--full</code> from live V3 API. Below is every top-level field compared against the current <code>ResearchProduct</code> model.</p>
+<h4 id="5a-top-level-fields">5a. Top-Level Fields</h4>
+<table>
+<thead>
+<tr>
+<th>V3 Response Field</th>
+<th>Current Model Field</th>
+<th>Type Match?</th>
+<th>Gap / Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code> (inherited)</td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>originalIds</code></td>
+<td><code>originalIds: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>pids</code></td>
+<td><code>pids: SafeList[Pid]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type: ResearchProductType</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>mainTitle</code></td>
+<td><code>mainTitle: SafeStr</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>title: SafeStr</code></td>
+<td><strong>Not in V3 response</strong></td>
+<td>Populated by validator from mainTitle — still needed</td>
+</tr>
+<tr>
+<td><code>subTitle</code></td>
+<td><code>subTitle: SafeStr</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>authors</code></td>
+<td><code>authors: SafeList[Author]</code></td>
+<td>OK</td>
+<td>See nested changes below</td>
+</tr>
+<tr>
+<td><code>bestAccessRight</code></td>
+<td><code>bestAccessRight: SafeBestAccessRight</code></td>
+<td>OK</td>
+<td>Can be <code>null</code> in V3</td>
+</tr>
+<tr>
+<td><code>country</code></td>
+<td><code>country: SafeResultCountry</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>countries</code></td>
+<td><code>countries: SafeList[SafeResultCountry]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>description: SafeStr</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>descriptions</code></td>
+<td><code>descriptions: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>publicationDate</code></td>
+<td><code>publicationDate: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>publisher</code></td>
+<td><code>publisher: SafeStr</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>embargoEndDate</code></td>
+<td><code>embargoEndDate: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>contributors</code></td>
+<td><code>contributors: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sources</code></td>
+<td><code>sources: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>formats</code></td>
+<td><code>formats: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>coverages</code></td>
+<td><code>coverages: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>dateOfCollection</code></td>
+<td><code>dateOfCollection: str \| None</code></td>
+<td>OK</td>
+<td>Often <code>null</code> in V3</td>
+</tr>
+<tr>
+<td><code>lastUpdateTimeStamp</code></td>
+<td><code>lastUpdateTimeStamp: int \| None</code></td>
+<td>OK</td>
+<td>Often <code>null</code> in V3</td>
+</tr>
+<tr>
+<td><code>indicators</code></td>
+<td><code>indicators: SafeIndicator</code></td>
+<td>OK</td>
+<td>See nested changes below</td>
+</tr>
+<tr>
+<td><code>instances</code></td>
+<td><code>instances: SafeList[Instance]</code></td>
+<td>OK</td>
+<td>See nested changes below</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td><code>language: SafeLanguage</code></td>
+<td>OK</td>
+<td>Now object <code>{code, label}</code> consistently</td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><code>subjects: SafeList[Subject]</code></td>
+<td><strong>SHAPE CHANGE</strong></td>
+<td>See below</td>
+</tr>
+<tr>
+<td><code>container</code></td>
+<td><code>container: SafeContainer</code></td>
+<td>OK</td>
+<td>New optional fields</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td><code>keywords: SafeList[str]</code></td>
+<td><strong>Missing from V3 response</strong></td>
+<td>V3 does not return <code>keywords</code> field</td>
+</tr>
+<tr>
+<td><code>geoLocation</code></td>
+<td><code>geoLocation: SafeGeoLocation</code></td>
+<td><strong>Missing from V3 response</strong></td>
+<td>Not in fetched record</td>
+</tr>
+<tr>
+<td><code>geoLocations</code></td>
+<td><code>geoLocations: SafeList[SafeGeoLocation]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>isGreen</code></td>
+<td><code>isGreen: bool \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>openAccessColor</code></td>
+<td><code>openAccessColor: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>isInDiamondJournal</code></td>
+<td><code>isInDiamondJournal: bool \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>publiclyFunded</code></td>
+<td><code>publiclyFunded: bool \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong><code>eoscIfGuidelines</code></strong></td>
+<td><strong>NOT IN MODEL</strong></td>
+<td><strong>NEW FIELD</strong></td>
+<td><code>null</code> or string — <strong>must add</strong></td>
+</tr>
+<tr>
+<td><code>codeRepositoryUrl</code></td>
+<td><code>codeRepositoryUrl: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>documentationUrls</code></td>
+<td><code>documentationUrls: SafeList[str]</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>programmingLanguage</code></td>
+<td><code>programmingLanguage: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td><code>size: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>version: str \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>contactPeople</code></td>
+<td><code>contactPeople: list \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>contactGroups</code></td>
+<td><code>contactGroups: list \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td><code>tools: list \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>collectedFrom</code></td>
+<td><code>collectedFrom: SafeList[CollectedFrom]</code></td>
+<td>OK</td>
+<td>Shape: <code>{key, value}</code></td>
+</tr>
+<tr>
+<td><code>projects</code></td>
+<td><code>projects: list \| None</code></td>
+<td>OK</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>organizations</code></td>
+<td><code>organizations: list \| None</code></td>
+<td><strong>SHAPE CHANGE</strong></td>
+<td>See below</td>
+</tr>
+<tr>
+<td><code>communities</code></td>
+<td><code>communities: list \| None</code></td>
+<td><strong>SHAPE CHANGE</strong></td>
+<td>See below</td>
+</tr>
+</tbody>
+</table>
+<h4 id="5b-nested-model-changes">5b. Nested Model Changes</h4>
+<p><strong>Author</strong> (V3 response):</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: null,
+  &quot;fullName&quot;: &quot;Rainer Duchmann&quot;,
+  &quot;name&quot;: &quot;Rainer&quot;,
+  &quot;surname&quot;: &quot;Duchmann&quot;,
+  &quot;rank&quot;: 1,
+  &quot;pid&quot;: null
+}
+</code></pre>
+<p>vs current model (<code>research_product.py:58-77</code>):
+- <strong>New field <code>id</code>:</strong> string or null — <strong>not in current Author model</strong>
+- <code>pid</code> can be <code>null</code> or an object (not just dict) — current model uses <code>dict | None</code> which is flexible enough
+- Otherwise matches: fullName, name, surname, rank ✓</p>
+<p><strong>Subject</strong> (V3 response) — <strong>SHAPE CHANGE</strong>:</p>
+<pre><code class="language-json">{
+  &quot;subject&quot;: {&quot;scheme&quot;: &quot;FOS&quot;, &quot;value&quot;: &quot;03 medical and health sciences&quot;},
+  &quot;provenance&quot;: null
+}
+</code></pre>
+<p>vs current model (<code>research_product.py:375-389</code>):
+- Current expects <code>subject: dict[str, str] | None</code> (flat scheme→value map)
+- V3 wraps it: <code>{"subject": {"scheme": "...", "value": "..."}, "provenance": ...}</code>
+- <strong>Action needed:</strong> Update Subject model or add a validator to unwrap</p>
+<p><strong>Instance.accessRight</strong> (V3 response):</p>
+<pre><code class="language-json">{
+  &quot;code&quot;: &quot;c_abf2&quot;,
+  &quot;label&quot;: &quot;OPEN&quot;,
+  &quot;scheme&quot;: &quot;http://vocabularies.coar-repositories.org/documentation/access_rights/&quot;,
+  &quot;openAccessRoute&quot;: null
+}
+</code></pre>
+<p>vs current <code>AccessRight</code> model (<code>research_product.py:215-230</code>):
+- <strong>New field <code>openAccessRoute</code>:</strong> <code>null</code> or one of <code>"gold"|"green"|"hybrid"|"bronze"</code> — <strong>not in current model</strong>
+- Current model has <code>extra="allow"</code> so it won't crash, but field is untyped</p>
+<p><strong>Container</strong> (V3 response) — <strong>new optional fields</strong>:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;Endo-Praxis&quot;,
+  &quot;issnPrinted&quot;: &quot;0177-4077&quot;,
+  &quot;issnOnline&quot;: &quot;1611-6429&quot;,
+  &quot;issnLinking&quot;: null,
+  &quot;ep&quot;: &quot;173&quot;,
+  &quot;sp&quot;: &quot;173&quot;,
+  &quot;vol&quot;: &quot;36&quot;,
+  &quot;edition&quot;: null,
+  &quot;conferencePlace&quot;: null,
+  &quot;conferenceDate&quot;: null
+}
+</code></pre>
+<p>vs current model (<code>research_product.py:393-418</code>):
+- <strong>New fields <code>conferencePlace</code>, <code>conferenceDate</code></strong> — not in current Container model
+- Current has <code>extra="allow"</code> so no crash, but untyped</p>
+<p><strong>indicators.citationImpact</strong> (V3 response):</p>
+<pre><code class="language-json">{
+  &quot;citationCount&quot;: 5.0,
+  &quot;influence&quot;: 2.774892e-09,
+  &quot;popularity&quot;: 3.2742757e-09,
+  &quot;impulse&quot;: 4.0,
+  &quot;citationClass&quot;: &quot;C5&quot;,
+  &quot;influenceClass&quot;: &quot;C4&quot;,
+  &quot;impulseClass&quot;: &quot;C4&quot;,
+  &quot;popularityClass&quot;: &quot;C4&quot;
+}
+</code></pre>
+<p>vs current <code>CitationImpact</code> model (<code>research_product.py:120-143</code>):
+- All fields present ✓
+- Includes <code>popularity</code> which was missing from some V2 responses — now always present</p>
+<p><strong>organizations</strong> (V3 response):</p>
+<pre><code class="language-json">{
+  &quot;legalName&quot;: &quot;Hospital zum Heiligen Geist&quot;,
+  &quot;acronym&quot;: &quot;Hospital zum Heiligen Geist&quot;,
+  &quot;id&quot;: &quot;openorgs____::...&quot;,
+  &quot;pids&quot;: [{&quot;scheme&quot;: &quot;ROR&quot;, &quot;value&quot;: &quot;https://ror.org/...&quot;}]
+}
+</code></pre>
+<ul>
+<li>Now has <code>acronym</code> and structured <code>pids</code> array — current model uses <code>list | None</code> (untyped), so flexible enough</li>
+</ul>
+<p><strong>communities</strong> (V3 response):</p>
+<pre><code class="language-json">{
+  &quot;code&quot;: &quot;covid-19&quot;,
+  &quot;label&quot;: &quot;Corona Virus Disease&quot;,
+  &quot;provenance&quot;: null
+}
+</code></pre>
+<ul>
+<li>Now has <code>provenance</code> field — current model uses <code>list | None</code> (untyped), so flexible enough</li>
+</ul>
+<hr />
+<h3 id="6-resource-client-_base_url_override">6. Resource Client — <code>_base_url_override</code></h3>
+<p><strong>File:</strong> <code>src/aireloom/resources/research_products_client.py:50</code></p>
+<pre><code class="language-python">_base_url_override: str | None = OPENAIRE_GRAPH_API_V2_BASE_URL
+</code></pre>
+<p><strong>Constant definition:</strong> <code>src/aireloom/constants.py:10</code></p>
+<pre><code class="language-python">OPENAIRE_GRAPH_API_V2_BASE_URL = &quot;https://api.openaire.eu/graph/v2&quot;
+</code></pre>
+<p><strong>Action required:</strong>
+1. <strong>Remove <code>_base_url_override</code></strong> entirely (set to <code>None</code> or delete the attribute) — V3 serves from the same base as all other endpoints
+2. Update docstring at line 42-43 that says "Overrides the base URL to use the v2 Graph API"
+3. Links methods (<code>search_links</code> line 100-104, <code>get_relations_info</code> line 158-162) use <code>OPENAIRE_GRAPH_API_BASE_URL</code> (V1) — these need separate evaluation as the links endpoint may move to <code>/v3/research-products/links</code></p>
+<hr />
+<h3 id="7-convenience-query-impact-queriespy">7. Convenience Query Impact (queries.py)</h3>
+<p>Three functions reference renamed filters:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Line</th>
+<th>Old Filter Reference</th>
+<th>Required Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>publications_by_organization</code></td>
+<td>112</td>
+<td><code>bestOpenAccessRightLabel</code></td>
+<td>→ <code>accessRightLabel</code></td>
+</tr>
+<tr>
+<td><code>publications_by_author</code></td>
+<td>150</td>
+<td><code>authorOrcid</code> (in str_map)</td>
+<td>→ <code>authorId</code></td>
+</tr>
+<tr>
+<td><code>count_publications</code></td>
+<td>~240+</td>
+<td>Indirectly via ResearchProductsFilters</td>
+<td>Will follow filter rename</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Specific code locations:</strong></p>
+<p><code>queries.py:112</code>:</p>
+<pre><code class="language-python"># CURRENT:
+filter_kwargs[&quot;bestOpenAccessRightLabel&quot;] = &quot;OPEN&quot;
+# BECOMES:
+filter_kwargs[&quot;accessRightLabel&quot;] = &quot;Open Access&quot;
+</code></pre>
+<blockquote>
+<p>Note: Value must change too — V3 uses <code>"Open Access"</code> not <code>"OPEN"</code>.</p>
+</blockquote>
+<p><code>queries.py:150</code>:</p>
+<pre><code class="language-python"># CURRENT:
+str_map={&quot;name&quot;: &quot;authorFullName&quot;, &quot;orcid&quot;: &quot;authorOrcid&quot;},
+# BECOMES:
+str_map={&quot;name&quot;: &quot;authorFullName&quot;, &quot;orcid&quot;: &quot;authorId&quot;},
+</code></pre>
+<hr />
+<h2 id="live-verification-log">Live Verification Log</h2>
+<p>All commands run from repo root using <code>python3 reference/v3-investigation/v3_live.py</code>.</p>
+<h3 id="renamed-filter-tests">Renamed Filter Tests</h3>
+<pre><code class="language-bash"># 1. authorOrcid → 400 Unknown parameter
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;authorOrcid=0000-0001-5008-711X&amp;pageSize=1&quot;
+STATUS: 400
+ERROR: Unknown parameter: authorOrcid; valid parameters are: [relCommunityId, pageSize, ...]
+
+# 2. authorId → 200 OK
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;authorId=0000-0001-5008-711X&amp;pageSize=1&quot;
+STATUS: 200
+HEADER: {&quot;numFound&quot;: 0, ...}
+
+# 3. bestOpenAccessRightLabel → 400 Unknown parameter
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;bestOpenAccessRightLabel=OPEN&amp;pageSize=1&quot;
+STATUS: 400
+ERROR: Unknown parameter: bestOpenAccessRightLabel
+
+# 4. accessRightLabel → 200 OK (139M results for &quot;Open Access&quot;)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;accessRightLabel=%22Open+Access%22&amp;pageSize=1&quot;
+STATUS: 200
+HEADER: {&quot;numFound&quot;: 139770230, ...}
+
+# 5. sdg → 400 Unknown parameter
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;sdg=1&amp;pageSize=1&quot;
+STATUS: 400
+ERROR: Unknown parameter: sdg
+
+# 6. sdgLabel → 400 Invalid value (needs full label)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;sdgLabel=1&amp;pageSize=1&quot;
+STATUS: 400
+ERROR: Invalid value: '1' in 'sdgLabel'. Allowed values are: ['1. No poverty', ...]
+</code></pre>
+<h3 id="new-filter-tests">New Filter Tests</h3>
+<pre><code class="language-bash"># language
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;language=en&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 0 (exact match)
+
+# publicationYear
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;publicationYear=2020&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 14232154
+
+# fromPublicationYear
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;fromPublicationYear=2020&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 146401418
+
+# toPublicationYear
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;toPublicationYear=2020&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 238024493
+
+# eoscIfGuidelines
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;eoscIfGuidelines=EOSC-Pilot&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 0
+
+# source
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;source=Crossref&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 0
+
+# hasLicense
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;hasLicense=true&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 161756541
+
+# relProject
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;relProject=12345&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 0
+
+# relOrganization
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;relOrganization=Harvard&amp;pageSize=1&quot;
+STATUS: 200  # numFound: 0
+
+# includeStats (adds header fields)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;includeStats=true&amp;pageSize=1&quot;
+STATUS: 200
+HEADER: {..., &quot;totalCitationsCount&quot;: 2137519997, &quot;countsByType&quot;: {...}}
+
+# excludePubDateRange (requires companion date param)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;excludePubDateRange=true&amp;fromPublicationYear=2020&amp;pageSize=1&quot;
+STATUS: 400
+ERROR: Parameter 'excludePubDateRange' requires at least one of 'fromPublicationDate' or 'toPublicationDate'
+
+# subCommunity, relCommunityName, relFunder, relFundingLevel1Id — all returned 200
+</code></pre>
+<h3 id="sort-field-tests">Sort Field Tests</h3>
+<pre><code class="language-bash">$ # All 7 sort fields return 200:
+sortBy=relevance+DESC      → 200 OK
+sortBy=publicationDate+DESC → 200 OK
+sortBy=dateOfCollection+DESC → 200 OK
+sortBy=influence+DESC      → 200 OK
+sortBy=popularity+DESC     → 200 OK  ← WORKS (contrary to hypothesis)
+sortBy=citationCount+DESC  → 200 OK
+sortBy=impulse+DESC        → 200 OK
+</code></pre>
+<h3 id="pagination-tests">Pagination Tests</h3>
+<pre><code class="language-bash"># pageSize=100 → 100 results
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;search=covid&amp;pageSize=100&quot;
+STATUS: 200, RESULTS: 100
+
+# pageSize=200 → 400 rejected
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;search=covid&amp;pageSize=200&quot;
+STATUS: 400, ERROR: Page size must be at most 100
+
+# cursor pagination
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;search=covid&amp;pageSize=1&amp;cursor=*&quot;
+STATUS: 200, HEADER includes &quot;nextCursor&quot;: &quot;AoM/DzAwMDY0...&quot;
+</code></pre>
+<h3 id="full-response-capture-for-model-comparison">Full Response Capture (for model comparison)</h3>
+<pre><code class="language-bash"># Publication type (rich nested structures)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;search=covid&amp;type=publication&amp;pageSize=1&quot; --full
+# Returned full JSON with authors[], subjects[], container{}, instances[],
+# indicators.citationImpact (with popularity), organizations[], communities[]
+
+# Software type (subtype-specific fields)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; \
+    &quot;search=covid&amp;type=software&amp;pageSize=1&quot; --full
+# Returned codeRepositoryUrl, programmingLanguage=null, instances[].type=&quot;Software&quot;
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="priority-1-breaking-changes-must-fix">Priority 1: Breaking Changes (Must Fix)</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>File:Line</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Rename <code>authorOrcid</code> → <code>authorId</code></strong></td>
+<td><code>endpoints.py:85</code></td>
+<td>Field name + update docstring</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Rename <code>bestOpenAccessRightLabel</code> → <code>accessRightLabel</code></strong></td>
+<td><code>endpoints.py:87</code></td>
+<td>Field name + update docstring; enum values are now labels like <code>"Open Access"</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Rename <code>sdg</code> → <code>sdgLabel</code></strong></td>
+<td><code>endpoints.py:93</code></td>
+<td>Field name; change type from <code>list[str]</code> to <code>str</code>; values are full SDG labels</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Remove <code>_base_url_override</code></strong></td>
+<td><code>research_products_client.py:50</code></td>
+<td>Delete or set to <code>None</code>; update docstring lines 42-43</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Update queries.py references</strong></td>
+<td><code>queries.py:112,150</code></td>
+<td><code>bestOpenAccessRightLabel</code> → <code>accessRightLabel</code>, <code>authorOrcid</code> → <code>authorId</code>; fix value <code>"OPEN"</code> → <code>"Open Access"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="priority-2-add-missing-fields-to-filters-model">Priority 2: Add Missing Fields to Filters Model</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Field</th>
+<th>Type</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td><code>authorId</code></td>
+<td><code>str \| None</code></td>
+<td>Primary author identifier filter (replaces authorOrcid)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>accessRightLabel</code></td>
+<td><code>str \| None</code></td>
+<td>Enumerated access right filter</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>sdgLabel</code></td>
+<td><code>str \| None</code></td>
+<td>SDG goal filter (17 enumerated values)</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>language</code></td>
+<td><code>str \| None</code></td>
+<td>Language code filter</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>publicationYear</code></td>
+<td><code>str \| None</code></td>
+<td>Publication year(s) filter</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>fromPublicationYear</code></td>
+<td><code>int \| None</code></td>
+<td>Year lower bound</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>toPublicationYear</code></td>
+<td><code>int \| None</code></td>
+<td>Year upper bound</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>hasLicense</code></td>
+<td><code>bool \| None</code></td>
+<td>License presence filter</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>relProject</code></td>
+<td><code>str \| None</code></td>
+<td>Project name search</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>source</code></td>
+<td><code>str \| None</code></td>
+<td>Data source name filter</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>eoscIfGuidelines</code></td>
+<td><code>str \| None</code></td>
+<td>EOSC IF guidelines filter</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>relFunder</code></td>
+<td><code>str \| None</code></td>
+<td>Funder short name</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>subCommunity</code></td>
+<td><code>str \| None</code></td>
+<td>Sub-community filter</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>relCommunityName</code></td>
+<td><code>str \| None</code></td>
+<td>Community name search</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>relFundingLevel0Id</code></td>
+<td><code>str \| None</code></td>
+<td>Funding L0 ID</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>relFundingLevel1Id</code></td>
+<td><code>str \| None</code></td>
+<td>Funding L1 ID</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>relFundingLevel2Id</code></td>
+<td><code>str \| None</code></td>
+<td>Funding L2 ID</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>relOrganization</code></td>
+<td><code>str \| None</code></td>
+<td>Organization name search</td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>relHostingDataSource</code></td>
+<td><code>str \| None</code></td>
+<td>Hosting DS name</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>excludePubDateRange</code></td>
+<td><code>bool \| None</code></td>
+<td>Date range negation</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>includeStats</code></td>
+<td><code>bool \| None</code></td>
+<td>Aggregate stats in header</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>cursor</code></td>
+<td><code>str \| None</code></td>
+<td>Cursor pagination token</td>
+</tr>
+</tbody>
+</table>
+<h3 id="priority-3-response-model-updates">Priority 3: Response Model Updates</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>Location</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>28</td>
+<td><strong>Add <code>eoscIfGuidelines</code></strong></td>
+<td><code>research_product.py:~508</code></td>
+<td><code>str \| None</code> — new top-level field</td>
+</tr>
+<tr>
+<td>29</td>
+<td><strong>Add <code>id</code> to Author</strong></td>
+<td><code>research_product.py:58-77</code></td>
+<td><code>str \| None = None</code> — new field in V3 author objects</td>
+</tr>
+<tr>
+<td>30</td>
+<td><strong>Update Subject model</strong></td>
+<td><code>research_product.py:375-389</code></td>
+<td>V3 wraps as <code>{subject: {scheme, value}, provenance}</code> — need adapter</td>
+</tr>
+<tr>
+<td>31</td>
+<td><strong>Add <code>openAccessRoute</code> to AccessRight</strong></td>
+<td><code>research_product.py:215-230</code></td>
+<td><code>str \| None = None</code> — now in instance accessRight</td>
+</tr>
+<tr>
+<td>32</td>
+<td><strong>Add <code>conferencePlace</code>, <code>conferenceDate</code> to Container</strong></td>
+<td><code>research_product.py:393-418</code></td>
+<td>Both <code>str \| None = None</code></td>
+</tr>
+<tr>
+<td>33</td>
+<td><strong>Consider typing organizations/communities</strong></td>
+<td><code>research_product.py:558-560</code></td>
+<td>Currently <code>list \| None</code> — V3 gives structured objects</td>
+</tr>
+</tbody>
+</table>
+<h3 id="priority-4-sort-dict-update">Priority 4: Sort Dict Update</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>34</td>
+<td><strong>Add <code>"popularity": {}</code> to sort dict</strong></td>
+<td><code>endpoints.py:331-338</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="priority-5-path-constant">Priority 5: Path Constant</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Change</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>35</td>
+<td><strong>Update <code>RESEARCH_PRODUCTS</code> path constant</strong></td>
+<td><code>endpoints.py:17</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li>
+<p><strong>Path casing</strong>: Current <code>RESEARCH_PRODUCTS = "researchProducts"</code> (camelCase, V2-style). V3 uses kebab-case paths (<code>research-products</code>). Must verify whether the path constant needs changing or if there's a URL normalization layer.</p>
+</li>
+<li>
+<p><strong>Subject model shape change</strong>: The V3 Subject structure <code>{"subject": {"scheme": "value"}, "provenance": null}</code> is fundamentally different from the current flat <code>dict[str, str]</code>. This will break any code accessing <code>subject["fos"]</code> directly. Need either a pre-processing validator or a model redesign.</p>
+</li>
+<li>
+<p><strong><code>sdgLabel</code> type change</strong>: Was <code>list[str]</code> (multiple SDGs), now <code>str</code> (single, but supports inline OR). This changes the filter UX — users must use OR syntax for multiple SDGs rather than passing a list.</p>
+</li>
+<li>
+<p><strong><code>accessRightLabel</code> value change</strong>: V2 used short codes like <code>"OPEN"</code>. V3 uses full labels like <code>"Open Access"</code>. Any hardcoded filter values will break.</p>
+</li>
+<li>
+<p><strong>Links endpoint future</strong>: The <code>search_links</code>/<code>iterate_links</code> methods currently hit V1 base URL. V3 has <code>/v3/research-products/links</code> — need separate migration assessment for these methods.</p>
+</li>
+<li>
+<p><strong><code>includeStats</code> header fields</strong>: The <code>totalCitationsCount</code> and <code>countsByType</code> header fields are not currently modeled in any response wrapper. If used, the header model needs extension.</p>
+</li>
+<li>
+<p><strong><code>logicalOperator</code> enum expansion</strong>: V3 spec shows <code>logicalOperator</code> accepts <code>['AND', 'OR', 'NOT']</code> (3 values). Current model only allows <code>['AND', 'OR']</code> (line 67). <strong>NOT is new in V3.</strong></p>
+</li>
+<li>
+<p><strong>Spec vs live discrepancy on <code>popularity</code> sort</strong>: The hypothesis (from prior research) stated the error message omits <code>popularity</code>. Live testing proves <strong><code>popularity</code> works fine</strong> as a sort field. The prior report was incorrect on this point.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
