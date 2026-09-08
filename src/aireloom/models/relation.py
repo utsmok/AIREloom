@@ -1,4 +1,4 @@
-"""Models for Graph API /researchProducts/links responses."""
+"""Models for Graph API /research-products/links responses."""
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -55,7 +55,7 @@ class Relation(BaseModel):
 
 
 class LinksResponse(BaseModel):
-    """Response envelope for /researchProducts/links endpoint.
+    """Response envelope for /research-products/links endpoint.
 
     Unlike standard ApiResponse, this is a standalone model because Relation
     entities don't carry an id field required by BaseEntity.

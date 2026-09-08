@@ -10,7 +10,7 @@ AIREloom is an async Python client for the [OpenAIRE Graph API](https://graph.op
 
 ## Features
 
-- **Full API coverage** — Research Products (v2), Projects, Organizations, Data Sources, Persons, Research Product Links (v1), Scholexplorer (v3)
+- **Full API coverage** — Research Products (v3), Projects, Organizations, Data Sources, Persons, Research Product Links, and Scholexplorer (v1/v2/v3)
 - **Async by design** — built on `httpx` + `asyncio` with proper connection pooling
 - **Typed throughout** — Pydantic models for all inputs/outputs, PEP 561 `py.typed` marker
 - **Ergonomics layer** — computed properties, SafeStr/SafeList defaults, convenience queries, iterator helpers

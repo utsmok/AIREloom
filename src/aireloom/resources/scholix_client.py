@@ -23,7 +23,6 @@ from ..constants import (
     DEFAULT_PAGE_SIZE,
     MAX_LINK_PAGE_SIZE,
     OPENAIRE_SCHOLIX_API_BASE_URL,
-    OPENAIRE_SCHOLIX_API_ROOT_URL,
 )
 from ..endpoints import ENDPOINT_DEFINITIONS, SCHOLIX, ScholixFilters  # Import model
 from ..models import (
@@ -113,7 +112,7 @@ class ScholixClient(BaseResourceClient):
         root = current.rstrip("/")
         if root.endswith(("/v1", "/v2", "/v3")):
             return root.rsplit("/", 1)[0]
-        return OPENAIRE_SCHOLIX_API_ROOT_URL
+        return root
 
     async def _request_json(
         self,
@@ -146,7 +145,16 @@ class ScholixClient(BaseResourceClient):
         if isinstance(payload, list):
             return payload
         if isinstance(payload, dict):
-            for key in ("result", "results", "links", "data"):
+            for key in (
+                "result",
+                "results",
+                "links",
+                "data",
+                "linkProviders",
+                "linkPublishers",
+                "datasources",
+                "dataSources",
+            ):
                 records = payload.get(key)
                 if isinstance(records, list):
                     return records
@@ -210,188 +218,186 @@ class ScholixClient(BaseResourceClient):
                 json_data=None,
             )
             return ScholixResponse.model_validate(response.json())
-
-    async def search_links_v2(
-            self,
-            page: int = 0,
-            page_size: int = DEFAULT_PAGE_SIZE,
-            filters: ScholixFilters | None = None,
-    ) -> ScholixResponse:
-            """Search the Schololexplorer V2 ``Links`` endpoint.
-
-            V2 accepts provider and PID-type filters that are not supported by the
-            V3 endpoint. Unlike V3, provider-only queries are allowed.
-            """
-            filter_dict = (
-                filters.model_dump(exclude_none=True, by_alias=True) if filters else {}
-            )
-            if page_size > MAX_LINK_PAGE_SIZE:
-                page_size = MAX_LINK_PAGE_SIZE
-            params = self._build_scholix_params(page, page_size, filter_dict)
-            payload = await self._request_json(
-                path="Links",
-                params=params,
-                base_url=self._version_base_url(2),
-            )
-            return ScholixResponse.model_validate(payload)
-
-    async def iterate_links_v2(
-            self,
-            page_size: int = DEFAULT_PAGE_SIZE,
-            filters: ScholixFilters | None = None,
-    ) -> AsyncIterator[ScholixRelationship]:
-            """Iterate through all links returned by the Scholix V2 endpoint."""
-            current_page = 0
-            total_pages = 1
-            while current_page < total_pages:
-                response = await self.search_links_v2(
-                    page=current_page,
-                    page_size=page_size,
-                    filters=filters,
-                )
-                if not response.result:
-                    break
-                for link in response.result:
-                    yield link
-                if current_page == 0:
-                    total_pages = response.total_pages
-                    if total_pages == 0:
-                        break
-                if current_page >= total_pages - 1:
-                    break
-                current_page += 1
-
-    async def list_link_providers(self, name: str | None = None) -> list[Any]:
-            """List Schololexplorer V2 link providers."""
-            params = {"name": name} if name is not None else {}
-            payload = await self._request_json(
-                path="LinkProvider",
-                params=params,
-                base_url=self._version_base_url(2),
-            )
-            return self._records_from_payload(payload)
-
-    async def list_link_publishers(
-            self,
-            *,
-            in_target: bool = True,
-            name: str | None = None,
-    ) -> list[Any]:
-            """List publishers of source or target objects from Scholix V2."""
-            path = "LinkPublisher/inTarget" if in_target else "LinkPublisher/inSource"
-            params = {"name": name} if name is not None else {}
-            payload = await self._request_json(
-                path=path,
-                params=params,
-                base_url=self._version_base_url(2),
-            )
-            return self._records_from_payload(payload)
-
-    async def list_datasources(self) -> list[Any]:
-            """List all data sources registered by the Schololexplorer V1 API."""
-            payload = await self._request_json(
-                path="listDatasources",
-                params={},
-                base_url=self._version_base_url(1),
-            )
-            return self._records_from_payload(payload)
-
-    async def links_from_pid(
-            self,
-            pid: str,
-            *,
-            pid_type: str | None = None,
-            typology_target: str | None = None,
-            datasource_target: str | None = None,
-            page: int | None = None,
-    ) -> list[ScholixV1Link]:
-            """Retrieve legacy Scholix V1 links associated with a PID."""
-            params = {
-                "pid": pid,
-                "pidType": pid_type,
-                "typologyTarget": typology_target,
-                "datasourceTarget": datasource_target,
-                "page": page,
-            }
-            payload = await self._request_json(
-                path="linksFromPid",
-                params={key: value for key, value in params.items() if value is not None},
-                base_url=self._version_base_url(1),
-            )
-            return [
-                ScholixV1Link.model_validate(item)
-                for item in self._records_from_payload(payload)
-            ]
-
-    async def links_from_publisher(
-            self,
-            publisher: str,
-            *,
-            page: int | None = None,
-    ) -> list[ScholixV1Link]:
-            """Retrieve legacy Scholix V1 links published by a publisher."""
-            params = {"publisher": publisher}
-            if page is not None:
-                params["page"] = page
-            payload = await self._request_json(
-                path="linksFromPublisher",
-                params=params,
-                base_url=self._version_base_url(1),
-            )
-            return [
-                ScholixV1Link.model_validate(item)
-                for item in self._records_from_payload(payload)
-            ]
-
-    async def links_from_datasource(
-            self,
-            datasource: str,
-            *,
-            page: int | None = None,
-    ) -> list[ScholixV1Link]:
-            """Retrieve legacy Scholix V1 links collected from a data source."""
-            params = {"datasource": datasource}
-            if page is not None:
-                params["page"] = page
-            payload = await self._request_json(
-                path="linksFromDatasource",
-                params=params,
-                base_url=self._version_base_url(1),
-            )
-            return [
-                ScholixV1Link.model_validate(item)
-                for item in self._records_from_payload(payload)
-            ]
-
-    async def get_kpi(self) -> str:
-            """Return the Scholexplorer Prometheus KPI document."""
-            try:
-                response = await self._api_client.request(
-                    method="GET",
-                    path="kpi/getKPI",
-                    params={},
-                    base_url_override=self._root_base_url(),
-                    data=None,
-                    json_data=None,
-                )
-                return response.text
-            except BibliofabricError:
-                raise
-            except Exception as exc:
-                raise BibliofabricError(
-                    f"Unexpected error requesting kpi/getKPI: {exc}"
-                ) from exc
         except Exception as e:
-            if isinstance(
-                e, BibliofabricError | ValidationError
-            ):  # ValidationError can come from Pydantic
+            if isinstance(e, BibliofabricError | ValidationError):
                 raise
             logger.exception(
-                f"Failed to search {self._entity_path} with params {params} at {self._base_url_override}"
+                f"Failed to search {self._entity_path} with params {params} "
+                f"at {self._base_url_override}"
             )
             raise BibliofabricError(
                 f"Unexpected error searching {self._entity_path}: {e}"
             ) from e
+
+    async def search_links_v2(
+        self,
+        page: int = 0,
+        page_size: int = DEFAULT_PAGE_SIZE,
+        filters: ScholixFilters | None = None,
+    ) -> ScholixResponse:
+        """Search the Scholexplorer V2 ``Links`` endpoint.
+
+        V2 accepts provider and PID-type filters that are not supported by the
+        V3 endpoint. Unlike V3, provider-only queries are allowed.
+        """
+        filter_dict = (
+            filters.model_dump(exclude_none=True, by_alias=True) if filters else {}
+        )
+        page_size = min(page_size, MAX_LINK_PAGE_SIZE)
+        params = self._build_scholix_params(page, page_size, filter_dict)
+        payload = await self._request_json(
+            path="Links",
+            params=params,
+            base_url=self._version_base_url(2),
+        )
+        return ScholixResponse.model_validate(payload)
+
+    async def iterate_links_v2(
+        self,
+        page_size: int = DEFAULT_PAGE_SIZE,
+        filters: ScholixFilters | None = None,
+    ) -> AsyncIterator[ScholixRelationship]:
+        """Iterate through all links returned by the Scholexplorer V2 endpoint."""
+        current_page = 0
+        total_pages = 1
+        while current_page < total_pages:
+            response = await self.search_links_v2(
+                page=current_page,
+                page_size=page_size,
+                filters=filters,
+            )
+            if not response.result:
+                break
+            for link in response.result:
+                yield link
+            if current_page == 0:
+                total_pages = response.total_pages
+                if total_pages == 0:
+                    break
+            if current_page >= total_pages - 1:
+                break
+            current_page += 1
+
+    async def list_link_providers(self, name: str | None = None) -> list[Any]:
+        """List Scholexplorer V2 link providers."""
+        params = {"name": name} if name is not None else {}
+        payload = await self._request_json(
+            path="LinkProvider",
+            params=params,
+            base_url=self._version_base_url(2),
+        )
+        return self._records_from_payload(payload)
+
+    async def list_link_publishers(
+        self,
+        *,
+        in_target: bool = True,
+        name: str | None = None,
+    ) -> list[Any]:
+        """List publishers of source or target objects from Scholexplorer V2."""
+        path = "LinkPublisher/inTarget" if in_target else "LinkPublisher/inSource"
+        params = {"name": name} if name is not None else {}
+        payload = await self._request_json(
+            path=path,
+            params=params,
+            base_url=self._version_base_url(2),
+        )
+        return self._records_from_payload(payload)
+
+    async def list_datasources(self) -> list[Any]:
+        """List all data sources registered by the Scholexplorer V1 API."""
+        payload = await self._request_json(
+            path="listDatasources",
+            params={},
+            base_url=self._version_base_url(1),
+        )
+        return self._records_from_payload(payload)
+
+    async def links_from_pid(
+        self,
+        pid: str,
+        *,
+        pid_type: str | None = None,
+        typology_target: str | None = None,
+        datasource_target: str | None = None,
+        page: int | None = None,
+    ) -> list[ScholixV1Link]:
+        """Retrieve legacy Scholix V1 links associated with a PID."""
+        params = {
+            "pid": pid,
+            "pidType": pid_type,
+            "typologyTarget": typology_target,
+            "datasourceTarget": datasource_target,
+            "page": page,
+        }
+        payload = await self._request_json(
+            path="linksFromPid",
+            params={key: value for key, value in params.items() if value is not None},
+            base_url=self._version_base_url(1),
+        )
+        return [
+            ScholixV1Link.model_validate(item)
+            for item in self._records_from_payload(payload)
+        ]
+
+    async def links_from_publisher(
+        self,
+        publisher: str,
+        *,
+        page: int | None = None,
+    ) -> list[ScholixV1Link]:
+        """Retrieve legacy Scholix V1 links published by a publisher."""
+        params: dict[str, str | int] = {"publisher": publisher}
+        if page is not None:
+            params["page"] = page
+        payload = await self._request_json(
+            path="linksFromPublisher",
+            params=params,
+            base_url=self._version_base_url(1),
+        )
+        return [
+            ScholixV1Link.model_validate(item)
+            for item in self._records_from_payload(payload)
+        ]
+
+    async def links_from_datasource(
+        self,
+        datasource: str,
+        *,
+        page: int | None = None,
+    ) -> list[ScholixV1Link]:
+        """Retrieve legacy Scholix V1 links collected from a data source."""
+        params: dict[str, str | int] = {"datasource": datasource}
+        if page is not None:
+            params["page"] = page
+        payload = await self._request_json(
+            path="linksFromDatasource",
+            params=params,
+            base_url=self._version_base_url(1),
+        )
+        return [
+            ScholixV1Link.model_validate(item)
+            for item in self._records_from_payload(payload)
+        ]
+
+    async def get_kpi(self) -> str:
+        """Return the Scholexplorer Prometheus KPI document."""
+        try:
+            response = await self._api_client.request(
+                method="GET",
+                path="kpi/getKPI",
+                params={},
+                base_url_override=self._root_base_url(),
+                data=None,
+                json_data=None,
+            )
+            return response.text
+        except BibliofabricError:
+            raise
+        except Exception as exc:
+            raise BibliofabricError(
+                f"Unexpected error requesting kpi/getKPI: {exc}"
+            ) from exc
 
     async def iterate_links(
         self,

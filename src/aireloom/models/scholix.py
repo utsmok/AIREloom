@@ -148,8 +148,16 @@ class ScholixRelationshipType(BaseModel):
     """
 
     name: ScholixRelationshipNameValue | str = Field(alias="Name", default="")
-    sub_type: str | None = Field(alias="SubType", default=None)
-    sub_type_schema: str | None = Field(alias="SubTypeSchema", default=None)
+    sub_type: str | None = Field(
+        alias="SubType",
+        default=None,
+        validation_alias=AliasChoices("subType", "SubType"),
+    )
+    sub_type_schema: str | None = Field(
+        alias="SubTypeSchema",
+        default=None,
+        validation_alias=AliasChoices("subTypeSchema", "SubTypeSchema"),
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 

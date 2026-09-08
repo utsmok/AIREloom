@@ -2,6 +2,24 @@
 
 All notable changes to AIREloom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-09-08
+
+Scholix compatibility and metadata fidelity release.
+
+### Added
+
+- Scholix V1 and V2 endpoint helpers for link providers, publisher directories,
+  data sources, links, and KPI data.
+- V2 Scholix filters for link providers and source/target PID types.
+
+### Fixed
+
+- Research product keywords and descriptions now preserve the API's structured
+  values.
+- Scholix `subType` and identifier fields accept the casing used by both API
+  generations.
+- Person batch lookups support both `id` and `originalId` identifiers.
+
 ## [0.5.1] - 2026-09-05
 
 Dependency alignment release; no API changes.

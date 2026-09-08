@@ -38,7 +38,7 @@ class Header(BaseModel):
         page: The current page number.
         maxScore: The maximum score among all matching results.
         totalPages: Total number of pages of results.
-        totalLinks: Total number of links (used by /researchProducts/links endpoint).
+        totalLinks: Total number of links (used by /research-products/links endpoint).
     """
 
     # Note: status, code, message are typically expected, but optional for robustness.
