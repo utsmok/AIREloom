@@ -10,6 +10,7 @@ from aireloom.constants import DEFAULT_PAGE_SIZE, OPENAIRE_SCHOLIX_API_BASE_URL
 from aireloom.endpoints import SCHOLIX, ScholixFilters
 from aireloom.models import (
     ScholixRelationship,
+    ScholixResponse,
     ScholixV1Link,
 )
 from aireloom.resources import ScholixClient
@@ -358,6 +359,18 @@ def test_scholix_subtype_aliases():
     assert link.source.identifier[0].id_val == "10.1234/source"
 
 
+def test_scholix_response_normalizes_legacy_shapes():
+    link = create_mock_scholix_link_data("10.1234/source", "10.1234/target")
+
+    assert ScholixResponse.model_validate([link]).result
+    assert ScholixResponse.model_validate({"links": [link]}).result
+
+
+def test_scholix_payload_record_extraction_shapes():
+    assert ScholixClient._records_from_payload([{"id": 1}]) == [{"id": 1}]
+    assert ScholixClient._records_from_payload({"unknown": "shape"}) == []
+
+
 @pytest.mark.asyncio
 async def test_search_scholix_links_v2(
     scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
@@ -387,6 +400,84 @@ async def test_search_scholix_links_v2(
         data=None,
         json_data=None,
     )
+
+
+@pytest.mark.asyncio
+async def test_iterate_scholix_links_v2(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    link = create_mock_scholix_link_data("10.1234/source", "10.1234/target")
+    responses = []
+    for page in range(2):
+        response = AsyncMock(spec=httpx.Response)
+        response.status_code = 200
+        response.json.return_value = {
+            "currentPage": page,
+            "totalPages": 2,
+            "totalLinks": 2,
+            "result": [link],
+        }
+        responses.append(response)
+    mock_api_client_fixture.request = AsyncMock(side_effect=responses)
+
+    results = [
+        item
+        async for item in scholix_client.iterate_links_v2(
+            page_size=1, filters=ScholixFilters(sourcePid="10.1234/source")
+        )
+    ]
+
+    assert len(results) == 2
+    assert mock_api_client_fixture.request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_iterate_scholix_links_v2_stops_on_empty_page(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    response = AsyncMock(spec=httpx.Response)
+    response.status_code = 200
+    response.json.return_value = {
+        "currentPage": 0,
+        "totalPages": 1,
+        "totalLinks": 0,
+        "result": [],
+    }
+    mock_api_client_fixture.request.return_value = response
+
+    results = [
+        item
+        async for item in scholix_client.iterate_links_v2(
+            filters=ScholixFilters(sourcePid="10.1234/source")
+        )
+    ]
+
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_iterate_scholix_links_v2_stops_when_total_pages_is_zero(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    link = create_mock_scholix_link_data("10.1234/source", "10.1234/target")
+    response = AsyncMock(spec=httpx.Response)
+    response.status_code = 200
+    response.json.return_value = {
+        "currentPage": 0,
+        "totalPages": 0,
+        "totalLinks": 1,
+        "result": [link],
+    }
+    mock_api_client_fixture.request.return_value = response
+
+    results = [
+        item
+        async for item in scholix_client.iterate_links_v2(
+            filters=ScholixFilters(sourcePid="10.1234/source")
+        )
+    ]
+
+    assert len(results) == 1
 
 
 @pytest.mark.asyncio
@@ -482,6 +573,51 @@ async def test_scholix_directory_and_kpi_endpoints(
         call.kwargs["base_url_override"]
         for call in mock_api_client_fixture.request.call_args_list
     ] == expected_bases
+
+
+def test_scholix_custom_base_url_without_version(mock_api_client_fixture):
+    client = ScholixClient(
+        api_client=mock_api_client_fixture, scholix_base_url="https://example.test"
+    )
+    assert client._root_base_url() == "https://example.test"
+
+
+@pytest.mark.asyncio
+async def test_legacy_scholix_publisher_and_datasource_links(
+    scholix_client: ScholixClient, mock_api_client_fixture: AsyncMock
+):
+    payload = {"links": []}
+    publisher_response = AsyncMock(spec=httpx.Response)
+    publisher_response.status_code = 200
+    publisher_response.json.return_value = payload
+    datasource_response = AsyncMock(spec=httpx.Response)
+    datasource_response.status_code = 200
+    datasource_response.json.return_value = payload
+    mock_api_client_fixture.request = AsyncMock(
+        side_effect=[publisher_response, datasource_response]
+    )
+
+    assert await scholix_client.links_from_publisher("Publisher", page=2) == []
+    assert await scholix_client.links_from_datasource("Datasource", page=3) == []
+
+    assert mock_api_client_fixture.request.call_args_list == [
+        call(
+            method="GET",
+            path="linksFromPublisher",
+            params={"publisher": "Publisher", "page": 2},
+            base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL.replace("/v3", "/v1"),
+            data=None,
+            json_data=None,
+        ),
+        call(
+            method="GET",
+            path="linksFromDatasource",
+            params={"datasource": "Datasource", "page": 3},
+            base_url_override=OPENAIRE_SCHOLIX_API_BASE_URL.replace("/v3", "/v1"),
+            data=None,
+            json_data=None,
+        ),
+    ]
 
 
 @pytest.mark.asyncio
