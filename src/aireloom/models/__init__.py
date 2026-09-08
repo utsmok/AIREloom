@@ -31,6 +31,10 @@ from .scholix import (
     ScholixRelationship,
     ScholixRelationshipNameValue,
     ScholixResponse,
+    ScholixV1Identifier,
+    ScholixV1Link,
+    ScholixV1Object,
+    ScholixV1RelationshipType,
 )
 
 __all__ = [
@@ -70,4 +74,8 @@ __all__ = [
     "ScholixRelationship",
     "ScholixRelationshipNameValue",
     "ScholixResponse",
+    "ScholixV1Identifier",
+    "ScholixV1Link",
+    "ScholixV1Object",
+    "ScholixV1RelationshipType",
 ]

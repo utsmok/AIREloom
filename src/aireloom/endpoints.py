@@ -243,6 +243,9 @@ class ScholixFilters(BaseModel):
     sourceType: Literal["Publication", "Dataset", "Software", "Other"] | None = None
     targetType: Literal["Publication", "Dataset", "Software", "Other"] | None = None
     relation: str | None = None
+    linkProvider: str | None = None
+    sourcePidType: str | None = None
+    targetPidType: str | None = None
     from_date: date | None = Field(default=None, alias="from")  # API uses "from"
     to_date: date | None = Field(default=None, alias="to")  # API uses "to"
 

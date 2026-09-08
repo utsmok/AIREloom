@@ -11,7 +11,7 @@ and DDI-CDI Codi Model: https://ddi-alliance.github.io/DDI-CDI/current/Model/
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 
 from .safe_types import SafeList, SafeStr
 
@@ -59,9 +59,21 @@ class ScholixIdentifier(BaseModel):
         id_url: An optional URL or string for the identifier (aliased from "IDURL").
     """
 
-    id_val: SafeStr = Field(alias="ID", default="")
-    id_scheme: SafeStr = Field(alias="IDScheme", default="")
-    id_url: str | None = Field(alias="IDURL", default=None)
+    id_val: SafeStr = Field(
+        alias="ID",
+        default="",
+        validation_alias=AliasChoices("ID", "id", "value"),
+    )
+    id_scheme: SafeStr = Field(
+        alias="IDScheme",
+        default="",
+        validation_alias=AliasChoices("IDScheme", "idScheme", "scheme", "type"),
+    )
+    id_url: str | None = Field(
+        alias="IDURL",
+        default=None,
+        validation_alias=AliasChoices("IDURL", "idUrl", "url"),
+    )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 
@@ -111,7 +123,11 @@ class ScholixEntity(BaseModel):
         alias="Identifier", default_factory=list
     )
     type: ScholixEntityTypeName = Field(alias="Type")
-    sub_type: str | None = Field(alias="SubType", default=None)
+    sub_type: str | None = Field(
+        alias="SubType",
+        default=None,
+        validation_alias=AliasChoices("subType", "SubType"),
+    )
     title: SafeStr = Field(alias="Title", default="")
     creator: SafeList[ScholixCreator] = Field(alias="Creator", default_factory=list)
     publication_date: str | None = Field(alias="PublicationDate", default=None)
@@ -209,6 +225,97 @@ class ScholixResponse(BaseModel):
         default_factory=list,
         alias="result",
         description="List of Scholix relationship links.",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_result_payload(cls, data):
+        """Accept the list and ``links`` shapes used by Scholix API versions."""
+        if isinstance(data, list):
+            return {"result": data}
+        if isinstance(data, dict) and "result" not in data and "links" in data:
+            data = dict(data)
+            data["result"] = data["links"]
+        return data
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+
+class ScholixV1Identifier(BaseModel):
+    """Identifier from the legacy Scholix V1 response schema."""
+
+    identifier: SafeStr = ""
+    schema: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class ScholixV1RelationshipType(BaseModel):
+    """Relationship metadata from the legacy Scholix V1 schema."""
+
+    name: SafeStr = ""
+    inverse_relationship: SafeStr = Field(
+        default="",
+        validation_alias=AliasChoices("inverseRelationship", "InverseRelationship"),
+    )
+    schema: SafeStr = ""
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+
+class ScholixV1Object(BaseModel):
+    """Source or target object from a Scholix V1 link."""
+
+    identifiers: SafeList[ScholixV1Identifier] = Field(default_factory=list)
+    title: SafeStr = ""
+    object_type: SafeStr = Field(
+        default="",
+        validation_alias=AliasChoices("objectType", "type"),
+    )
+    object_sub_type: SafeStr = Field(
+        default="",
+        validation_alias=AliasChoices("objectSubType", "subtype", "subType"),
+    )
+    creators: SafeList[dict] = Field(default_factory=list)
+    publisher: SafeList[dict] = Field(default_factory=list)
+    object_provider: SafeList[dict] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("objectProvider", "objectProviders"),
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_identifiers(cls, data):
+        """Accept singular ``identifier`` as well as V1's plural spelling."""
+        if isinstance(data, dict) and "identifiers" not in data:
+            data = dict(data)
+            if "identifier" in data:
+                value = data.pop("identifier")
+                data["identifiers"] = value if isinstance(value, list) else [value]
+        return data
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+
+class ScholixV1Link(BaseModel):
+    """A legacy Scholix V1 relationship record."""
+
+    link_provider: SafeList[dict] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("linkProvider", "LinkProvider"),
+    )
+    publication_date: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("publicationDate", "LinkPublicationDate"),
+    )
+    relationship: ScholixV1RelationshipType = Field(
+        default_factory=ScholixV1RelationshipType
+    )
+    source: ScholixV1Object = Field(default_factory=ScholixV1Object)
+    target: ScholixV1Object = Field(default_factory=ScholixV1Object)
+    license_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("licenseURL", "LicenseURL"),
     )
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")

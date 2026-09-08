@@ -589,11 +589,11 @@ class ResearchProduct(BaseEntity):
     def split_keywords(cls, v: Any) -> list[str]:
         """Attempts to split a comma-separated string of keywords into a list.
 
-        If the input `v` is a string, it's split by commas, and each part is stripped
-        of whitespace. If `v` is None or not a string, it returns an empty list.
+        Strings are split by commas and existing lists are preserved after removing
+        empty or non-string values. The API has returned both shapes over time.
 
         Args:
-            v: The value to parse, expected to be a string or None.
+            v:             The value to parse, expected to be a string, list, or None.
 
         Returns:
             A list of keyword strings, or [] if input was None or unexpected.
@@ -602,34 +602,75 @@ class ResearchProduct(BaseEntity):
             return []
         if isinstance(v, str):
             return [kw.strip() for kw in v.split(",") if kw.strip()]
+        if isinstance(v, list):
+            return [kw.strip() for kw in v if isinstance(kw, str) and kw.strip()]
         logger.warning(
-            f"Unexpected value for ResearchProduct.keywords: {v}. Expected string or None."
+            f"Unexpected value for ResearchProduct.keywords: {v}. "
+            "Expected string, list, or None."
         )
         return []
 
     @model_validator(mode="before")
     @classmethod
-    def get_title_from_main_title(cls, data: Any) -> Any:
-        """Populates the `title` field from `mainTitle` if `title` is not present.
+    def normalize_api_metadata(cls, data: Any) -> Any:
+        """Fill compatibility fields from the canonical V3 response fields.
 
-        The OpenAIRE API sometimes uses `mainTitle` for the primary title. This
-        validator ensures that the `title` field in the Pydantic model is populated
-        using `mainTitle` if `title` itself is missing in the input data, effectively
-        aliasing `mainTitle` to `title`.
+        V3 returns abstracts in ``descriptions`` and keyword subjects in
+        ``subjects``. Populate the legacy convenience fields when the API omits
+        them, while preserving explicit values supplied by callers.
 
         Args:
             data: The raw input data dictionary before validation.
 
         Returns:
-            The (potentially modified) input data dictionary.
+            The normalized input data dictionary.
         """
-        if (
-            isinstance(data, dict)
-            and "mainTitle" in data
-            and ("title" not in data or data["title"] is None)
+        if not isinstance(data, dict):
+            return data
+
+        data = dict(data)
+        if "mainTitle" in data and (
+            "title" not in data or data["title"] is None
         ):
             data["title"] = data["mainTitle"]
-            # Keep mainTitle in data so it populates the explicit field
+
+        if not data.get("description"):
+            descriptions = data.get("descriptions")
+            if isinstance(descriptions, str):
+                descriptions = [descriptions]
+            if isinstance(descriptions, list):
+                data["description"] = next(
+                    (
+                        description.strip()
+                        for description in descriptions
+                        if isinstance(description, str) and description.strip()
+                    ),
+                    "",
+                )
+
+        if not data.get("keywords"):
+            keyword_values: list[str] = []
+            subjects = data.get("subjects")
+            if isinstance(subjects, list):
+                for subject in subjects:
+                    raw_subject = (
+                        subject.get("subject")
+                        if isinstance(subject, dict)
+                        else None
+                    )
+                    if not isinstance(raw_subject, dict):
+                        continue
+                    scheme = raw_subject.get("scheme")
+                    value = raw_subject.get("value")
+                    if (
+                        isinstance(scheme, str)
+                        and scheme.casefold() == "keyword"
+                        and isinstance(value, str)
+                        and value.strip()
+                    ):
+                        keyword_values.append(value.strip())
+            data["keywords"] = keyword_values
+
         return data
 
     # ── Computed fields ─────────────────────────────────────────────────
