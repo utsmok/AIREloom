@@ -416,3 +416,32 @@ def test_persons_filters_forbid_extra():
 def test_persons_client_routes_to_v3(persons_client):
     """PersonsClient has no base URL override — it inherits the default V3 Graph base."""
     assert persons_client._base_url_override is None
+
+
+def test_persons_batch_getters_are_generated(persons_client):
+    assert hasattr(persons_client, "batch_get_by_openaire_id")
+    assert hasattr(persons_client, "batch_get_by_original_id")
+
+
+@pytest.mark.asyncio
+async def test_batch_get_persons_by_original_id(
+    persons_client: PersonsClient, mock_api_client_fixture: AsyncMock
+):
+    identifiers = ["orcid:0000-0001-2345-6789", "orcid:0000-0002-3456-7890"]
+    response = AsyncMock(spec=httpx.Response)
+    response.status_code = 200
+    response.json.return_value = {
+        "results": [
+            {"id": "person_1", "originalId": [identifiers[0]]},
+            {"id": "person_2", "originalId": [identifiers[1]]},
+        ],
+        "header": {"numFound": 2, "pageSize": 2},
+    }
+    mock_api_client_fixture.request = AsyncMock(return_value=response)
+
+    result = await persons_client.batch_get_by_original_id(identifiers)
+
+    assert set(result) == set(identifiers)
+    assert result[identifiers[0]].id == "person_1"
+    params = mock_api_client_fixture.request.call_args.kwargs["params"]
+    assert params["originalId"] == ",".join(identifiers)

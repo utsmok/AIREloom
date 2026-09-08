@@ -629,9 +629,7 @@ class ResearchProduct(BaseEntity):
             return data
 
         data = dict(data)
-        if "mainTitle" in data and (
-            "title" not in data or data["title"] is None
-        ):
+        if "mainTitle" in data and ("title" not in data or data["title"] is None):
             data["title"] = data["mainTitle"]
 
         if not data.get("description"):
@@ -654,9 +652,7 @@ class ResearchProduct(BaseEntity):
             if isinstance(subjects, list):
                 for subject in subjects:
                     raw_subject = (
-                        subject.get("subject")
-                        if isinstance(subject, dict)
-                        else None
+                        subject.get("subject") if isinstance(subject, dict) else None
                     )
                     if not isinstance(raw_subject, dict):
                         continue
