@@ -1,6 +1,8 @@
 # aireloom/resources/organizations_client.py
 """Client for interacting with the OpenAIRE Organizations API endpoint."""
 
+from pydantic import BaseModel
+
 from ..endpoints import ORGANIZATIONS
 from ..models import Organization, OrganizationResponse
 from ._standard import StandardResourceClient
@@ -17,8 +19,8 @@ class OrganizationsClient(StandardResourceClient):
     """
 
     _entity_path: str = ORGANIZATIONS
-    _entity_model: type[Organization] = Organization
-    _search_response_model: type[OrganizationResponse] = OrganizationResponse
+    _entity_model: type[BaseModel] | None = Organization
+    _search_response_model: type[BaseModel] | None = OrganizationResponse
     _batch_fields: dict[str, str] = {
         "pid": "pid",
         "openaire_id": "id",

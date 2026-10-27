@@ -18,6 +18,7 @@ from bibliofabric.resources import (
     GettableMixin,
     SearchableMixin,
 )
+from pydantic import BaseModel
 
 from ._batch import BatchMixin
 from ._standard import GraphV3FilterSerializationMixin
@@ -52,8 +53,8 @@ class ResearchProductsClient(
     """
 
     _entity_path: str = RESEARCH_PRODUCTS
-    _entity_model: type[ResearchProduct] = ResearchProduct
-    _search_response_model: type[ResearchProductResponse] = ResearchProductResponse
+    _entity_model: type[BaseModel] | None = ResearchProduct
+    _search_response_model: type[BaseModel] | None = ResearchProductResponse
     _batch_fields: dict[str, str] = {
         "doi": "pid",
         "openaire_id": "id",

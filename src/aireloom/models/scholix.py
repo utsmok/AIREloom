@@ -253,7 +253,8 @@ class ScholixV1Identifier(BaseModel):
     """Identifier from the legacy Scholix V1 response schema."""
 
     identifier: SafeStr = ""
-    schema: SafeStr = ""
+    # Mirrors the Scholix JSON key; shadows BaseModel.schema() by design.
+    schema: SafeStr = ""  # ty: ignore[invalid-attribute-override]
 
     model_config = ConfigDict(extra="allow")
 
@@ -266,7 +267,8 @@ class ScholixV1RelationshipType(BaseModel):
         default="",
         validation_alias=AliasChoices("inverseRelationship", "InverseRelationship"),
     )
-    schema: SafeStr = ""
+    # Mirrors the Scholix JSON key; shadows BaseModel.schema() by design.
+    schema: SafeStr = ""  # ty: ignore[invalid-attribute-override]
 
     model_config = ConfigDict(populate_by_name=True, extra="allow")
 

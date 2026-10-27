@@ -1,6 +1,8 @@
 # aireloom/resources/persons_client.py
 """Client for interacting with the OpenAIRE Persons API endpoint."""
 
+from pydantic import BaseModel
+
 from ..endpoints import PERSONS
 from ..models import Person, PersonResponse
 from ._standard import StandardResourceClient
@@ -17,8 +19,8 @@ class PersonsClient(StandardResourceClient):
     """
 
     _entity_path: str = PERSONS
-    _entity_model: type[Person] = Person
-    _search_response_model: type[PersonResponse] = PersonResponse
+    _entity_model: type[BaseModel] | None = Person
+    _search_response_model: type[BaseModel] | None = PersonResponse
     _batch_fields: dict[str, str] = {
         "openaire_id": "id",
         "original_id": "originalId",

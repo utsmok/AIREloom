@@ -1,6 +1,8 @@
 # aireloom/resources/projects_client.py
 """Client for interacting with the OpenAIRE Projects API endpoint."""
 
+from pydantic import BaseModel
+
 from ..endpoints import PROJECTS
 from ..models import Project, ProjectResponse
 from ._standard import StandardResourceClient
@@ -17,8 +19,8 @@ class ProjectsClient(StandardResourceClient):
     """
 
     _entity_path: str = PROJECTS
-    _entity_model: type[Project] = Project
-    _search_response_model: type[ProjectResponse] = ProjectResponse
+    _entity_model: type[BaseModel] | None = Project
+    _search_response_model: type[BaseModel] | None = ProjectResponse
     _batch_fields: dict[str, str] = {
         "code": "code",
         "openaire_id": "id",
