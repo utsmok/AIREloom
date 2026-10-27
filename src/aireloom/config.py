@@ -6,7 +6,11 @@ from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 # Import OpenAIRE-specific constants
-from .constants import DEFAULT_USER_AGENT, REGISTERED_SERVICE_API_TOKEN_URL
+from .constants import (
+    DEFAULT_USER_AGENT,
+    REGISTERED_SERVICE_API_TOKEN_URL,
+    REGISTERED_SERVICE_API_TOKEN_URL_V2,
+)
 
 
 class ApiSettings(BaseApiSettings):
@@ -56,6 +60,24 @@ class ApiSettings(BaseApiSettings):
         default=REGISTERED_SERVICE_API_TOKEN_URL,
         description="OAuth2 Token Endpoint URL",
     )
+    # OpenAIRE moved auth to a new identity platform on 2026-11-02 10:00 CET; the new
+    # token endpoint does not exist before then, so switching stays opt-in.
+    new_token_endpoint: bool = Field(
+        default=False,
+        description=(
+            "Request tokens from the new OpenAIRE Keycloak endpoint "
+            "(post-2026-11-02). Ignored when openaire_token_url is set explicitly."
+        ),
+    )
+
+    @property
+    def effective_token_url(self) -> str:
+        """Token endpoint in effect: explicit override wins, then the toggle."""
+        if self.openaire_token_url != REGISTERED_SERVICE_API_TOKEN_URL:
+            return self.openaire_token_url
+        if self.new_token_endpoint:
+            return REGISTERED_SERVICE_API_TOKEN_URL_V2
+        return self.openaire_token_url
 
 
 # Create a single, cached instance of settings

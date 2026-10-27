@@ -10,6 +10,10 @@ OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v3"
 OPENAIRE_SCHOLIX_API_ROOT_URL = "https://api.scholexplorer.openaire.eu"
 OPENAIRE_SCHOLIX_API_BASE_URL = "https://api.scholexplorer.openaire.eu/v3"
 REGISTERED_SERVICE_API_TOKEN_URL = "https://aai.openaire.eu/oidc/token"
+# New identity-platform endpoint, live only after the 2026-11-02 10:00 CET migration.
+REGISTERED_SERVICE_API_TOKEN_URL_V2 = (
+    "https://aai.openaire.eu/auth/realms/openaire/protocol/openid-connect/token"
+)
 
 # Default settings
 DEFAULT_TIMEOUT: int = 30  # Default request timeout in seconds

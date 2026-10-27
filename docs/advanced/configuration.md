@@ -30,6 +30,7 @@ See the [Authentication Guide](../authentication.md) for details.
 | `openaire_client_id` | `AIRELOOM_OPENAIRE_CLIENT_ID` | `None` | OAuth2 client ID |
 | `openaire_client_secret` | `AIRELOOM_OPENAIRE_CLIENT_SECRET` | `None` | OAuth2 client secret |
 | `openaire_token_url` | `AIRELOOM_OPENAIRE_TOKEN_URL` | `https://aai.openaire.eu/oidc/token` | OAuth2 token endpoint |
+| `new_token_endpoint` | `AIRELOOM_NEW_TOKEN_ENDPOINT` | `False` | Request tokens from the new OpenAIRE endpoint (`…/auth/realms/openaire/protocol/openid-connect/token`), live after the 2026-11-02 migration. Ignored when `AIRELOOM_OPENAIRE_TOKEN_URL` is set |
 
 ## Rate Limiting
 

@@ -5,6 +5,12 @@ import pytest
 from bibliofabric.auth import StaticTokenAuth
 
 from aireloom import AireloomSession
+from aireloom.client import AireloomClient
+from aireloom.config import ApiSettings
+from aireloom.constants import (
+    REGISTERED_SERVICE_API_TOKEN_URL,
+    REGISTERED_SERVICE_API_TOKEN_URL_V2,
+)
 
 
 @pytest.mark.asyncio
@@ -120,3 +126,25 @@ async def test_session_programmatic_config_override(httpx_mock, monkeypatch):
     # Restore original get_settings and clear cache
     monkeypatch.setattr("aireloom.config.get_settings", original_get_settings_func)
     get_settings.cache_clear()  # Clear again for subsequent tests
+
+
+def test_default_token_url_is_legacy(monkeypatch):
+    monkeypatch.delenv("AIRELOOM_NEW_TOKEN_ENDPOINT", raising=False)
+    settings = ApiSettings(_env_file=None)
+    assert settings.effective_token_url == REGISTERED_SERVICE_API_TOKEN_URL
+
+
+def test_env_toggle_switches_token_url(monkeypatch):
+    monkeypatch.setenv("AIRELOOM_NEW_TOKEN_ENDPOINT", "1")
+    settings = ApiSettings(_env_file=None)
+    assert settings.effective_token_url == REGISTERED_SERVICE_API_TOKEN_URL_V2
+    client = AireloomClient(settings=settings, client_id="id", client_secret="secret")
+    assert client._auth_strategy._token_url == REGISTERED_SERVICE_API_TOKEN_URL_V2
+
+
+def test_explicit_token_url_beats_toggle(monkeypatch):
+    monkeypatch.setenv("AIRELOOM_NEW_TOKEN_ENDPOINT", "1")
+    settings = ApiSettings(
+        _env_file=None, openaire_token_url="https://custom.example/token"
+    )
+    assert settings.effective_token_url == "https://custom.example/token"

@@ -178,7 +178,7 @@ class AireloomClient(BaseApiClient):
         _client_id = client_id or self._settings.openaire_client_id
         _client_secret = client_secret or self._settings.openaire_client_secret
         _api_token = api_token or self._settings.openaire_api_token
-        _token_url = self._settings.openaire_token_url
+        _token_url = self._settings.effective_token_url
 
         logger.debug(
             f"Auth decision: client_id_param={'***' if client_id else None}, "
