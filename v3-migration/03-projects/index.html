@@ -1,0 +1,2266 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/03-projects/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Projects Endpoint (/v3/projects) - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-projects-endpoint-v3projects" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Projects Endpoint (/v3/projects)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-filter-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Filter Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-date-filter-families" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Date Filter Families
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-sort-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Sort Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-response-model-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Response Model Comparison
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Response Model Comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-top-level-project-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 Top-level Project Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-nested-fundings-array-current-funding-model-vs-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 Nested fundings Array (current Funding model vs live)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-nested-granted-object-current-grant-model-vs-live" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 Nested granted Object (current Grant model vs live)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-new-funding-field-not-in-current-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.4 NEW funding Field (not in current model)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-new-links-field-not-in-current-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.5 NEW links Field (not in current model)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-resource-client-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Resource Client Routing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification Log
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification Log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-filter-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      New Filter Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#year-range-filter-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      Year Range Filter Test
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date-range-filter-test-existing-params-confirming-still-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      Date Range Filter Test (existing params, confirming still work)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed-parameter-confirmation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed Parameter Confirmation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#full-response-capture-for-model-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Full Response Capture (for model comparison)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#r1-add-13-new-filter-fields-to-projectsfilters" class="md-nav__link">
+    <span class="md-ellipsis">
+      R1: Add 13 new filter fields to ProjectsFilters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r2-remove-grantid-field-from-projectsfilters" class="md-nav__link">
+    <span class="md-ellipsis">
+      R2: Remove grantID field from ProjectsFilters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r3-change-date-filter-types-from-date-to-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      R3: Change date filter types from date to str
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r4-expand-logicaloperator-enum-to-include-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      R4: Expand logicalOperator enum to include "NOT"
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r5-add-funding-field-to-project-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      R5: Add funding field to Project model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r6-consider-adding-links-field-to-project-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      R6: Consider adding links field to Project model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r7-add-_base_url_override-to-projectsclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      R7: Add _base_url_override to ProjectsClient
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r8-update-keywords-type-annotation-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      R8: Update keywords type annotation (optional)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-projects-endpoint-v3projects">V3 Migration Research — Projects Endpoint (<code>/v3/projects</code>)</h1>
+<h2 id="scope">Scope</h2>
+<p>Full analysis of the <code>/v3/projects</code> endpoint: all 36 parameters (filter + meta), 3 sort fields, response model (<code>APIProject</code> + nested funding/grant structures), and resource client routing. Compared against:
+- Current AIREloom code (<code>ProjectsFilters</code>, <code>Project</code> model, <code>ProjectsClient</code>, <code>ENDPOINT_DEFINITIONS</code>)
+- V3 OpenAPI spec (<code>graph_v3_openapi.json</code>)
+- V3 documentation (https://graph.openaire.eu/docs/apis/graph-api/projects/)
+- <strong>Live V3 API</strong> (https://api.openaire.eu/graph/v3/projects) — every claim verified</p>
+<h2 id="method">Method</h2>
+<ol>
+<li>Extracted all 36 parameters from V3 OpenAPI spec <code>paths./v3/projects.get.parameters</code></li>
+<li>Cross-referenced against current <code>ProjectsFilters</code> (21 fields) at <code>src/aireloom/endpoints.py:180-229</code></li>
+<li>Ran 20+ live API calls via <code>reference/v3-investigation/v3_live.py</code> covering:</li>
+<li>All 13 new filter params (representative sample)</li>
+<li>All 3 sort fields (single + multi-field)</li>
+<li>Both date-filter families (date-based vs year-based)</li>
+<li>Full <code>--full</code> response capture for field-level model comparison</li>
+<li>Extracted V3 schemas: <code>APIProject</code>, <code>Funding</code>, <code>Granted</code>, <code>Funder</code>, <code>Programme</code>, <code>FundingStream</code></li>
+</ol>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-filter-parameters">1. Filter Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Param</th>
+<th>In Current Code?</th>
+<th>V3 Spec Type</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>search</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>title</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>keywords</code></td>
+<td>YES (as <code>list[str]</code>)</td>
+<td>string</td>
+<td>200 OK</td>
+<td><strong>Type change</strong>: V3 spec says <code>string</code>; live returns comma-separated string. Current model's list[str] + validator still works due to parsing logic</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>id</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>code</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>grantID</code></td>
+<td><strong>YES</strong></td>
+<td><strong>REMOVED</strong></td>
+<td><strong>400 ERROR</strong></td>
+<td><strong>REMOVED in V3</strong>. Returns <code>Unknown parameter: grantID</code>. Must be deleted</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>acronym</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>callIdentifier</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>fundingShortName</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK (129K results for EC)</td>
+<td>Unchanged; example value <code>EC</code> works</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>fundingStreamId</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>fromStartDate</code></td>
+<td>YES (as <code>date</code>)</td>
+<td><strong>string</strong></td>
+<td>200 OK (205K results)</td>
+<td><strong>Type change</strong>: V3 spec says <code>string</code> (accepts YYYY or YYYY-MM-DD). Current code uses Python <code>date</code> type which serializes as YYYY-MM-DD — this works but is more restrictive than V3 allows</td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>toStartDate</code></td>
+<td>YES (as <code>date</code>)</td>
+<td><strong>string</strong></td>
+<td>200 OK</td>
+<td>Same type change as above</td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>fromEndDate</code></td>
+<td>YES (as <code>date</code>)</td>
+<td><strong>string</strong></td>
+<td>200 OK</td>
+<td>Same type change as above</td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>toEndDate</code></td>
+<td>YES (as <code>date</code>)</td>
+<td><strong>string</strong></td>
+<td>200 OK</td>
+<td>Same type change as above</td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>relOrganizationName</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>relOrganizationId</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>relCommunityId</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>relOrganizationCountryCode</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>relCollectedFromDatasourceId</code></td>
+<td>YES</td>
+<td>string</td>
+<td>200 OK</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>logicalOperator</code></td>
+<td>YES (<code>Literal["AND","OR"]</code>)</td>
+<td>string (enum AND/OR/<strong>NOT</strong>)</td>
+<td>N/A</td>
+<td><strong>Enum expanded</strong>: V3 adds <code>"NOT"</code> as valid value</td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>country</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>2.94M results</strong> for <code>US</code>)</td>
+<td><strong>NEW parameter</strong>. Filters by project country</td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>funder</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (but <strong>0 results</strong> for all tested values)</td>
+<td><strong>NEW parameter</strong>. Tested: EC, "European Commission", NSF, "NSF", NIH, "NIH", UKRI, "UK Research and Innovation" — all return 0. <strong>Suspect this filter requires specific internal ID format or is non-functional despite being documented</strong>. Use <code>fundingShortName</code> instead for now</td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>fundinglevel0Id</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>4059 results</strong> for quoted value)</td>
+<td><strong>NEW parameter</strong>. Requires double-quoting when value contains spaces/colons. Example: <code>fundinglevel0Id="ukri________::UKRI::Horizon Europe Guarantee"</code></td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>fundinglevel1Id</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>Not tested (no known value)</td>
+<td><strong>NEW parameter</strong>. Likely same quoting rules as level0</td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>fundinglevel2Id</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>Not tested (no known value)</td>
+<td><strong>NEW parameter</strong>. Likely same quoting rules as level0</td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>projectOAMandatePublications</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>104K results</strong> for <code>true</code>)</td>
+<td><strong>NEW parameter</strong>. Filters projects with OA mandate for publications. Accepts boolean-like strings</td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>startYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>118K results</strong> for <code>2020</code>)</td>
+<td><strong>NEW parameter</strong>. Exact year match on project start year</td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>endYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>118K results</strong> for <code>2024</code>)</td>
+<td><strong>NEW parameter</strong>. Exact year match on project end year</td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>activeYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>552K results</strong> for <code>2020</code>)</td>
+<td><strong>NEW parameter</strong>. Projects active (running) in given year</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>fromStartYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK (<strong>340K results</strong> for range 2020-2022)</td>
+<td><strong>NEW parameter</strong>. Start year &gt;= given year</td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>toStartYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK</td>
+<td>Used with fromStartYear above</td>
+</tr>
+<tr>
+<td>32</td>
+<td><code>fromEndYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK</td>
+<td><strong>NEW parameter</strong>. End year &gt;= given year</td>
+</tr>
+<tr>
+<td>33</td>
+<td><code>toEndYear</code></td>
+<td><strong>NO (NEW)</strong></td>
+<td>string</td>
+<td>200 OK</td>
+<td><strong>NEW parameter</strong>. End year &lt;= given year</td>
+</tr>
+<tr>
+<td>--</td>
+<td><code>page</code></td>
+<td>(implicit)</td>
+<td>integer</td>
+<td>200 OK</td>
+<td>1-indexed, max 10000 dataset</td>
+</tr>
+<tr>
+<td>--</td>
+<td><code>pageSize</code></td>
+<td>(implicit)</td>
+<td>integer</td>
+<td>200 OK</td>
+<td>Range 1-100</td>
+</tr>
+<tr>
+<td>--</td>
+<td><code>cursor</code></td>
+<td>(implicit)</td>
+<td>string</td>
+<td>N/A</td>
+<td>Cursor pagination supported</td>
+</tr>
+<tr>
+<td>--</td>
+<td><code>sortBy</code></td>
+<td>(implicit)</td>
+<td>string</td>
+<td>See section below</td>
+<td>Sort directive</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Summary</strong>: 13 new parameters, 1 removed (<code>grantID</code>), 2 type changes (date filters: <code>date</code> -&gt; <code>string</code>), 1 enum expansion (<code>logicalOperator</code> gains <code>NOT</code>).</p>
+<h3 id="2-date-filter-families">2. Date Filter Families</h3>
+<p>V3 provides <strong>two parallel date filtering systems</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Parameters</th>
+<th>Format</th>
+<th>Live Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Date-based</strong> (existing)</td>
+<td><code>fromStartDate</code>, <code>toStartDate</code>, <code>fromEndDate</code>, <code>toEndDate</code></td>
+<td><code>YYYY</code> or <code>YYYY-MM-DD</code></td>
+<td>WORKS: <code>fromStartDate=2022-01-01&amp;toStartDate=2023-12-31</code> -&gt; 205K results</td>
+</tr>
+<tr>
+<td><strong>Year-based</strong> (NEW)</td>
+<td><code>startYear</code>, <code>endYear</code>, <code>activeYear</code>, <code>fromStartYear</code>, <code>toStartYear</code>, <code>fromEndYear</code>, <code>toEndYear</code></td>
+<td><code>YYYY</code> (string)</td>
+<td>ALL WORK: see individual tests above</td>
+</tr>
+</tbody>
+</table>
+<p>Both families are functional. The year-based filters are strictly string-type years (no dashes). The date-based filters accept both <code>YYYY</code> and full dates.</p>
+<p><strong>Current code issue</strong>: <code>fromStartDate</code>/<code>toStartDate</code>/<code>fromEndDate</code>/<code>toEndDate</code> are typed as Python <code>date</code> objects in <code>ProjectsFilters</code>. This means users must pass <code>date(2022, 1, 1)</code> rather than the raw string <code>"2022"</code>. The V3 API accepts bare years like <code>fromStartDate=2022</code>. Changing to <code>str</code> would be more permissive and match the spec.</p>
+<h3 id="3-sort-fields">3. Sort Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>In Current ENDPOINT_DEFINITIONS?</th>
+<th>Live Test Result</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>relevance</code></td>
+<td>YES (default)</td>
+<td>Works (implicit default)</td>
+<td>Explicit <code>sortBy=relevance</code> returns <strong>400</strong> — must include direction</td>
+</tr>
+<tr>
+<td><code>startDate</code></td>
+<td>YES</td>
+<td><strong>200 OK</strong> with <code>sortBy=startDate+DESC</code></td>
+<td>Space between field and direction</td>
+</tr>
+<tr>
+<td><code>endDate</code></td>
+<td>YES</td>
+<td><strong>200 OK</strong> with <code>sortBy=endDate+DESC</code></td>
+<td>Space between field direction</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical finding on sort format</strong>:</p>
+<p>The V3 error message states: <em>"The field should be in the format 'fieldname ASC|DESC'"</em> and <em>"Multiple sorting parameters should be comma-separated."</em></p>
+<p>However, live testing reveals:</p>
+<table>
+<thead>
+<tr>
+<th>Format Tried</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sortBy=relevance</code></td>
+<td><strong>400</strong> — missing direction</td>
+</tr>
+<tr>
+<td><code>sortBy=startDate,DESC</code></td>
+<td><strong>400</strong> — comma as field-direction separator fails</td>
+</tr>
+<tr>
+<td><code>sortBy=endDate,ASC</code></td>
+<td><strong>400</strong> — same</td>
+</tr>
+<tr>
+<td><code>sortBy=%22startDate+DESC%22</code></td>
+<td><strong>400</strong> — URL-encoded quotes around whole thing fails</td>
+</tr>
+<tr>
+<td><code>sortBy=startDate+DESC</code></td>
+<td><strong>200 OK</strong> — <strong>SPACE between fieldname and direction works</strong></td>
+</tr>
+<tr>
+<td><code>sortBy=startDate+DESC%2C+endDate+ASC</code></td>
+<td><strong>200 OK</strong> — <strong>COMMA+SPACE between multiple sort fields works</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Actual format</strong>: <code>fieldname ASC|DESC</code> with a <strong>space</strong> separating field from direction, and <code>,</code> (comma+space) separating multiple sort directives. The docs' description is correct but easy to misinterpret.</p>
+<p>Current <code>ENDPOINT_DEFINITIONS</code> at line 348-354 already lists the correct 3 sort fields. No changes needed there.</p>
+<h3 id="4-response-model-comparison">4. Response Model Comparison</h3>
+<h4 id="41-top-level-project-fields">4.1 Top-level Project Fields</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Current Model (<code>project.py</code>)</th>
+<th>V3 Spec (<code>APIProject</code>)</th>
+<th>Live Response</th>
+<th>Gap?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>inherited from BaseEntity</td>
+<td>string</td>
+<td>present (e.g. <code>corda_______::...</code>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>str \| None</code></td>
+<td>string</td>
+<td>present</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>acronym</code></td>
+<td><code>SafeStr</code> (defaults <code>""</code>)</td>
+<td>string</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>SafeStr</code></td>
+<td>string</td>
+<td>present</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>websiteUrl</code></td>
+<td><code>str \| None</code></td>
+<td>string</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>startDate</code></td>
+<td><code>str \| None</code></td>
+<td>string</td>
+<td>present (format <code>YYYY-MM-DD</code>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>endDate</code></td>
+<td><code>str \| None</code></td>
+<td>string</td>
+<td>present (format <code>YYYY-MM-DD</code>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>callIdentifier</code></td>
+<td><code>str \| None</code></td>
+<td>string</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td><code>SafeList[str]</code> (parsed from string)</td>
+<td><strong>string</strong></td>
+<td>present as <strong>comma-separated string</strong> e.g. <code>"Longevity, Genetic-epidemiology, COVID-19"</code></td>
+<td>Minor: spec says string, current model parses to list. Both work.</td>
+</tr>
+<tr>
+<td><code>openAccessMandateForPublications</code></td>
+<td><code>bool \| None</code></td>
+<td>boolean</td>
+<td>present (<code>false</code>/<code>true</code>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>openAccessMandateForDataset</code></td>
+<td><code>bool \| None</code></td>
+<td>boolean</td>
+<td>present</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><code>SafeList[str]</code></td>
+<td>array</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>summary</code></td>
+<td><code>SafeStr</code></td>
+<td>string</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>fundings</code></td>
+<td><code>SafeList[Funding]</code></td>
+<td>array of Funder</td>
+<td>present</td>
+<td>Structure differs slightly (see below)</td>
+</tr>
+<tr>
+<td><code>granted</code></td>
+<td><code>SafeGrant</code> (Grant)</td>
+<td>Granted</td>
+<td>present</td>
+<td>Field name matches, nested structure matches</td>
+</tr>
+<tr>
+<td><code>h2020Programmes</code></td>
+<td><code>SafeList[H2020Programme]</code></td>
+<td>array of Programme</td>
+<td>present (can be null)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong><code>funding</code></strong></td>
+<td><strong>NOT PRESENT</strong></td>
+<td><strong>NOT in APIProject spec</strong></td>
+<td><strong>PRESENT in live response!</strong></td>
+<td><strong>NEW FIELD</strong> — hierarchical funding object (see 4.4)</td>
+</tr>
+<tr>
+<td><strong><code>links</code></strong></td>
+<td><strong>NOT PRESENT</strong></td>
+<td><strong>NOT in APIProject spec</strong></td>
+<td><strong>PRESENT in live response!</strong></td>
+<td><strong>NEW FIELD</strong> — array of related entities (organizations, etc.)</td>
+</tr>
+<tr>
+<td><strong><code>originalIds</code></strong></td>
+<td><strong>NOT PRESENT</strong></td>
+<td><strong>array</strong> in spec</td>
+<td>Not observed (null/absent in tested responses)</td>
+<td><strong>Spec-only so far</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="42-nested-fundings-array-current-funding-model-vs-live">4.2 Nested <code>fundings</code> Array (current <code>Funding</code> model vs live)</h4>
+<table>
+<thead>
+<tr>
+<th>Sub-field</th>
+<th>Current <code>Funding</code> Model</th>
+<th>Live Response</th>
+<th>Match?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fundingStream.id</code></td>
+<td><code>str \| None</code></td>
+<td>present (e.g. <code>"EC::FP7::SP2::ERC"</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>fundingStream.description</code></td>
+<td><code>SafeStr</code> (defaults <code>""</code>)</td>
+<td>present (e.g. <code>"SEVENTH FRAMEWORK PROGRAMME - SP2-Ideas - ERC"</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>jurisdiction</code></td>
+<td><code>str \| None</code></td>
+<td>present (e.g. <code>"EU"</code>, <code>"GB"</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>SafeStr</code></td>
+<td>present (e.g. <code>"European Commission"</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>shortName</code></td>
+<td><code>SafeStr</code></td>
+<td>present (e.g. <code>"EC"</code>, <code>"UKRI"</code>)</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>The existing <code>Funding</code> / <code>FundingStream</code> models align well with live data.</p>
+<h4 id="43-nested-granted-object-current-grant-model-vs-live">4.3 Nested <code>granted</code> Object (current <code>Grant</code> model vs live)</h4>
+<table>
+<thead>
+<tr>
+<th>Sub-field</th>
+<th>Current <code>Grant</code> Model</th>
+<th>Live Response</th>
+<th>Match?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>currency</code></td>
+<td><code>SafeStr</code></td>
+<td>present (e.g. <code>"GBP"</code>, <code>"EUR"</code>, <code>null</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>fundedAmount</code></td>
+<td><code>float \| None</code></td>
+<td>present (e.g. <code>81871.0</code>, <code>0.0</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>totalCost</code></td>
+<td><code>float \| None</code></td>
+<td>present (e.g. <code>0.0</code>, <code>1.0E7</code>)</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>The existing <code>Grant</code> model matches.</p>
+<h4 id="44-new-funding-field-not-in-current-model">4.4 NEW <code>funding</code> Field (not in current model)</h4>
+<p>This is a <strong>new top-level field</strong> present in live V3 responses but absent from both the current model and the V3 OpenAPI <code>APIProject</code> schema. It provides a hierarchical view of funding:</p>
+<pre><code class="language-json">{
+  &quot;funding&quot;: {
+    &quot;funder&quot;: {
+      &quot;id&quot;: &quot;ec__________::EC&quot;,
+      &quot;shortname&quot;: &quot;EC&quot;,
+      &quot;name&quot;: &quot;European Commission&quot;,
+      &quot;jurisdiction&quot;: { &quot;code&quot;: &quot;EU&quot;, &quot;label&quot;: &quot;European Union&quot; },
+      &quot;pid&quot;: null
+    },
+    &quot;level0&quot;: {
+      &quot;id&quot;: &quot;ec__________::EC::FP7&quot;,
+      &quot;description&quot;: &quot;SEVENTH FRAMEWORK PROGRAMME&quot;,
+      &quot;name&quot;: &quot;FP7&quot;
+    },
+    &quot;level1&quot;: {
+      &quot;id&quot;: &quot;ec__________::EC::FP7::SP2&quot;,
+      &quot;description&quot;: &quot;SP2-Ideas&quot;,
+      &quot;name&quot;: &quot;SP2&quot;
+    },
+    &quot;level2&quot;: {
+      &quot;id&quot;: &quot;ec__________::EC::FP7::SP2::ERC&quot;,
+      &quot;description&quot;: &quot;ERC&quot;,
+      &quot;name&quot;: &quot;ERC&quot;
+    }
+  }
+}
+</code></pre>
+<p>This is structurally richer than the flat <code>fundings</code> array — it includes the full hierarchy (funder → level0 → level1 → level2) with IDs, descriptions, names, and jurisdiction details. <strong>This field should be added to the V3 Project model.</strong></p>
+<h4 id="45-new-links-field-not-in-current-model">4.5 NEW <code>links</code> Field (not in current model)</h4>
+<p>Present in live responses as an array of related entity links (primarily organizations participating in the project):</p>
+<pre><code class="language-json">{
+  &quot;links&quot;: [{
+    &quot;header&quot;: {
+      &quot;relationType&quot;: &quot;projectOrganization&quot;,
+      &quot;relationClass&quot;: &quot;hasParticipant&quot;,
+      &quot;relatedIdentifier&quot;: &quot;openorgs____::...&quot;,
+      &quot;relatedRecordType&quot;: &quot;organization&quot;,
+      &quot;trust&quot;: &quot;0.900&quot;
+    },
+    &quot;legalname&quot;: &quot;UNIVERSITY OF STRATHCLYDE&quot;,
+    &quot;pid&quot;: [...],
+    &quot;country&quot;: { &quot;code&quot;: &quot;UNKNOWN&quot;, &quot;label&quot;: &quot;Unknown&quot; },
+    ...
+  }]
+}
+</code></pre>
+<p>This is a significant new structure. It embeds related organization data inline with each project result.</p>
+<h3 id="5-resource-client-routing">5. Resource Client Routing</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current Code</th>
+<th>V3 Requirement</th>
+<th>Action Needed?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base path</td>
+<td><code>_entity_path = PROJECTS = "projects"</code></td>
+<td><code>/v3/projects</code></td>
+<td><strong>None</strong> — path unchanged</td>
+</tr>
+<tr>
+<td>Base URL</td>
+<td>Inherits default (currently routes to v1/v2)</td>
+<td>Must route to <code>/graph/v3</code></td>
+<td><strong>Yes</strong> — needs <code>_base_url_override</code> like ResearchProductsClient has</td>
+</tr>
+<tr>
+<td>Response model</td>
+<td><code>ProjectResponse = ApiResponse[Project]</code></td>
+<td>Envelope unchanged (<code>header</code> + <code>results</code> + <code>facets</code>)</td>
+<td><strong>Minor</strong> — add new fields to <code>Project</code></td>
+</tr>
+<tr>
+<td>Batch fields</td>
+<td><code>{"code": "code", "openaire_id": "id"}</code></td>
+<td>Still valid</td>
+<td><strong>None</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Current <code>ProjectsClient</code> at <code>src/aireloom/resources/projects_client.py:9-25</code> is minimal and inherits from <code>StandardResourceClient</code>. It does NOT have a <code>_base_url_override</code>, meaning it currently hits whatever base URL the client defaults to (likely v1). For V3 migration, it will need the override added.</p>
+<hr />
+<h2 id="live-verification-log">Live Verification Log</h2>
+<h3 id="new-filter-tests">New Filter Tests</h3>
+<pre><code class="language-bash"># startYear — EXACT MATCH filter (new)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;projects&quot; &quot;startYear=2020&amp;pageSize=1&quot;
+STATUS: 200, numFound: 118338
+
+# endYear — EXACT MATCH filter (new)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;projects&quot; &quot;endYear=2024&amp;pageSize=1&quot;
+STATUS: 200, numFound: 118712
+
+# activeYear — projects running in given year (new)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;projects&quot; &quot;activeYear=2020&amp;pageSize=1&quot;
+STATUS: 200, numFound: 552426
+
+# country — filter by project country (new)
+$ python3 reference/v3-investigation/v3_live.py graph &quot;projects&quot; &quot;country=US&amp;pageSize=1&quot;
+STATUS: 200, numFound: 2945252
+
+# funder — filter by funder name (new) — ALL RETURNED 0 RESULTS:
+$ python3 ... &quot;funder=EC&quot;           → 0 results
+$ python3 ... &quot;funder=%22European+Commission%22&quot; → 0 results
+$ python3 ... &quot;funder=NSF&quot;           → 0 results
+$ python3 ... &quot;funder=%22NSF%22&quot;     → 0 results
+$ python3 ... &quot;funder=NIH&quot;           → 0 results
+$ python3 ... &quot;funder=%22NIH%22&quot;     → 0 results
+$ python3 ... &quot;funder=UKRI&quot;          → 0 results
+$ python3 ... &quot;funder=%22UK+Research+and+Innovation%22&quot; → 0 results
+
+# fundinglevel0Id — hierarchical funding filter (new)
+$ python3 ... &quot;fundinglevel0Id=%22ukri________::UKRI::Horizon+Europe+Guarantee%22&amp;pageSize=1&quot;
+STATUS: 200, numFound: 4059
+
+# projectOAMandatePublications — OA mandate filter (new)
+$ python3 ... &quot;projectOAMandatePublications=true&amp;pageSize=1&quot;
+STATUS: 200, numFound: 104944
+</code></pre>
+<h3 id="year-range-filter-test">Year Range Filter Test</h3>
+<pre><code class="language-bash">$ python3 ... &quot;fromStartYear=2020&amp;toStartYear=2022&amp;pageSize=1&quot;
+STATUS: 200, numFound: 340432
+</code></pre>
+<h3 id="date-range-filter-test-existing-params-confirming-still-work">Date Range Filter Test (existing params, confirming still work)</h3>
+<pre><code class="language-bash">$ python3 ... &quot;fromStartDate=2022-01-01&amp;toStartDate=2023-12-31&amp;pageSize=1&quot;
+STATUS: 200, numFound: 205544
+</code></pre>
+<h3 id="sort-tests">Sort Tests</h3>
+<pre><code class="language-bash"># Single-field sort with SPACE separator — WORKS
+$ python3 ... &quot;sortBy=startDate+DESC&amp;pageSize=1&quot;
+STATUS: 200, numFound: 3910921
+
+$ python3 ... &quot;sortBy=endDate+DESC&amp;pageSize=1&quot;
+STATUS: 200, numFound: 3910921
+
+# Multi-field sort with COMMA+SPACE between fields — WORKS
+$ python3 ... &quot;sortBy=startDate+DESC%2C+endDate+ASC&amp;pageSize=1&quot;
+STATUS: 200, numFound: 3910921
+
+# COMMA alone (no space) as field-direction separator — FAILS (400)
+$ python3 ... &quot;sortBy=startDate,DESC&amp;pageSize=1&quot;
+ERROR: The field should be in the format 'fieldname ASC|DESC'
+
+# Missing direction — FAILS (400)
+$ python3 ... &quot;sortBy=relevance&amp;pageSize=1&quot;
+ERROR: The field should be in the format 'fieldname ASC|DESC'
+</code></pre>
+<h3 id="removed-parameter-confirmation">Removed Parameter Confirmation</h3>
+<pre><code class="language-bash"># grantID — REMOVED in V3
+$ python3 ... &quot;grantID=101079773&amp;pageSize=1&quot;
+ERROR: Unknown parameter: grantID; valid parameters are: [funder, cursor, country, ...]
+</code></pre>
+<h3 id="full-response-capture-for-model-comparison">Full Response Capture (for model comparison)</h3>
+<pre><code class="language-bash">$ python3 ... &quot;search=horizon&amp;pageSize=1&quot; --full
+# Returned project with id=&quot;ukri________::ac17a6291524831f7699980e93ff19e2&quot;
+# Contains ALL expected fields PLUS new `funding` and `links` fields
+# Key observation: funding.funder.jurisdiction is now an object {code, label}
+#               not a plain string like in the old fundings[].jurisdiction
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="r1-add-13-new-filter-fields-to-projectsfilters">R1: Add 13 new filter fields to <code>ProjectsFilters</code></h3>
+<p><strong>File</strong>: <code>src/aireloom/endpoints.py:180-229</code></p>
+<p>Add these fields to <code>ProjectsFilters</code>:</p>
+<pre><code class="language-python"># --- NEW: Year-based date filters ---
+startYear: str | None = None              # exact start year match
+endYear: str | None = None                # exact end year match
+activeYear: str | None = None             # projects active in year
+fromStartYear: str | None = None          # start year &gt;=
+toStartYear: str | None = None            # start year &lt;=
+fromEndYear: str | None = None            # end year &gt;=
+toEndYear: str | None = None              # end year &lt;=
+
+# --- NEW: Funding hierarchy filters ---
+country: str | None = None                # project country
+funder: str | None = None                 # funder name (see risk note)
+fundinglevel0Id: str | None = None        # funding level 0 ID
+fundinglevel1Id: str | None = None        # funding level 1 ID
+fundinglevel2Id: str | None = None        # funding level 2 ID
+projectOAMandatePublications: str | None = None  # OA publications mandate
+</code></pre>
+<h3 id="r2-remove-grantid-field-from-projectsfilters">R2: Remove <code>grantID</code> field from <code>ProjectsFilters</code></h3>
+<p><strong>File</strong>: <code>src/aireloom/endpoints.py:213</code></p>
+<p><code>grantID</code> no longer exists in V3. Delete line 213.</p>
+<h3 id="r3-change-date-filter-types-from-date-to-str">R3: Change date filter types from <code>date</code> to <code>str</code></h3>
+<p><strong>File</strong>: <code>src/aireloom/endpoints.py:218-221</code></p>
+<p>Change <code>fromStartDate</code>, <code>toStartDate</code>, <code>fromEndDate</code>, <code>toEndDate</code> from <code>date | None</code> to <code>str | None</code>. The V3 API accepts bare years (e.g., <code>fromStartDate=2022</code>) in addition to full dates. Using <code>str</code> is more permissive and matches the spec.</p>
+<h3 id="r4-expand-logicaloperator-enum-to-include-not">R4: Expand <code>logicalOperator</code> enum to include <code>"NOT"</code></h3>
+<p><strong>File</strong>: <code>src/aireloom/endpoints.py:203</code></p>
+<p>Change from <code>Literal["AND", "OR"]</code> to <code>Literal["AND", "OR", "NOT"]</code>.</p>
+<h3 id="r5-add-funding-field-to-project-model">R5: Add <code>funding</code> field to <code>Project</code> model</h3>
+<p><strong>File</strong>: <code>src/aireloom/models/project.py</code></p>
+<p>Add a new <code>ProjectFunding</code> model class for the hierarchical funding structure:</p>
+<pre><code class="language-python">class FunderInfo(BaseModel):
+    id: str | None = None
+    shortname: SafeStr = &quot;&quot;
+    name: SafeStr = &quot;&quot;
+    jurisdiction: dict | None = None  # {&quot;code&quot;: &quot;EU&quot;, &quot;label&quot;: &quot;European Union&quot;}
+    pid: list | None = None
+
+class FundingLevel(BaseModel):
+    id: str | None = None
+    description: SafeStr = &quot;&quot;
+    name: SafeStr = &quot;&quot;
+
+class ProjectFunding(BaseModel):
+    funder: FunderInfo | None = None
+    level0: FundingLevel | None = None
+    level1: FundingLevel | None = None
+    level2: FundingLevel | None = None
+</code></pre>
+<p>Then add to <code>Project</code>:</p>
+<pre><code class="language-python">funding: ProjectFunding | None = None
+</code></pre>
+<h3 id="r6-consider-adding-links-field-to-project-model">R6: Consider adding <code>links</code> field to <code>Project</code> model</h3>
+<p><strong>File</strong>: <code>src/aireloom/models/project.py</code></p>
+<p>The <code>links</code> array contains inline related entity data (participating organizations with names, PIDs, countries). This is a large nested structure. Decision needed: model it fully, store as raw dict, or skip (since dedicated relation endpoints exist).</p>
+<h3 id="r7-add-_base_url_override-to-projectsclient">R7: Add <code>_base_url_override</code> to <code>ProjectsClient</code></h3>
+<p><strong>File</strong>: <code>src/aireloom/resources/projects_client.py:9-25</code></p>
+<p>Follow the pattern used by <code>ResearchProductsClient</code> — add a class-level <code>_base_url_override</code> pointing to the V3 graph endpoint.</p>
+<h3 id="r8-update-keywords-type-annotation-optional">R8: Update <code>keywords</code> type annotation (optional)</h3>
+<p><strong>File</strong>: <code>src/aireloom/models/project.py:128</code></p>
+<p>The V3 spec defines <code>keywords</code> as <code>string</code> (comma-separated). Current model uses <code>SafeList[str]</code> with a validator that splits on commas/semicolons. This works correctly in practice. No urgent change, but consider adding a comment noting the V3 spec type.</p>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li>
+<p><strong><code>funder</code> filter appears non-functional</strong>: Despite being documented and listed in the valid parameters, <code>funder</code> returned 0 results for 8 different value formats including short names ("EC", "NSF") and full names ("European Commission"). The <code>fundingShortName</code> filter works correctly for the same values. <strong>Risk</strong>: Users may try <code>funder</code> and get empty results. Recommend documenting that <code>fundingShortName</code> is the preferred filter, or investigate further whether <code>funder</code> expects internal OpenAIRE IDs.</p>
+</li>
+<li>
+<p><strong><code>funding</code> field missing from V3 OpenAPI spec</strong>: The <code>funding</code> hierarchical object is present in every live response but absent from the <code>APIProject</code> schema in the V3 OpenJSON spec. Similarly, <code>links</code> is present in live responses but not in the spec. <strong>Risk</strong>: Future spec updates may rename/restructure these fields. Treat as stable-but-undocumented.</p>
+</li>
+<li>
+<p><strong><code>originalIds</code> in spec but not in responses</strong>: The V3 <code>APIProject</code> schema includes <code>originalIds: array</code> but none of the test responses contained this field (all were null/absent). May only populate for certain project types.</p>
+</li>
+<li>
+<p><strong>Sort format fragility</strong>: The space-between-field-and-direction requirement (<code>startDate DESC</code> not <code>startDate,DESC</code>) is unusual for REST APIs and could be a source of bugs. Any client-side sort construction must use <code>%20</code> or <code>+</code> between field name and <code>ASC</code>/<code>DESC</code>.</p>
+</li>
+<li>
+<p><strong><code>keywords</code> type divergence</strong>: V3 spec says <code>string</code>, current model says <code>list[str]</code>. The validator masks this by splitting the string. If the V3 API ever returns actual array-type keywords, the validator would break. Low risk but worth monitoring.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
