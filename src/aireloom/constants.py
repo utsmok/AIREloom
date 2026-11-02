@@ -9,8 +9,9 @@ from importlib.metadata import PackageNotFoundError, version as _get_version
 OPENAIRE_GRAPH_API_BASE_URL = "https://api.openaire.eu/graph/v3"
 OPENAIRE_SCHOLIX_API_ROOT_URL = "https://api.scholexplorer.openaire.eu"
 OPENAIRE_SCHOLIX_API_BASE_URL = "https://api.scholexplorer.openaire.eu/v3"
+# Legacy endpoint, retired 2026-11-02 (returns 410 Gone).
 REGISTERED_SERVICE_API_TOKEN_URL = "https://aai.openaire.eu/oidc/token"
-# New identity-platform endpoint, live only after the 2026-11-02 10:00 CET migration.
+# OpenAIRE identity-platform (Keycloak) endpoint; the live default since 2026-11-02.
 REGISTERED_SERVICE_API_TOKEN_URL_V2 = (
     "https://aai.openaire.eu/auth/realms/openaire/protocol/openid-connect/token"
 )

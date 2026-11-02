@@ -60,13 +60,16 @@ class ApiSettings(BaseApiSettings):
         default=REGISTERED_SERVICE_API_TOKEN_URL,
         description="OAuth2 Token Endpoint URL",
     )
-    # OpenAIRE moved auth to a new identity platform on 2026-11-02 10:00 CET; the new
-    # token endpoint does not exist before then, so switching stays opt-in.
+    # OpenAIRE retired the legacy endpoint on 2026-11-02 (now returns 410 Gone);
+    # the Keycloak endpoint is the default and AIRELOOM_NEW_TOKEN_ENDPOINT=0
+    # restores the retired legacy URL.
     new_token_endpoint: bool = Field(
-        default=False,
+        default=True,
         description=(
-            "Request tokens from the new OpenAIRE Keycloak endpoint "
-            "(post-2026-11-02). Ignored when openaire_token_url is set explicitly."
+            "Request tokens from the OpenAIRE Keycloak endpoint "
+            "(default since the 2026-11-02 migration). Set to 0 only to fall "
+            "back to the retired legacy endpoint. Ignored when "
+            "openaire_token_url is set explicitly."
         ),
     )
 
