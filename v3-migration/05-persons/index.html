@@ -1,0 +1,1700 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/05-persons/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Persons Endpoint (/v3/persons) - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-persons-endpoint-v3persons" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Persons Endpoint (/v3/persons)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-filter-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Filter Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sort-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Sort Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-response-model-field-by-field-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Response Model — Field-by-Field Comparison
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-routing-pagination-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Routing / Pagination Notes
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-logicaloperator-not-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. logicalOperator NOT Support
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification-commands-observed-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification (Commands &amp; Observed Output)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification (Commands & Observed Output)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#givenname-filter-the-headline-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      givenName filter (THE headline fix)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lastname-filter-the-headline-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      lastName filter (THE headline fix)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      search filter
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#originalid-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      originalId filter
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-by-id-full-response-for-model-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get by ID (full response for model comparison)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-relevance-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort: relevance (works)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-startdate-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort: startDate (REJECTED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-enddate-rejected" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort: endDate (REJECTED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logicaloperatornot-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      logicalOperator=NOT (works)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#r1-remove-caution-docstrings-from-personsfilters-must" class="md-nav__link">
+    <span class="md-ellipsis">
+      R1. Remove CAUTION docstrings from PersonsFilters (MUST)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r2-add-not-to-logicaloperator-literal-must" class="md-nav__link">
+    <span class="md-ellipsis">
+      R2. Add "NOT" to logicalOperator literal (MUST)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r3-remove-startdateenddate-from-persons-sort-definition-must" class="md-nav__link">
+    <span class="md-ellipsis">
+      R3. Remove startDate/endDate from persons sort definition (MUST)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r4-person-model-no-structural-changes-needed-ok" class="md-nav__link">
+    <span class="md-ellipsis">
+      R4. Person model — no structural changes needed (OK)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r5-personsclient-no-changes-needed-ok" class="md-nav__link">
+    <span class="md-ellipsis">
+      R5. PersonsClient — no changes needed (OK)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-persons-endpoint-v3persons">V3 Migration Research — Persons Endpoint (<code>/v3/persons</code>)</h1>
+<h2 id="scope">Scope</h2>
+<p>The persons endpoint: filter parameters (especially the fixed <code>givenName</code>/<code>lastName</code>), sort capabilities (now relevance-only), response model (<code>Person</code>), and the <code>PersonsClient</code> resource client. Covers <code>GET /v3/persons</code> (search/list) and <code>GET /v3/persons/{id}</code> (get-by-id).</p>
+<h2 id="method">Method</h2>
+<ol>
+<li>Read current source code: <code>PersonsFilters</code> in <code>src/aireloom/endpoints.py</code>, <code>Person</code> model in <code>src/aireloom/models/person.py</code>, <code>PersonsClient</code> in <code>src/aireloom/resources/persons_client.py</code>.</li>
+<li>Extracted V3 OpenAPI spec parameters/schema for <code>/v3/persons</code> from <code>reference/v3-investigation/graph_v3_openapi.json</code>.</li>
+<li>Read V3 documentation at <code>https://graph.openaire.eu/docs/apis/graph-api/persons/</code> and <code>https://graph.openaire.eu/docs/data-model/entities/persons/</code>.</li>
+<li>Ran <strong>10 live API calls</strong> against <code>https://api.openaire.eu/graph/v3/persons</code> via <code>reference/v3-investigation/v3_live.py</code> to verify every parameter, sort value, and response field.</li>
+</ol>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-filter-parameters">1. Filter Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>V1/V2 Current Code</th>
+<th>V3 Spec</th>
+<th>Live-Verified Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td><code>str \| None</code></td>
+<td>string, optional</td>
+<td><strong>200 OK</strong> — <code>search=covid</code> → numFound=1393</td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td><code>str \| None</code></td>
+<td>string, optional</td>
+<td><strong>200 OK</strong> — returns results when ID exists</td>
+<td>Standard OpenAIRE ID lookup</td>
+</tr>
+<tr>
+<td><code>originalId</code></td>
+<td><code>str \| None</code></td>
+<td>string, optional</td>
+<td><strong>200 OK</strong> — works with ORCID-style IDs</td>
+<td>e.g., <code>originalId=0000-0002-1825-0097</code></td>
+</tr>
+<tr>
+<td><code>givenName</code></td>
+<td><code>str \| None</code> (<strong>CAUTION: 500</strong>)</td>
+<td>string, optional</td>
+<td><strong>200 OK</strong> — <code>givenName=John</code> → numFound=35,018</td>
+<td><strong>FIXED in V3</strong> — was HTTP 500, now works perfectly</td>
+</tr>
+<tr>
+<td><code>lastName</code></td>
+<td><code>str \| None</code> (<strong>CAUTION: 500</strong>)</td>
+<td>string, optional</td>
+<td><strong>200 OK</strong> — <code>lastName=Smith</code> → numFound=12,917</td>
+<td><strong>FIXED in V3</strong> — was HTTP 500, now works perfectly</td>
+</tr>
+<tr>
+<td><code>logicalOperator</code></td>
+<td><code>Literal["AND", "OR"]</code></td>
+<td>enum: <code>["AND", "OR", "NOT"]</code></td>
+<td><strong>200 OK</strong> — <code>logicalOperator=NOT</code> works</td>
+<td><strong>V3 adds NOT support</strong>; current code missing <code>"NOT"</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key discovery — <code>givenName</code>/<code>lastName</code> fix confirmed:</strong></p>
+<pre><code>STATUS: 200  URL: .../v3/persons?givenName=John&amp;pageSize=1
+HEADER: {&quot;numFound&quot;: 35018, &quot;maxScore&quot;: 1.0, ...}
+
+STATUS: 200  URL: .../v3/persons?lastName=Smith&amp;pageSize=1
+HEADER: {&quot;numFound&quot;: 12917, &quot;maxScore&quot;: 1.0, ...}
+</code></pre>
+<p>Both return 200 with substantial result counts. The V1/V2 500 error is resolved.</p>
+<h3 id="2-sort-fields">2. Sort Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Sort Field</th>
+<th>V1/V2 Current Code</th>
+<th>V3 Spec Pattern</th>
+<th>Live-Verified Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>relevance</code></td>
+<td>Listed</td>
+<td><code>^((relevance)\s+(ASC\|DESC),?\s*)+$</code></td>
+<td><strong>200 OK</strong> — <code>sortBy=relevance+DESC</code> works</td>
+</tr>
+<tr>
+<td><code>startDate</code></td>
+<td>Listed</td>
+<td><strong>not in pattern</strong></td>
+<td><strong>400 BAD REQUEST</strong> — removed in V3</td>
+</tr>
+<tr>
+<td><code>endDate</code></td>
+<td>Listed</td>
+<td><strong>not in pattern</strong></td>
+<td><strong>400 BAD REQUEST</strong> — removed in V3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Live verification of rejected sorts:</strong></p>
+<pre><code>STATUS: 400  sortBy=startDate+DESC
+ERROR: &quot;The field should be in the format 'fieldname ASC|DESC', persons can be only sorted by the 'relevance'.&quot;
+
+STATUS: 400  sortBy=endDate+DESC
+ERROR: &quot;The field should be in the format 'fieldname ASC|DESC', persons can be only sorted by the 'relevance'.&quot;
+</code></pre>
+<p>V3 persons endpoint is <strong>relevance-only sorting</strong> (D10 fix). The <code>startDate</code>/<code>endDate</code> entries in <code>ENDPOINT_DEFINITIONS["persons"]["sort"]</code> are now invalid.</p>
+<h3 id="3-response-model-field-by-field-comparison">3. Response Model — Field-by-Field Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Current Person Model (person.py)</th>
+<th>V3 Docs Type</th>
+<th>V3 OpenAPI Schema</th>
+<th>Live API Observed</th>
+<th>Gap?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>inherited from <code>BaseEntity</code> (string)</td>
+<td>String, ONE</td>
+<td>string</td>
+<td><code>"orcid_______::000037cb..."</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>originalId</code></td>
+<td><code>SafeList[str]</code></td>
+<td>String, MANY</td>
+<td>array of string</td>
+<td><code>["0000-0002-8905-3269"]</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>givenName</code></td>
+<td><code>SafeStr = ""</code></td>
+<td>String, ONE</td>
+<td>string</td>
+<td><code>"Robert"</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>familyName</code></td>
+<td><code>SafeStr = ""</code></td>
+<td>String, ONE</td>
+<td>string</td>
+<td><code>"Cueto"</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>alternativeNames</code></td>
+<td><code>SafeList[str]</code></td>
+<td>String, MANY</td>
+<td>array of string</td>
+<td><code>["Robert John Cueto", ...]</code> or <code>null</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>biography</code></td>
+<td><code>SafeStr = ""</code></td>
+<td>String, ONE</td>
+<td>string</td>
+<td>long text or <code>null</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td><code>SafeList[str]</code></td>
+<td>String, MANY</td>
+<td>array of string</td>
+<td><code>null</code> in all tested records</td>
+<td>None (type correct)</td>
+</tr>
+<tr>
+<td><code>indicator</code></td>
+<td><code>dict \| None = None</code></td>
+<td><strong>Object</strong>, ONE</td>
+<td><strong>array</strong> (spec error!)</td>
+<td><code>null</code> in all tested records</td>
+<td><strong>Spec/doc mismatch</strong> — docs say Object (matches our model), spec wrongly says array</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td><code>dict \| None = None</code></td>
+<td><strong>Object</strong>, ONE</td>
+<td><strong>array</strong> (spec error!)</td>
+<td><code>null</code> in all tested records</td>
+<td><strong>Spec/doc mismatch</strong> — docs say Object (matches our model), spec wrongly says array</td>
+</tr>
+<tr>
+<td><code>consent</code></td>
+<td><code>bool \| None = None</code></td>
+<td>Boolean, ONE</td>
+<td>boolean</td>
+<td><code>null</code> in all tested records</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>coAuthors</code></td>
+<td><code>SafeList[str]</code></td>
+<td>String, MANY</td>
+<td>array of string</td>
+<td><code>["Harvey Chim", ...]</code></td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Important discrepancy:</strong> The V3 <strong>OpenAPI JSON schema</strong> declares <code>indicator</code> and <code>context</code> as <code>type: "array"</code>, but the V3 <strong>documentation page</strong> explicitly shows them as <strong>Objects</strong> with key-value structure (e.g., <code>{"citationCount": 342, "downloads": 28}</code>). The live API returns <code>null</code> for all tested persons (including high-profile researchers like Yoshua Bengio). Our current model uses <code>dict | None</code> which aligns with the <strong>docs</strong>, not the spec. Trust the docs + model shape here.</p>
+<h3 id="4-routing-pagination-notes">4. Routing / Pagination Notes</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base URL</td>
+<td><code>https://api.openaire.eu/graph/v3/persons</code></td>
+</tr>
+<tr>
+<td>List endpoint</td>
+<td><code>GET /v3/persons</code></td>
+</tr>
+<tr>
+<td>Get-by-ID</td>
+<td><code>GET /v3/persons/{id}</code></td>
+</tr>
+<tr>
+<td>Page indexing</td>
+<td><strong>1-indexed</strong> (<code>page=1</code> is first; <code>page=0</code> → 400)</td>
+</tr>
+<tr>
+<td>pageSize range</td>
+<td>1–100 (rejects &gt;100 with 400)</td>
+</tr>
+<tr>
+<td>Cursor pagination</td>
+<td>Supported (<code>cursor=*</code> for initial, returns <code>nextCursor</code>)</td>
+</tr>
+<tr>
+<td>Default sort</td>
+<td><code>relevance DESC</code></td>
+</tr>
+<tr>
+<td>Header envelope</td>
+<td><code>numFound</code>, <code>maxScore</code>, <code>queryTime</code>, <code>page</code>, <code>pageSize</code>, <code>nextCursor</code></td>
+</tr>
+</tbody>
+</table>
+<p>Standard V3 pagination behavior — no special quirks like the links endpoint.</p>
+<h3 id="5-logicaloperator-not-support">5. logicalOperator NOT Support</h3>
+<p>V3 spec defines <code>logicalOperator</code> as <code>enum: ["AND", "OR", "NOT"]</code>. Verified NOT works:</p>
+<pre><code>STATUS: 200  URL: .../v3/persons?givenName=John&amp;lastName=Smith&amp;logicalOperator=NOT&amp;pageSize=1
+HEADER: {&quot;numFound&quot;: 88, &quot;maxScore&quot;: 1.0, ...}
+</code></pre>
+<p>Returns persons named John who are NOT named Smith (88 results). Current code only allows <code>Literal["AND", "OR"]</code> — missing <code>"NOT"</code>.</p>
+<hr />
+<h2 id="live-verification-commands-observed-output">Live Verification (Commands &amp; Observed Output)</h2>
+<h3 id="givenname-filter-the-headline-fix">givenName filter (THE headline fix)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;pageSize=1&quot;
+# STATUS: 200
+# HEADER: {&quot;numFound&quot;: 35018, &quot;maxScore&quot;: 1.0, &quot;queryTime&quot;: 47, &quot;page&quot;: 1, &quot;pageSize&quot;: 1}
+# RESULTS: 1
+</code></pre>
+<h3 id="lastname-filter-the-headline-fix">lastName filter (THE headline fix)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;lastName=Smith&amp;pageSize=1&quot;
+# STATUS: 200
+# HEADER: {&quot;numFound&quot;: 12917, &quot;maxScore&quot;: 1.0, &quot;queryTime&quot;: 49, &quot;page&quot;: 1, &quot;pageSize&quot;: 1}
+# RESULTS: 1
+</code></pre>
+<h3 id="search-filter">search filter</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;search=covid&amp;pageSize=1&quot;
+# STATUS: 200
+# HEADER: {&quot;numFound&quot;: 1393, &quot;maxScore&quot;: 4.6960306, &quot;queryTime&quot;: 234, &quot;page&quot;: 1, &quot;pageSize&quot;: 1}
+# RESULTS: 1
+</code></pre>
+<h3 id="originalid-filter">originalId filter</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;originalId=0000-0002-1825-0097&amp;pageSize=1&quot;
+# STATUS: 200 (results depend on whether ORCID exists in Graph)
+</code></pre>
+<h3 id="get-by-id-full-response-for-model-comparison">Get by ID (full response for model comparison)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons/orcid_______::000037cb1e4968862ff640cd5d2d7001&quot; &quot;&quot; --full
+# STATUS: 200
+# Full person object with all fields — matches current Person model shape exactly
+# Key fields observed:
+#   id, originalId (array), givenName, familyName, alternativeNames (array or null),
+#   biography (string or null), subject (null), indicator (null), context (null),
+#   consent (null), coAuthors (array of strings)
+</code></pre>
+<h3 id="sort-relevance-works">Sort: relevance (works)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;pageSize=1&amp;sortBy=relevance+DESC&quot;
+# STATUS: 200
+</code></pre>
+<h3 id="sort-startdate-rejected">Sort: startDate (REJECTED)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;pageSize=1&amp;sortBy=startDate+DESC&quot;
+# STATUS: 400
+# ERROR: &quot;The field should be in the format 'fieldname ASC|DESC', persons can be only sorted by the 'relevance'.&quot;
+</code></pre>
+<h3 id="sort-enddate-rejected">Sort: endDate (REJECTED)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;pageSize=1&amp;sortBy=endDate+DESC&quot;
+# STATUS: 400
+# ERROR: &quot;The field should be in the format 'fieldname ASC|DESC', persons can be only sorted by the 'relevance'.&quot;
+</code></pre>
+<h3 id="logicaloperatornot-works">logicalOperator=NOT (works)</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;lastName=Smith&amp;logicalOperator=NOT&amp;pageSize=1&quot;
+# STATUS: 200
+# HEADER: {&quot;numFound&quot;: 88, &quot;maxScore&quot;: 1.0, &quot;queryTime&quot;: 23, ...}
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="r1-remove-caution-docstrings-from-personsfilters-must">R1. Remove CAUTION docstrings from <code>PersonsFilters</code> (MUST)</h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py:301-315</code></p>
+<p>The class docstring and attribute docstrings contain stale warnings about <code>givenName</code>/<code>lastName</code> causing HTTP 500 errors. These must be rewritten to reflect that both filters work correctly in V3:</p>
+<ul>
+<li><strong>Line 304–306</strong>: Remove "but they currently cause HTTP 500 errors from the server. Only 'search', 'id', and 'originalId' work reliably. These params are kept for forward compatibility."</li>
+<li><strong>Line 312</strong>: Remove <code>CAUTION: causes API 500.</code> from <code>givenName</code> docstring</li>
+<li><strong>Line 313</strong>: Remove <code>CAUTION: causes API 500.</code> from <code>lastName</code> docstring</li>
+</ul>
+<p>New docstring should state that all six filter parameters are functional in V3.</p>
+<h3 id="r2-add-not-to-logicaloperator-literal-must">R2. Add <code>"NOT"</code> to <code>logicalOperator</code> literal (MUST)</h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py:322</code></p>
+<p>Change:</p>
+<pre><code class="language-python">logicalOperator: Literal[&quot;AND&quot;, &quot;OR&quot;] | None = None
+</code></pre>
+<p>To:</p>
+<pre><code class="language-python">logicalOperator: Literal[&quot;AND&quot;, &quot;OR&quot;, &quot;NOT&quot;] | None = None
+</code></pre>
+<p>V3 spec explicitly includes <code>"NOT"</code> in the enum, and live testing confirms it works.</p>
+<h3 id="r3-remove-startdateenddate-from-persons-sort-definition-must">R3. Remove <code>startDate</code>/<code>endDate</code> from persons sort definition (MUST)</h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py:356-363</code></p>
+<p>Change:</p>
+<pre><code class="language-python">PERSONS: {
+    &quot;filters_model&quot;: PersonsFilters,
+    &quot;sort&quot;: {
+        &quot;relevance&quot;: {},
+        &quot;startDate&quot;: {},
+        &quot;endDate&quot;: {},
+    },
+},
+</code></pre>
+<p>To:</p>
+<pre><code class="language-python">PERSONS: {
+    &quot;filters_model&quot;: PersonsFilters,
+    &quot;sort&quot;: {
+        &quot;relevance&quot;: {},
+    },
+},
+</code></pre>
+<p>These sort fields return 400 in V3. Only <code>relevance</code> is valid.</p>
+<h3 id="r4-person-model-no-structural-changes-needed-ok">R4. Person model — no structural changes needed (OK)</h3>
+<p><strong>File:</strong> <code>src/aireloom/models/person.py</code></p>
+<p>The current <code>Person</code> model aligns well with the V3 live API response:
+- All 11 fields present in the model appear in API responses
+- Types match (with <code>SafeStr</code>/<code>SafeList</code> wrappers being appropriate)
+- <code>indicator: dict | None</code> and <code>context: dict | None</code> match the V3 <strong>documentation</strong> (Object type), despite the OpenAPI spec erroneously listing them as arrays
+- <code>extra="allow"</code> on model_config provides forward safety</p>
+<p><strong>Minor note:</strong> The module docstring (line 5–6) references "v1 persons endpoint" and the old v1 URL. Should be updated to V3.</p>
+<h3 id="r5-personsclient-no-changes-needed-ok">R5. PersonsClient — no changes needed (OK)</h3>
+<p><strong>File:</strong> <code>src/aireloom/resources/persons_client.py</code></p>
+<p>The client is a clean <code>StandardResourceClient</code> subclass with correct path/model wiring. No changes required for V3 migration — it inherits pagination/sort/filter handling from the base class, which reads from <code>ENDPOINT_DEFINITIONS</code>. Once R1–R3 are applied to endpoints.py, this client works correctly.</p>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li>
+<p><strong><code>indicator</code>/<code>context</code> always null in live data:</strong> Across 6+ tested persons (including Yoshua Bengio, Robert Williamson, Robert Cueto), both fields are consistently <code>null</code>. The docs show example objects but real data may not populate them yet. This is not a model problem (our <code>dict | None</code> handles it), but users should not expect these fields to have data.</p>
+</li>
+<li>
+<p><strong>OpenAPI spec vs. docs mismatch on <code>indicator</code>/<code>context</code>:</strong> The V3 OpenAPI JSON schema declares these as <code>type: "array"</code> while the V3 HTML documentation shows them as Objects with sub-keys. Our model (and the live API's <code>null</code> values) cannot definitively resolve this, but the doc examples strongly suggest Object/dict is correct. If non-null responses ever surface as arrays, the model will need adjustment.</p>
+</li>
+<li>
+<p><strong>No breaking changes for existing consumers:</strong> All current model fields remain valid. The migration is purely additive (NOT operator) and corrective (remove CAUTIONs, remove dead sort fields).</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>

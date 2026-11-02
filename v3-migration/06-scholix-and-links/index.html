@@ -1,0 +1,2312 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/06-scholix-and-links/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Scholix & Graph Links Endpoints - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-scholix-graph-links-endpoints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Scholix &amp; Graph Links Endpoints
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-graph-links-endpoint-v3research-productslinks-pagination-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Graph Links Endpoint (/v3/research-products/links) — Pagination &amp; Envelope
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Graph Links Endpoint (/v3/research-products/links) — Pagination & Envelope">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-pagination-is-0-indexed-confirmed" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 Pagination is 0-indexed (CONFIRMED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-silent-pagesize-cap-confirmed" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 Silent pageSize Cap (CONFIRMED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-response-envelope-divergent-from-standard-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 Response Envelope (Divergent from Standard Endpoints)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-no-cursor-support-confirmed" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 No Cursor Support (CONFIRMED)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-latent-bug-off-by-one-page-index-critical" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. LATENT BUG: Off-by-One Page Index (CRITICAL)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-filter-parameters-links-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Filter Parameters — Links Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-response-model-alignment-links-modelsrelationpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Response Model Alignment — Links (models/relation.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-relations-info-endpoint-v3research-productslinksrelations-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Relations-Info Endpoint (/v3/research-products/links/relations-info)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-scholix-endpoint-v3links-at-scholexploreropenaireeu" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Scholix Endpoint (/v3/Links at scholexplorer.openaire.eu)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Scholix Endpoint (/v3/Links at scholexplorer.openaire.eu)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-pagination-confirmed-0-indexed" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.1 Pagination (CONFIRMED 0-indexed)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-response-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.2 Response Envelope
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-scholix-model-alignment-modelsscholixpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.3 Scholix Model Alignment (models/scholix.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-scholix-filter-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.4 Scholix Filter Parameters
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-scholexplorer-openapi-spec-defects-confirmed" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Scholexplorer OpenAPI Spec Defects (CONFIRMED)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#graph-links-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Graph Links Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scholix-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scholix Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-fix-page-index-bug-data-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRITICAL: Fix Page-Index Bug (Data Loss)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-clamp-pagesizesize-to-99" class="md-nav__link">
+    <span class="md-ellipsis">
+      HIGH: Clamp pageSize/size to 99
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-update-docstrings-and-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      MEDIUM: Update Docstrings and References
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low-header-model-consideration" class="md-nav__link">
+    <span class="md-ellipsis">
+      LOW: Header Model Consideration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scholix-client-no-changes-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scholix Client: No Changes Needed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-scholix-graph-links-endpoints">V3 Migration Research — Scholix &amp; Graph Links Endpoints</h1>
+<h2 id="scope">Scope</h2>
+<p>Both link-retrieval mechanisms in AIREloom:
+1. <strong>Graph Links endpoint</strong> — <code>GET /v3/research-products/links</code> (and <code>/v3/research-products/links/relations-info</code>)
+2. <strong>Scholexplorer (Scholix) API</strong> — <code>GET /v3/Links</code> at <code>api.scholexplorer.openaire.eu</code></p>
+<p>Covers: pagination behavior, page-index bugs, silent pageSize caps, response envelopes, filter parameters, model alignment, and OpenAPI spec defects.</p>
+<h2 id="method">Method</h2>
+<ul>
+<li>Read current source code in <code>src/aireloom/endpoints.py</code>, <code>research_products_client.py</code>, <code>scholix_client.py</code>, <code>models/relation.py</code>, <code>models/scholix.py</code></li>
+<li>Parsed V3 OpenAPI spec (<code>reference/v3-investigation/graph_v3_openapi.json</code>) for links endpoint schema</li>
+<li>Fetched and parsed Scholexplorer OpenAPI spec from live URL for spec-defect verification</li>
+<li>Ran <strong>12+ live API calls</strong> via <code>reference/v3-investigation/v3_live.py</code> against both endpoints with varying page/pageSize/size/cursor values</li>
+<li>Cross-referenced model field names against actual JSON response keys</li>
+</ul>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-graph-links-endpoint-v3research-productslinks-pagination-envelope">1. Graph Links Endpoint (<code>/v3/research-products/links</code>) — Pagination &amp; Envelope</h3>
+<h4 id="11-pagination-is-0-indexed-confirmed">1.1 Pagination is 0-indexed (CONFIRMED)</h4>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>URL</th>
+<th>Status</th>
+<th>Results</th>
+<th>Header</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>page=0</td>
+<td><code>...page=0&amp;pageSize=10</code></td>
+<td><strong>200</strong></td>
+<td>10 results</td>
+<td><code>{"page":0,"totalPages":13,"totalLinks":121}</code></td>
+</tr>
+<tr>
+<td>page=1</td>
+<td><code>...page=1&amp;pageSize=10</code></td>
+<td><strong>200</strong></td>
+<td>10 results</td>
+<td><code>{"page":1,"totalPages":13,"totalLinks":121}</code></td>
+</tr>
+</tbody>
+</table>
+<p>The results <strong>differ</strong> between page=0 and page=1:
+- <strong>page=0 first target DOI</strong>: <code>10.3886/e111743v1</code> (dataset "Are Ideas Getting Harder to Find?")
+- <strong>page=1 first target DOI</strong>: <code>10.2139/ssrn.2250887</code> (publication "Universities: The Fallen Angels of Bayh-Dole?")</p>
+<p><strong>Conclusion</strong>: The endpoint is definitively 0-indexed. page=0 is the first page.</p>
+<h4 id="12-silent-pagesize-cap-confirmed">1.2 Silent pageSize Cap (CONFIRMED)</h4>
+<table>
+<thead>
+<tr>
+<th>pageSize</th>
+<th>Actual results returned</th>
+<th>totalPages</th>
+<th>totalLinks</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td><strong>10</strong></td>
+<td>13</td>
+<td>121</td>
+<td><strong>Silently capped to 10</strong></td>
+</tr>
+<tr>
+<td>99</td>
+<td><strong>99</strong></td>
+<td>2</td>
+<td>121</td>
+<td>Returns full 99</td>
+</tr>
+<tr>
+<td>10</td>
+<td>10</td>
+<td>13</td>
+<td>121</td>
+<td>Normal</td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>25</td>
+<td>121</td>
+<td>Normal</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical finding</strong>: <code>pageSize=100</code> silently returns only 10 results (not 100, not an error). Maximum working value is <strong>99</strong>. The V3 OpenAPI spec says <code>"maximum value: 100"</code> which is <strong>incorrect</strong> — 100 triggers a silent cap to 10.</p>
+<h4 id="13-response-envelope-divergent-from-standard-endpoints">1.3 Response Envelope (Divergent from Standard Endpoints)</h4>
+<p>The links endpoint uses a <strong>different header structure</strong> than regular V3 endpoints:</p>
+<pre><code class="language-json">// Links endpoint header (ACTUAL)
+{
+  &quot;page&quot;: 0,
+  &quot;totalPages&quot;: 13,
+  &quot;totalLinks&quot;: 121
+}
+</code></pre>
+<p><strong>Absent from links header</strong> (present in standard SearchHeader):
+- <code>numFound</code> — NOT present
+- <code>pageSize</code> — NOT present
+- <code>nextCursor</code> — NOT present
+- <code>queryTime</code> — NOT present
+- <code>maxScore</code> — NOT present
+- <code>debug</code> — NOT present</p>
+<p><strong>Present in standard SearchHeader but irrelevant for links</strong>: <code>totalCitationsCount</code>, <code>countsByType</code>.</p>
+<p>Response body shape: <code>{ header: {page, totalPages, totalLinks}, results: [Relation, ...] }</code></p>
+<h4 id="14-no-cursor-support-confirmed">1.4 No Cursor Support (CONFIRMED)</h4>
+<p>Tested <code>cursor=*</code> on the links endpoint:
+- Returns <strong>200</strong> with results identical to <code>page=0</code>
+- Header shows <code>totalPages: 61</code> (vs 13 for normal paging) — inconsistent metadata
+- The cursor parameter is <strong>silently ignored</strong>; it does not enable cursor-based pagination
+- <strong>Recommendation</strong>: Do not use cursor on this endpoint; use page-based pagination only</p>
+<h3 id="2-latent-bug-off-by-one-page-index-critical">2. LATENT BUG: Off-by-One Page Index (CRITICAL)</h3>
+<p><strong>Current code</strong> (<code>src/aireloom/resources/research_products_client.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Line</th>
+<th>Current Default</th>
+<th>Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search_links()</code></td>
+<td><strong>81</strong></td>
+<td><code>page: int = 1</code></td>
+<td>Defaults to <strong>page 1</strong> (second page)</td>
+</tr>
+<tr>
+<td><code>iterate_links()</code></td>
+<td><strong>126</strong></td>
+<td><code>current_page = 1</code></td>
+<td>Starts at <strong>page 1</strong> (skips first page)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Impact</strong>: Every call to <code>search_links()</code> without explicit <code>page=0</code> and every <code>iterate_links()</code> call <strong>silently skips the entire first page of results</strong>. For our test DOI (121 links, 13 pages at pageSize=10), this means skipping ~10 links (~8% of results).</p>
+<p><strong>Evidence</strong>:</p>
+<pre><code>page=0 → first target: doi 10.3886/e111743v1  (dataset)
+page=1 → first target: doi 10.2139/ssrn.2250887 (publication)
+</code></pre>
+<p>These are completely different records. The bug causes <strong>data loss</strong>.</p>
+<p><strong>Fix required</strong>:
+- <code>search_links()</code>: Change default <code>page: int = 1</code> → <code>page: int = 0</code> (line 81)
+- <code>iterate_links()</code>: Change <code>current_page = 1</code> → <code>current_page = 0</code> (line 126)
+- Update docstrings from "1-indexed" to "0-indexed"</p>
+<h3 id="3-filter-parameters-links-endpoint">3. Filter Parameters — Links Endpoint</h3>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>V1/V2 Code (LinksFilters)</th>
+<th>V3 Spec</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sourcePid</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Filter by source PID (e.g., DOI)</td>
+</tr>
+<tr>
+<td><code>targetPid</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Filter by target PID</td>
+</tr>
+<tr>
+<td><code>sourcePublisher</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Filter by source publisher name</td>
+</tr>
+<tr>
+<td><code>targetPublisher</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Filter by target publisher name</td>
+</tr>
+<tr>
+<td><code>sourceType</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Values: publication, dataset, software, other</td>
+</tr>
+<tr>
+<td><code>targetType</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Values: publication, dataset, software, other</td>
+</tr>
+<tr>
+<td><code>relation</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Relation type name (e.g., Cites, References)</td>
+</tr>
+<tr>
+<td><code>fromDate</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Format: YYYY or YYYY-MM-DD</td>
+</tr>
+<tr>
+<td><code>toDate</code></td>
+<td>string</td>
+<td>✅ present</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Format: YYYY or YYYY-MM-DD</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>integer</td>
+<td>set in code (default=1 ❌)</td>
+<td>✅ optional</td>
+<td>✅ 0-indexed</td>
+<td><strong>BUG: default should be 0</strong></td>
+</tr>
+<tr>
+<td><code>pageSize</code></td>
+<td>integer</td>
+<td>set in code (default=20)</td>
+<td>✅ optional, max=100❌</td>
+<td>✅ max=99</td>
+<td><strong>Spec says max=100 but 100 silently caps to 10</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Filter status</strong>: All filters are compatible between code and V3 API. No parameter renames needed.</p>
+<p><strong>Docstring issue</strong>: <code>LinksFilters</code> docstring references <code>https://api.openaire.eu/graph/v1/researchProducts/links</code> — should be updated to v3.</p>
+<h3 id="4-response-model-alignment-links-modelsrelationpy">4. Response Model Alignment — Links (<code>models/relation.py</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>header</code> (Header)</td>
+<td><code>header</code></td>
+<td>object</td>
+<td>✅ matches</td>
+<td>But Header model has fields not returned by links (numFound, nextCursor, etc.) — harmless due to <code>extra="allow"</code> + Optionals</td>
+</tr>
+<tr>
+<td><code>results</code> (list[Relation])</td>
+<td><code>results</code></td>
+<td>array</td>
+<td>✅ matches</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Relation model fields</strong> vs live V3 response:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Live JSON Key</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source</code> (Node)</td>
+<td><code>source</code></td>
+<td>object</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>target</code> (Node)</td>
+<td><code>target</code></td>
+<td>object</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>relType</code> (RelType)</td>
+<td><code>relType</code></td>
+<td>object</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Node fields</strong> vs live:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Live JSON Key</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td><code>title</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>instanceType</code></td>
+<td><code>instanceType</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>publicationDate</code></td>
+<td><code>publicationDate</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>identifiers</code></td>
+<td><code>identifiers</code></td>
+<td>array</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>authors</code></td>
+<td><code>authors</code></td>
+<td>array</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>collectedFrom</code></td>
+<td><code>collectedFrom</code></td>
+<td>array</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Identifier fields</strong> vs live:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Live JSON Key</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>idScheme</code></td>
+<td><code>idScheme</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>idUrl</code></td>
+<td><code>idUrl</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>RelType fields</strong> vs live:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Live JSON Key</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>name</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>typeSchema</code></td>
+<td><code>typeSchema</code></td>
+<td>string</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict</strong>: All relation model fields align perfectly with V3 live responses. No changes needed.</p>
+<h3 id="5-relations-info-endpoint-v3research-productslinksrelations-info">5. Relations-Info Endpoint (<code>/v3/research-products/links/relations-info</code>)</h3>
+<p><strong>Status</strong>: ✅ <strong>Fully functional</strong></p>
+<p>Returns a JSON array of relation type descriptors (no envelope wrapper):</p>
+<pre><code class="language-json">[
+  {
+    &quot;relation&quot;: &quot;Cites&quot;,
+    &quot;inverse&quot;: &quot;IsCitedBy&quot;,
+    &quot;description&quot;: &quot;This resource cites another resource.&quot;,
+    &quot;descriptionInverse&quot;: &quot;This resource is cited by another resource.&quot;
+  },
+  // ... 19 total relation types
+]
+</code></pre>
+<p><strong>Full list of 19 relation types returned</strong>:
+Cites/IsCitedBy, IsSourceOf/IsDerivedFrom, IsRelatedTo, HasAmongTopNSimilarDocuments/IsAmongTopNSimilarDocuments, References/IsReferencedBy, HasPart/IsPartOf, IsSupplementTo/IsSupplementedBy, IsNewVersionOf/IsPreviousVersionOf, HasVersion/IsVersionOf, Continues/IsContinuedBy, Documents/IsDocumentedBy, IsIdenticalTo, IsOriginalFormOf/VariantFormOf, Reviews/IsReviewedBy, Compiles/IsCompiledBy, Obsoletes/IsObsoletedBy, Describes/IsDescribedBy, [truncated at "Req"...]</p>
+<p>Current code (<code>get_relations_info()</code> at line 150) handles this correctly — wraps in list if scalar. No changes needed.</p>
+<h3 id="6-scholix-endpoint-v3links-at-scholexploreropenaireeu">6. Scholix Endpoint (<code>/v3/Links</code> at scholexplorer.openaire.eu)</h3>
+<h4 id="61-pagination-confirmed-0-indexed">6.1 Pagination (CONFIRMED 0-indexed)</h4>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>URL</th>
+<th>Status</th>
+<th>currentPage</th>
+<th>totalLinks</th>
+<th>totalPages</th>
+<th>RESULTS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>page=0, size=10</td>
+<td><code>...page=0&amp;size=10</code></td>
+<td><strong>200</strong></td>
+<td>0</td>
+<td>121</td>
+<td>13</td>
+<td>10</td>
+</tr>
+<tr>
+<td>page=0, size=100</td>
+<td><code>...page=0&amp;size=100</code></td>
+<td><strong>200</strong></td>
+<td>0</td>
+<td>121</td>
+<td>13</td>
+<td><strong>10</strong> (silent cap!)</td>
+</tr>
+<tr>
+<td>page=0, size=99</td>
+<td><code>...page=0&amp;size=99</code></td>
+<td><strong>200</strong></td>
+<td>0</td>
+<td>121</td>
+<td>2</td>
+<td><strong>99</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Same silent cap pattern as Graph links</strong>: size=100 → 10 results. Max working value = 99.</p>
+<h4 id="62-response-envelope">6.2 Response Envelope</h4>
+<p>Scholix uses its own envelope (different from Graph links):</p>
+<pre><code class="language-json">{
+  &quot;currentPage&quot;: 0,
+  &quot;totalLinks&quot;: 121,
+  &quot;totalPages&quot;: 13,
+  &quot;result&quot;: [ /* ScholixRelationship objects */ ]
+}
+</code></pre>
+<p>Key differences from Graph links:
+- Uses <code>currentPage</code> (not <code>page</code>)
+- Uses <code>result</code> (not <code>results</code>)
+- No <code>header</code> wrapper — flat envelope</p>
+<h4 id="63-scholix-model-alignment-modelsscholixpy">6.3 Scholix Model Alignment (<code>models/scholix.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Alias (Live Key)</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>current_page</code></td>
+<td><code>currentPage</code></td>
+<td>✅</td>
+<td>int</td>
+</tr>
+<tr>
+<td><code>total_links</code></td>
+<td><code>totalLinks</code></td>
+<td>✅</td>
+<td>int</td>
+</tr>
+<tr>
+<td><code>total_pages</code></td>
+<td><code>totalPages</code></td>
+<td>✅</td>
+<td>int</td>
+</tr>
+<tr>
+<td><code>result</code></td>
+<td><code>result</code></td>
+<td>✅</td>
+<td>list[ScholixRelationship]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ScholixRelationship</strong> fields:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Alias</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>link_provider</code></td>
+<td><code>LinkProvider</code></td>
+<td>✅</td>
+<td>list of provider objects</td>
+</tr>
+<tr>
+<td><code>relationship_type</code></td>
+<td><code>RelationshipType</code></td>
+<td>✅</td>
+<td>{Name, SubType, SubTypeSchema}</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td><code>Source</code></td>
+<td>✅</td>
+<td>ScholixEntity</td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td><code>Target</code></td>
+<td>✅</td>
+<td>ScholixEntity</td>
+</tr>
+<tr>
+<td><code>link_publication_date</code></td>
+<td><code>LinkPublicationDate</code></td>
+<td>✅</td>
+<td>date string</td>
+</tr>
+<tr>
+<td><code>license_url</code></td>
+<td><code>LicenseURL</code></td>
+<td>✅</td>
+<td>nullable</td>
+</tr>
+<tr>
+<td><code>harvest_date</code></td>
+<td><code>HarvestDate</code></td>
+<td>✅</td>
+<td>date string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ScholixEntity</strong> fields:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Alias</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>identifier</code></td>
+<td><code>Identifier</code></td>
+<td>✅</td>
+<td>list with ID, IDScheme, IDURL</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>Type</code></td>
+<td>✅</td>
+<td>publication/dataset/software/other</td>
+</tr>
+<tr>
+<td><code>sub_type</code></td>
+<td><code>SubType</code></td>
+<td>✅</td>
+<td>e.g., "Article"</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>Title</code></td>
+<td>✅</td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>creator</code></td>
+<td><code>Creator</code></td>
+<td>✅</td>
+<td>list with name, identifier</td>
+</tr>
+<tr>
+<td><code>publication_date</code></td>
+<td><code>PublicationDate</code></td>
+<td>✅</td>
+<td>date string</td>
+</tr>
+<tr>
+<td><code>publisher</code></td>
+<td><code>Publisher</code></td>
+<td>✅</td>
+<td>list with name, identifier</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ScholixRelationshipType</strong> fields:</p>
+<table>
+<thead>
+<tr>
+<th>Model Field</th>
+<th>Alias (Live Key)</th>
+<th>Live Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>Name</code></td>
+<td>✅ (e.g., "References")</td>
+</tr>
+<tr>
+<td><code>sub_type</code></td>
+<td><code>SubType</code></td>
+<td>✅ (e.g., "references")</td>
+</tr>
+<tr>
+<td><code>sub_type_schema</code></td>
+<td><code>SubTypeSchema</code></td>
+<td>✅ (e.g., "datacite")</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict</strong>: All Scholix models align correctly with live V3 API responses. No field changes needed.</p>
+<h4 id="64-scholix-filter-parameters">6.4 Scholix Filter Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Code (ScholixFilters)</th>
+<th>V3 Spec (Scholix)</th>
+<th>Live Verified</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sourcePid</code></td>
+<td>✅ string</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Required in practice for results</td>
+</tr>
+<tr>
+<td><code>targetPid</code></td>
+<td>✅ string</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Alternative to sourcePid</td>
+</tr>
+<tr>
+<td><code>sourcePublisher</code></td>
+<td>✅ string</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td></td>
+</tr>
+<tr>
+<td><code>targetPublisher</code></td>
+<td>✅ string</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sourceType</code></td>
+<td>✅ Literal[4 values]</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>PascalCase: Publication, Dataset...</td>
+</tr>
+<tr>
+<td><code>targetType</code></td>
+<td>✅ Literal[4 values]</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>PascalCase: Publication, Dataset...</td>
+</tr>
+<tr>
+<td><code>relation</code></td>
+<td>✅ string</td>
+<td>✅ optional</td>
+<td>✅ works</td>
+<td>Relation type name</td>
+</tr>
+<tr>
+<td><code>from_date</code> (alias "from")</td>
+<td>✅ date</td>
+<td>✅ as "from"</td>
+<td>✅ works</td>
+<td>API param name is "from"</td>
+</tr>
+<tr>
+<td><code>to_date</code> (alias "to")</td>
+<td>✅ date</td>
+<td>✅ as "to"</td>
+<td>✅ works</td>
+<td>API param name is "to"</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td>set in code (default=0 ✅)</td>
+<td><strong>required=True ❌</strong></td>
+<td>✅ 0-indexed</td>
+<td>Spec bug: says required but default=0 works</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>set in code (page_size)</td>
+<td>✅ optional, max=100❌</td>
+<td>✅ max=99</td>
+<td>Same silent cap at 100</td>
+</tr>
+</tbody>
+</table>
+<h3 id="7-scholexplorer-openapi-spec-defects-confirmed">7. Scholexplorer OpenAPI Spec Defects (CONFIRMED)</h3>
+<p>Fetched from <code>https://api.scholexplorer.openaire.eu/api-docs/Scholexplorer%20API%20V3.0</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Defect</th>
+<th>Detail</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Title typo</strong></td>
+<td><code>info.title</code> = <code>"ScholeExplorer APIs"</code></td>
+<td>Missing 'x' — should be "Scholexplorer"</td>
+</tr>
+<tr>
+<td><strong>page required=true</strong></td>
+<td><code>/v3/Links</code> GET param <code>page</code> has <code>required: true</code></td>
+<td><strong>Wrong</strong> — page defaults to 0 when omitted; should be <code>required: false</code></td>
+</tr>
+<tr>
+<td><strong>size max=100</strong></td>
+<td>Description says "max is 100"</td>
+<td><strong>Misleading</strong> — size=100 silently caps to 10; real max is 99</td>
+</tr>
+</tbody>
+</table>
+<p>Additionally noted: <code>/v3/api-docs</code> returns <strong>500</strong> on the Scholexplorer server.</p>
+<hr />
+<h2 id="live-verification-summary">Live Verification Summary</h2>
+<p>All commands run from repo root via <code>python3 reference/v3-investigation/v3_live.py</code>.</p>
+<h3 id="graph-links-endpoint">Graph Links Endpoint</h3>
+<pre><code class="language-bash"># 1. Confirm 0-indexed: page=0 returns first page
+python3 v3_live.py graph &quot;research-products/links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;pageSize=10&quot; --full
+# STATUS: 200, HEADER: {&quot;page&quot;:0,&quot;totalPages&quot;:13,&quot;totalLinks&quot;:121}, RESULTS: 10
+# First result target DOI: 10.3886/e111743v1
+
+# 2. page=1 returns DIFFERENT results (second page)
+python3 v3_live.py graph &quot;research-products/links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=1&amp;pageSize=10&quot; --full
+# STATUS: 200, HEADER: {&quot;page&quot;:1,&quot;totalPages&quot;:13,&quot;totalLinks&quot;:121}, RESULTS: 10
+# First result target DOI: 10.2139/ssrn.2250887 ← DIFFERENT from page=0!
+
+# 3. pageSize=100 silent cap → only 10 results
+python3 v3_live.py graph &quot;research-products/links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;pageSize=100&quot;
+# STATUS: 200, HEADER: {&quot;page&quot;:0,&quot;totalPages&quot;:13,&quot;totalLinks&quot;:121}, RESULTS: 10 ← CAPPED!
+
+# 4. pageSize=99 → full 99 results
+python3 v3_live.py graph &quot;research-products/links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;pageSize=99&quot;
+# STATUS: 200, HEADER: {&quot;page&quot;:0,&quot;totalPages&quot;:2,&quot;totalLinks&quot;:121}, RESULTS: 99 ← FULL
+
+# 5. cursor=* silently ignored (same results as page=0)
+python3 v3_live.py graph &quot;research-products/links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;cursor=*&amp;pageSize=2&quot; --full
+# STATUS: 200, identical first result to page=0, totalPages=61 (inconsistent metadata)
+
+# 6. relations-info endpoint
+python3 v3_live.py graph &quot;research-products/links/relations-info&quot; &quot;&quot; --full
+# STATUS: 200, returns array of 19 relation type objects
+</code></pre>
+<h3 id="scholix-endpoint">Scholix Endpoint</h3>
+<pre><code class="language-bash"># 7. Scholix page=0, size=10
+python3 v3_live.py scholix &quot;Links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;size=10&quot; --full
+# STATUS: 200, CURRENTPAGE:0, TOTALLINKS:121, TOTALPAGES:13, RESULTS:10
+
+# 8. Scholix size=100 silent cap → 10 results
+python3 v3_live.py scholix &quot;Links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;size=100&quot;
+# STATUS: 200, CURRENTPAGE:0, TOTALLINKS:121, TOTALPAGES:13, RESULTS:10 ← CAPPED!
+
+# 9. Scholix size=99 → 99 results
+python3 v3_live.py scholix &quot;Links&quot; &quot;sourcePid=10.1016/j.respol.2021.104226&amp;page=0&amp;size=99&quot;
+# STATUS: 200, CURRENTPAGE:0, TOTALLINKS:121, TOTALPAGES:2, RESULTS:99 ← FULL
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="critical-fix-page-index-bug-data-loss">CRITICAL: Fix Page-Index Bug (Data Loss)</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line</th>
+<th>Current</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>81</strong></td>
+<td><code>page: int = 1</code></td>
+<td><code>page: int = 0</code></td>
+</tr>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>91</strong></td>
+<td>Docstring: "1-indexed page number"</td>
+<td>Change to "0-indexed page number"</td>
+</tr>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>126</strong></td>
+<td><code>current_page = 1</code></td>
+<td><code>current_page = 0</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="high-clamp-pagesizesize-to-99">HIGH: Clamp pageSize/size to 99</h3>
+<p>Both endpoints silently cap at 100→10. The library should clamp proactively:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>82</strong>, <strong>112</strong></td>
+<td>Add validation: <code>if page_size &gt; 99: page_size = 99</code> (or raise)</td>
+</tr>
+<tr>
+<td><code>src/aireloom/resources/scholix_client.py</code></td>
+<td><strong>102</strong>, <strong>162</strong></td>
+<td>Same clamping for <code>size</code> parameter in <code>_build_scholix_params</code> or callers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medium-update-docstrings-and-references">MEDIUM: Update Docstrings and References</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line</th>
+<th>Issue</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>86</strong></td>
+<td>Comment says "v1 <code>/researchProducts/links</code> endpoint"</td>
+<td>Update to "v3 <code>/research-products/links</code> endpoint"</td>
+</tr>
+<tr>
+<td><code>src/aireloom/resources/research_products_client.py</code></td>
+<td><strong>153</strong></td>
+<td>Comment says "v1 <code>/researchProducts/links/relations-info</code>"</td>
+<td>Update to "v3"</td>
+</tr>
+<tr>
+<td><code>src/aireloom/endpoints.py</code></td>
+<td><strong>267</strong></td>
+<td>LinksFilters docstring references <code>graph/v1/...</code> URL</td>
+<td>Update to v3 URL</td>
+</tr>
+<tr>
+<td><code>src/aireloom/endpoints.py</code></td>
+<td><strong>23</strong></td>
+<td><code>LINKS = "researchProducts/links"</code> uses camelCase</td>
+<td>V3 uses kebab-case; verify if server accepts both or fix to <code>"research-products/links"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="low-header-model-consideration">LOW: Header Model Consideration</h3>
+<p>The <code>Header</code> base model (<code>src/aireloom/models/base.py:20-75</code>) contains fields that links never returns (<code>numFound</code>, <code>nextCursor</code>, <code>queryTime</code>, <code>maxScore</code>, <code>pageSize</code>). This is harmless because they're Optional and the model has <code>extra="allow"</code>, but could mislead future developers into expecting those fields. Options:
+- Keep as-is (low risk, backwards-compatible)
+- Document that links header is a subset</p>
+<h3 id="scholix-client-no-changes-needed">Scholix Client: No Changes Needed</h3>
+<p>The Scholix client already correctly:
+- Uses 0-indexed pages (<code>search_links</code> default <code>page=0</code>, <code>iterate_links</code> starts at <code>current_page=0</code>)
+- Maps <code>page_size</code> → <code>size</code> parameter via <code>_build_scholix_params()</code>
+- Uses correct response envelope fields (<code>currentPage</code>, <code>totalLinks</code>, <code>totalPages</code>, <code>result</code>)
+- All model aliases match live API key names</p>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li><strong>Silent cap stability</strong>: The pageSize=100→10 and size=100→10 silent cap could change without notice if OpenAIRE fixes their backend. Clamping to 99 in client code protects against this.</li>
+<li><strong>cursor=* on links</strong>: Returns 200 with inconsistent <code>totalPages</code> (61 vs 13). Is this an undocumented partial feature or a server bug? <strong>Do not rely on cursor pagination for links.</strong></li>
+<li><strong>Path case-sensitivity</strong>: Current constant is <code>LINKS = "researchProducts/links"</code> (camelCase). V3 uses kebab-case paths everywhere else. Need to verify whether the Graph API accepts both casings for this legacy-named endpoint.</li>
+<li><strong>Scholix spec says page required</strong>: If OpenAIRE updates their server to enforce the spec's <code>required=true</code>, omitting <code>page</code> would break. Currently safe since code always sends it explicitly.</li>
+<li><strong>Compounded bug impact</strong>: The page=1 default + pageSize=100 default (in iterate_links) means users get wrong page AND 10x fewer results per page than expected — a ~8% data loss AND 10x slowdown.</li>
+<li><strong>No sort support on either endpoint</strong>: Neither Graph links nor Scholix expose a <code>sortBy</code> parameter. Result ordering is server-determined and non-configurable.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>

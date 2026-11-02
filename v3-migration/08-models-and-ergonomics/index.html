@@ -1,0 +1,2816 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/08-models-and-ergonomics/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Models, Ergonomics & Packaging - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-models-ergonomics-packaging" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Models, Ergonomics &amp; Packaging
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-response-data-models-field-by-field-v3-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Response Data Models — Field-by-Field V3 Verification
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Response Data Models — Field-by-Field V3 Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-header-model-srcaireloommodelsbasepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 Header Model (src/aireloom/models/base.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-researchproduct-srcaireloommodelsresearch_productpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 ResearchProduct (src/aireloom/models/research_product.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-project-srcaireloommodelsprojectpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 Project (src/aireloom/models/project.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-organization-srcaireloommodelsorganizationpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 Organization (src/aireloom/models/organization.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-datasource-srcaireloommodelsdata_sourcepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5 DataSource (src/aireloom/models/data_source.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#16-person-srcaireloommodelspersonpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.6 Person (src/aireloom/models/person.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-filter-models-v3-parameter-renames-live-verified" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Filter Models — V3 Parameter Renames (LIVE VERIFIED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ergonomics-layer-queriespy-function-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Ergonomics Layer (queries.py) — Function Inventory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-filter-value-quoting-requirement-live-verified" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Filter Value Quoting Requirement (LIVE VERIFIED)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-packaging-exports-type-marker" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Packaging / Exports / Type Marker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commands-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands Run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-observed-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Observed Responses
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#r1-add-missing-fields-to-researchproduct-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      R1: Add Missing Fields to ResearchProduct Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r2-add-missing-fundings-field-to-organization-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      R2: Add Missing fundings Field to Organization Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r3-add-5-missing-datasource-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      R3: Add 5 Missing DataSource Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r4-rename-filter-fields-in-endpointspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      R4: Rename Filter Fields in endpoints.py
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r5-update-ergonomics-layer-filter-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      R5: Update Ergonomics Layer Filter References
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r6-implement-auto-quoting-for-filter-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      R6: Implement Auto-Quoting for Filter Values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r7-consider-adding-new-v3-only-filter-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      R7: Consider Adding New V3-Only Filter Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r8-update-development-status-classifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      R8: Update Development Status Classifier
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-models-ergonomics-packaging">V3 Migration Research — Models, Ergonomics &amp; Packaging</h1>
+<h2 id="scope">Scope</h2>
+<p>Cross-cutting audit covering:
+1. <strong>All response data models</strong> — field-by-field V3 verification against live API
+2. <strong>Ergonomics layer (<code>queries.py</code>)</strong> — convenience function filter field mapping and required renames
+3. <strong>V3 filter-value quoting requirement</strong> — live verification of <code>%22</code> quoting for spaces/parens
+4. <strong>Packaging/exports/type-marker</strong> — version, <code>py.typed</code>, classifiers</p>
+<h2 id="method">Method</h2>
+<ul>
+<li>Read all model files under <code>src/aireloom/models/</code> (base, research_product, project, organization, data_source, person, relation, scholix, safe_types)</li>
+<li>Read filter definitions in <code>src/aireloom/endpoints.py</code> (7 filter models)</li>
+<li>Read ergonomics layer <code>src/aireloom/queries.py</code> (11 convenience functions + <code>_resolve_identifier</code>)</li>
+<li>Queried <strong>live V3 API</strong> via <code>reference/v3-investigation/v3_live.py</code> for each entity type with <code>--full</code> to inspect actual response JSON</li>
+<li>Cross-referenced V3 OpenAPI spec (<code>graph_v3_openapi.json</code>) — 60 params for research-products alone</li>
+<li>Tested old vs new filter names live to confirm renames</li>
+</ul>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-response-data-models-field-by-field-v3-verification">1. Response Data Models — Field-by-Field V3 Verification</h3>
+<h4 id="11-header-model-srcaireloommodelsbasepy">1.1 Header Model (<code>src/aireloom/models/base.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>queryTime</code></td>
+<td><code>queryTime</code></td>
+<td>int</td>
+<td>✅ OK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>numFound</code></td>
+<td><code>numFound</code></td>
+<td>int</td>
+<td>✅ OK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>nextCursor</code></td>
+<td><code>nextCursor</code></td>
+<td>str|null</td>
+<td>✅ OK</td>
+<td>Present even when no more pages (null)</td>
+</tr>
+<tr>
+<td><code>pageSize</code></td>
+<td><code>pageSize</code></td>
+<td>int</td>
+<td>✅ OK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td><code>page</code></td>
+<td>int</td>
+<td>✅ OK</td>
+<td>1-indexed on regular endpoints</td>
+</tr>
+<tr>
+<td><code>maxScore</code></td>
+<td><code>maxScore</code></td>
+<td>float</td>
+<td>✅ OK</td>
+<td></td>
+</tr>
+<tr>
+<td><code>totalPages</code></td>
+<td><em>(not in regular header)</em></td>
+<td>—</td>
+<td>⚠️ Links-only</td>
+<td>Only appears in <code>/research-products/links</code> envelope</td>
+</tr>
+<tr>
+<td><code>totalLinks</code></td>
+<td><em>(not in regular header)</em></td>
+<td>—</td>
+<td>⚠️ Links-only</td>
+<td>Only appears in <code>/research-products/links</code> envelope</td>
+</tr>
+</tbody>
+</table>
+<h4 id="12-researchproduct-srcaireloommodelsresearch_productpy">1.2 ResearchProduct (<code>src/aireloom/models/research_product.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Gap?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td><code>pids</code></td>
+<td>list[Pid]</td>
+<td>✅</td>
+<td>Model maps correctly</td>
+</tr>
+<tr>
+<td><code>mainTitle</code></td>
+<td><code>mainTitle</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>subTitle</code></td>
+<td><code>subTitle</code></td>
+<td>str|null</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>otherTitles</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td>Correctly optional</td>
+</tr>
+<tr>
+<td><code>descriptions</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>authors</code></td>
+<td><code>authors</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>Contains orcid, fullName, rank, order</td>
+</tr>
+<tr>
+<td><code>contributors</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>publicationDate</code></td>
+<td><code>publicationDate</code></td>
+<td>str</td>
+<td>✅</td>
+<td>ISO date string</td>
+</tr>
+<tr>
+<td><code>publisher</code></td>
+<td><code>publisher</code></td>
+<td>str|null</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>sources</code></td>
+<td><code>sources</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td>List of DOI-like strings</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type</code></td>
+<td>str</td>
+<td>✅</td>
+<td>"publication", "dataset", etc.</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td><code>language</code></td>
+<td>{code,label}</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>countries</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><code>subjects</code></td>
+<td>list[{provenance,subject}]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>pids</code></td>
+<td><code>pids</code></td>
+<td>{scheme,value}</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>instances</code></td>
+<td><code>instances</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>Rich: collectedFrom, hostedBy, pids, urls, type, refereed, publicationDate</td>
+</tr>
+<tr>
+<td><code>container</code></td>
+<td><code>container</code></td>
+<td>object</td>
+<td>✅</td>
+<td>Has conferenceDate/Place, edition, ep, iss, issnLinking/Online/Printed, name, sp, vol</td>
+</tr>
+<tr>
+<td><code>bestAccessRight</code></td>
+<td><code>bestAccessRight</code></td>
+<td>null</td>
+<td>✅</td>
+<td>Null when no access right info</td>
+</tr>
+<tr>
+<td><code>codeRepositoryUrl</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>embargoEndDate</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>openAccessColor</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>indicators</code></td>
+<td><code>indicators</code></td>
+<td>{citationImpact:{...}}</td>
+<td>✅</td>
+<td>citationCount, impulse, influence, popularity + classes</td>
+</tr>
+<tr>
+<td><code>collectedFrom</code></td>
+<td><code>collectedFrom</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>{key,value} format</td>
+</tr>
+<tr>
+<td><code>communities</code></td>
+<td><code>communities</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>{code,acronym,label,id,type}</td>
+</tr>
+<tr>
+<td><code>contactGroups</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>contactPeople</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>coverages</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>dateOfCollection</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>documentationUrls</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>formats</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>geoLocations</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>programmingLanguage</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>lastUpdateTimeStamp</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>organizations</code></td>
+<td><code>organizations</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>{name,id,type,shortname}</td>
+</tr>
+<tr>
+<td><code>projects</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>links</code></td>
+<td><code>links</code></td>
+<td>list</td>
+<td>✅</td>
+<td>Empty array when none</td>
+</tr>
+<tr>
+<td><code>originalIds</code></td>
+<td><code>originalIds</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NEW: <code>eoscIfGuidelines</code></strong></td>
+<td><code>eoscIfGuidelines</code></td>
+<td>null</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Field exists in V3 response; not declared in Pydantic model</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>green</code></strong></td>
+<td><code>green</code></td>
+<td>bool</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Boolean flag in V3 response</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>inDiamondJournal</code></strong></td>
+<td><code>inDiamondJournal</code></td>
+<td>bool</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Boolean flag in V3 response</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>isGreen</code></strong></td>
+<td><code>isGreen</code></td>
+<td>bool</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Boolean flag in V3 response</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>isInDiamondJournal</code></strong></td>
+<td><code>isInDiamondJournal</code></td>
+<td>bool</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Boolean flag in V3 response</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>publiclyFunded</code></strong></td>
+<td><code>publiclyFunded</code></td>
+<td>bool</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Boolean flag in V3 response</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Undeclared V3 fields found in live response that should be added to <code>ResearchProduct</code>:</strong>
+- <code>eoscIfGuidelines</code> (null in tested record)
+- <code>green: bool = False</code>
+- <code>inDiamondJournal: bool = False</code>
+- <code>isGreen: bool</code>
+- <code>isInDiamondJournal: bool</code>
+- <code>publiclyFunded: bool</code></p>
+<h4 id="13-project-srcaireloommodelsprojectpy">1.3 Project (<code>src/aireloom/models/project.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Gap?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td><code>code</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>acronym</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>title</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>startDate</code></td>
+<td><code>startDate</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>endDate</code></td>
+<td><code>endDate</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>callIdentifier</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>summary</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>websiteUrl</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>funding</code></td>
+<td><code>funding</code></td>
+<td>{funder,jurisdiction,level0,level1,level2}</td>
+<td>✅</td>
+<td>funder has id,shortname,name,jurisdiction,pid</td>
+</tr>
+<tr>
+<td><code>fundings</code></td>
+<td><code>fundings</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td>Array of funding objects</td>
+</tr>
+<tr>
+<td><code>granted</code></td>
+<td><code>granted</code></td>
+<td>{currency,totalCost,fundedAmount}</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>h2020Programmes</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>openAccessMandateForPublications</code></td>
+<td><code>openAccessMandateForPublications</code></td>
+<td>bool</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>openAccessMandateForDataset</code></td>
+<td><code>openAccessMandateForDataset</code></td>
+<td>bool</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>links</code></td>
+<td><code>links</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>No missing fields detected for Project model.</strong></p>
+<h4 id="14-organization-srcaireloommodelsorganizationpy">1.4 Organization (<code>src/aireloom/models/organization.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Gap?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>legalName</code></td>
+<td><code>legalName</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>legalShortName</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>alternativeNames</code></td>
+<td><code>alternativeNames</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>country</code></td>
+<td><code>country</code></td>
+<td>{code,label}</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>pids</code></td>
+<td><code>pids</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>websiteUrl</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>collectedFrom</code></td>
+<td><code>collectedFrom</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>originalIds</code></td>
+<td><code>originalIds</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NEW: <code>fundings</code></strong></td>
+<td><code>fundings</code></td>
+<td>list[dict]</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>New in V3 — array of funding info</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Missing field:</strong> <code>fundings: list[Funding] | None = None</code></p>
+<h4 id="15-datasource-srcaireloommodelsdata_sourcepy">1.5 DataSource (<code>src/aireloom/models/data_source.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Gap?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>officialName</code></td>
+<td><code>officialName</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>englishName</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>openaireCompatibility</code></td>
+<td><code>openaireCompatibility</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>type</code></td>
+<td>{scheme,value}</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>dateOfValidation</code></td>
+<td><code>dateOfValidation</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>description</code></td>
+<td>str|null</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>thematic</code></td>
+<td><code>thematic</code></td>
+<td>bool</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>versioning</code></td>
+<td><code>versioning</code></td>
+<td>bool</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>logoUrl</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>languages</code></td>
+<td><code>languages</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>subjects</code></td>
+<td><code>subjects</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>collectedFrom</code></td>
+<td><code>collectedFrom</code></td>
+<td>list[dict]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>originalIds</code></td>
+<td><code>originalIds</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>NEW: <code>eoscdatasourcetype</code></strong></td>
+<td><code>eoscdatasourcetype</code></td>
+<td>{code,label}</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>EOSC datasource type classification</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>jurisdiction</code></strong></td>
+<td><code>jurisdiction</code></td>
+<td>null</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Jurisdiction info</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>links</code></strong></td>
+<td><code>links</code></td>
+<td>list[dict]</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Related links</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>odlanguages</code></strong></td>
+<td><code>odlanguages</code></td>
+<td>list[str]</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>OpenDOAR languages</td>
+</tr>
+<tr>
+<td><strong>NEW: <code>openaireCompatibilityId</code></strong></td>
+<td><code>openaireCompatibilityId</code></td>
+<td>str</td>
+<td>🆕 <strong>MISSING from model</strong></td>
+<td>Compatibility ID string</td>
+</tr>
+</tbody>
+</table>
+<p><strong>5 missing fields</strong> for DataSource — all new in V3.</p>
+<h4 id="16-person-srcaireloommodelspersonpy">1.6 Person (<code>src/aireloom/models/person.py</code>)</h4>
+<table>
+<thead>
+<tr>
+<th>Current Field</th>
+<th>V3 Live Field</th>
+<th>Type</th>
+<th>Gap?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>givenName</code></td>
+<td><code>givenName</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>familyName</code></td>
+<td><code>familyName</code></td>
+<td>str</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>alternativeNames</code></td>
+<td><code>alternativeNames</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>biography</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>coAuthors</code></td>
+<td><code>coAuthors</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>consent</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>indicator</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>originalId</code></td>
+<td><code>originalId</code></td>
+<td>list[str]</td>
+<td>✅</td>
+<td></td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td><em>null</em></td>
+<td>—</td>
+<td>✅</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>No missing fields detected for Person model.</strong></p>
+<h3 id="2-filter-models-v3-parameter-renames-live-verified">2. Filter Models — V3 Parameter Renames (LIVE VERIFIED)</h3>
+<p>The following filter field names <strong>changed between V1/V2 and V3</strong>. All three were confirmed by hitting the live V3 API:</p>
+<table>
+<thead>
+<tr>
+<th>Old Name (V1/V2)</th>
+<th>New Name (V3)</th>
+<th>Live Test Result</th>
+<th>Used In</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authorOrcid</code></td>
+<td><code>authorId</code></td>
+<td>❌ 400 → ✅ 200</td>
+<td><code>queries.py:150</code>, <code>queries.py:256</code></td>
+</tr>
+<tr>
+<td><code>bestOpenAccessRightLabel</code></td>
+<td><code>accessRightLabel</code></td>
+<td>❌ 400 → ✅ 200</td>
+<td><code>queries.py:112</code>, <code>queries.py:259</code></td>
+</tr>
+<tr>
+<td><code>sdg</code></td>
+<td><code>sdgLabel</code></td>
+<td>❌ 400 → ✅ 200</td>
+<td><code>endpoints.py:93</code></td>
+</tr>
+</tbody>
+</table>
+<p>Additionally, V3 introduces these <strong>new filter parameters</strong> not present in current code:</p>
+<table>
+<thead>
+<tr>
+<th>New V3 Parameter</th>
+<th>Type (OpenAPI)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fromPublicationYear</code></td>
+<td>integer</td>
+<td>Year-based filtering (separate from date range)</td>
+</tr>
+<tr>
+<td><code>toPublicationYear</code></td>
+<td>integer</td>
+<td>Year upper bound</td>
+</tr>
+<tr>
+<td><code>publicationYear</code></td>
+<td>string</td>
+<td>Exact year match</td>
+</tr>
+<tr>
+<td><code>excludePubDateRange</code></td>
+<td>boolean</td>
+<td>Exclude publications in date range</td>
+</tr>
+<tr>
+<td><code>hasLicense</code></td>
+<td>boolean</td>
+<td>Filter by license presence</td>
+</tr>
+<tr>
+<td><code>relFunder</code></td>
+<td>string</td>
+<td>Filter by funder name/ID</td>
+</tr>
+<tr>
+<td><code>relFundingLevel0Id</code></td>
+<td>string</td>
+<td>Funding hierarchy level 0</td>
+</tr>
+<tr>
+<td><code>relFundingLevel1Id</code></td>
+<td>string</td>
+<td>Funding hierarchy level 1</td>
+</tr>
+<tr>
+<td><code>relFundingLevel2Id</code></td>
+<td>string</td>
+<td>Funding hierarchy level 2</td>
+</tr>
+<tr>
+<td><code>relHostingDataSource</code></td>
+<td>string</td>
+<td>Hosting datasource name (vs ID)</td>
+</tr>
+<tr>
+<td><code>relOrganization</code></td>
+<td>string</td>
+<td>Organization name (vs ID)</td>
+</tr>
+<tr>
+<td><code>relProject</code></td>
+<td>string</td>
+<td>Project name (vs ID)</td>
+</tr>
+<tr>
+<td><code>includeStats</code></td>
+<td>boolean</td>
+<td>Include statistics in response</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>string</td>
+<td>Source filter</td>
+</tr>
+<tr>
+<td><code>subCommunity</code></td>
+<td>string</td>
+<td>Sub-community filter</td>
+</tr>
+<tr>
+<td><code>eoscIfGuidelines</code></td>
+<td>string</td>
+<td>EOSC IF guidelines filter</td>
+</tr>
+</tbody>
+</table>
+<p><strong>V3 parameters removed/no longer valid</strong> (in current code but rejected by V3):</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>description</code></td>
+<td>Not in V3 param list (may still work as undocumented)</td>
+</tr>
+<tr>
+<td><code>impulseClass</code></td>
+<td>Not in V3 error message's valid list, but IS in OpenAPI spec — needs live test</td>
+</tr>
+<tr>
+<td><code>popularityClass</code></td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>instanceType</code></td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>isInDiamondJournal</code></td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>isPubliclyFunded</code></td>
+<td>Same as above</td>
+</tr>
+<tr>
+<td><code>relCommunityId</code></td>
+<td>Still valid per error message</td>
+</tr>
+<tr>
+<td><code>relCollectedFromDatasourceId</code></td>
+<td>NOT in V3 valid list — renamed?</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-ergonomics-layer-queriespy-function-inventory">3. Ergonomics Layer (<code>queries.py</code>) — Function Inventory</h3>
+<p>Every convenience function, its filter references, and required changes:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Line(s)</th>
+<th>Filter Model</th>
+<th>Filter Fields Referenced</th>
+<th>Required Rename(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>publications_by_doi</code></td>
+<td>50–62</td>
+<td><code>ResearchProductsFilters</code></td>
+<td><code>pid</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>publications_by_organization</code></td>
+<td>94–119</td>
+<td><code>ResearchProductsFilters</code></td>
+<td><code>search</code>, <code>relOrganizationId</code>, <code>rorId</code>, <code>type</code>, <code>fromPublicationDate</code>, <code>toPublicationDate</code>, <strong><code>bestOpenAccessRightLabel</code></strong></td>
+<td><strong><code>bestOpenAccessRightLabel</code> → <code>accessRightLabel</code></strong> (line 112)</td>
+</tr>
+<tr>
+<td><code>publications_by_author</code></td>
+<td>145–163</td>
+<td><code>ResearchProductsFilters</code></td>
+<td><code>authorFullName</code>, <strong><code>authorOrcid</code></strong>, <code>type</code></td>
+<td><strong><code>authorOrcid</code> → <code>authorId</code></strong> (line 150)</td>
+</tr>
+<tr>
+<td><code>publications_by_project</code></td>
+<td>189–223</td>
+<td><code>ResearchProductsFilters</code></td>
+<td><code>search</code>, <code>relProjectId</code>, <code>relProjectCode</code>, <code>hasProjectRel</code>, <code>type</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>count_publications</code></td>
+<td>252–261</td>
+<td><code>ResearchProductsFilters</code></td>
+<td><code>type</code>, <code>search</code>, <code>pid</code>, <strong><code>authorOrcid</code></strong>, <code>relOrganizationId</code>, <code>relProjectId</code>, <strong><code>bestOpenAccessRightLabel</code></strong></td>
+<td><strong>Both</strong>: line 256 (<code>authorOrcid→authorId</code>), line 259 (<code>bestOpenAccessRightLabel→accessRightLabel</code>)</td>
+</tr>
+<tr>
+<td><code>projects_by_organization</code></td>
+<td>290–306</td>
+<td><code>ProjectsFilters</code></td>
+<td><code>search</code>, <code>relOrganizationId</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>citing_works</code></td>
+<td>334–343</td>
+<td><code>ScholixFilters</code></td>
+<td><code>targetPid</code>, <code>sourceType</code></td>
+<td>None (Scholix unchanged)</td>
+</tr>
+<tr>
+<td><code>related_datasets</code></td>
+<td>364–369</td>
+<td><code>ScholixFilters</code></td>
+<td><code>sourcePid</code>, <code>targetType</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>all_links</code></td>
+<td>392–414</td>
+<td><code>ScholixFilters</code></td>
+<td><code>sourcePid</code>, <code>targetPid</code></td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>_resolve_identifier</code></td>
+<td>422–463</td>
+<td>N/A (helper)</td>
+<td>Populates <code>filter_kwargs</code> dict consumed by callers above</td>
+<td>Indirect — callers pass wrong key names</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total impact: 4 lines across 2 functions need filter-key renames.</strong></p>
+<h3 id="4-filter-value-quoting-requirement-live-verified">4. Filter Value Quoting Requirement (LIVE VERIFIED)</h3>
+<p>V3 <strong>requires double-quoting</strong> of filter values containing spaces, parentheses, or logical operators.</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Query String</th>
+<th>HTTP Status</th>
+<th>Response Snippet</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unquoted space value</td>
+<td><code>accessRightLabel=Open+Access</code></td>
+<td><strong>400</strong></td>
+<td><code>"Invalid value for 'accessRightLabel'. Values containing spaces, parentheses or logical operators must be wrapped in double quotes"</code></td>
+</tr>
+<tr>
+<td>Quoted space value</td>
+<td><code>accessRightLabel=%22Open+Access%22</code></td>
+<td><strong>200</strong></td>
+<td><code>numFound: 139770230</code></td>
+</tr>
+<tr>
+<td>Inline OR with quotes</td>
+<td><code>countryCode=(%22US%22+OR+%22GB%22)</code></td>
+<td><strong>200</strong></td>
+<td>Returns results</td>
+</tr>
+<tr>
+<td>SDG label (quoted)</td>
+<td><code>sdgLabel=%224.+Education%22</code></td>
+<td><strong>200</strong></td>
+<td><code>numFound: 5328980</code></td>
+</tr>
+<tr>
+<td>SDG label (unquoted number)</td>
+<td><code>sdgLabel=1</code></td>
+<td><strong>400</strong></td>
+<td>Allowed values are full names like <code>'1. No poverty'</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Current serialization path:</strong>
+- <code>src/aireloom/resources/research_products_client.py:98</code>: <code>params.update(filters.model_dump(exclude_none=True))</code>
+- <code>src/aireloom/resources/scholix_client.py:121</code>: <code>filters.model_dump(exclude_none=True, by_alias=True)</code></p>
+<p>Neither path applies any quoting. Values like <code>"OPEN"</code> for <code>accessRightLabel</code> (used in <code>queries.py:112,259</code>) will fail in V3 because the V3 parameter is now <code>accessRightLabel</code> which expects quoted values for anything with spaces.</p>
+<p><strong>Note:</strong> The value <code>"OPEN"</code> (no spaces) may work without quoting for <code>accessRightLabel=OPEN</code> — this needs testing. But user-facing values like <code>"Open Access"</code> definitely require quoting.</p>
+<h3 id="5-packaging-exports-type-marker">5. Packaging / Exports / Type Marker</h3>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+<th>Location</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Version</td>
+<td><code>0.4.0</code></td>
+<td><code>pyproject.toml</code></td>
+<td>✅ Current</td>
+</tr>
+<tr>
+<td>Python requirement</td>
+<td><code>&gt;=3.12</code></td>
+<td><code>pyproject.toml</code></td>
+<td>✅ Enforces modern syntax</td>
+</tr>
+<tr>
+<td><code>py.typed</code> marker</td>
+<td>Exists</td>
+<td><code>src/aireloom/py.typed</code></td>
+<td>✅ PEP 561 compliant</td>
+</tr>
+<tr>
+<td>Typing classifier</td>
+<td><code>"Typing :: Typed"</code></td>
+<td><code>pyproject.toml</code></td>
+<td>✅ Declared</td>
+</tr>
+<tr>
+<td>Dev status classifier</td>
+<td><code>"Development Status :: 3 - Alpha"</code></td>
+<td><code>pyproject.toml</code></td>
+<td>⚠️ Should update to Beta after V3 migration</td>
+</tr>
+<tr>
+<td>Main export (<code>__init__.py</code>)</td>
+<td>Exports: client, session, exceptions, <code>Header</code>, <code>BaseEntity</code>, all entity models, all relation models</td>
+<td><code>src/aireloom/__init__.py</code></td>
+<td>✅ Complete</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td><code>bibliofabric&gt;=0.4.2,&lt;0.5.0</code></td>
+<td><code>pyproject.toml</code></td>
+<td>✅ Provides <code>SafeList</code>, <code>SafeStr</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="live-verification">Live Verification</h2>
+<h3 id="commands-run">Commands Run</h3>
+<pre><code class="language-bash"># ResearchProduct full response
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;search=covid&amp;pageSize=1&quot; --full
+
+# Project full response  
+python3 reference/v3-investigation/v3_live.py graph &quot;projects&quot; &quot;title=covid&amp;pageSize=1&quot; --full
+
+# Organization full response
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;legalName=utrecht&amp;pageSize=1&quot; --full
+
+# DataSource full response
+python3 reference/v3-investigation/v3_live.py graph &quot;datasources&quot; &quot;officialName=zenodo&amp;pageSize=1&quot; --full
+
+# Person full response
+python3 reference/v3-investigation/v3_live.py graph &quot;persons&quot; &quot;givenName=John&amp;pageSize=1&quot; --full
+
+# Old filter name rejections (all 400):
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;authorOrcid=0000-0001-8569-7X&amp;pageSize=1&quot;
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;bestOpenAccessRightLabel=OPEN&amp;pageSize=1&quot;
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;sdg=1&amp;pageSize=1&quot;
+
+# New filter name acceptances (all 200):
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;authorId=0000-0001-8569-7990-364e6a3c&amp;pageSize=1&quot;
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;accessRightLabel=%22Open+Access%22&amp;pageSize=1&quot;
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;sdgLabel=%224.+Education%22&amp;pageSize=1&quot;
+
+# Quoting requirement tests:
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;accessRightLabel=Open+Access&amp;pageSize=1&quot;     # 400
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;accessRightLabel=%22Open+Access%22&amp;pageSize=1&quot;  # 200
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;countryCode=(%22US%22+OR+%22GB%22)&amp;pageSize=1&quot;  # 200
+
+# New V3-only parameters:
+python3 reference/v3-investigation/v3_live.py graph &quot;research-products&quot; &quot;publicationYear=2024&amp;pageSize=1&quot;  # 200
+
+# Full V3 valid parameter list extracted from 400 error message (31 params)
+</code></pre>
+<h3 id="key-observed-responses">Key Observed Responses</h3>
+<p><strong>ResearchProduct (first result, truncated):</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;__oaipool__oai:arXiv.org:2412.12345&quot;,
+  &quot;mainTitle&quot;: &quot;...&quot;,
+  &quot;type&quot;: &quot;publication&quot;,
+  &quot;eoscIfGuidelines&quot;: null,
+  &quot;green&quot;: false,
+  &quot;inDiamondJournal&quot;: false,
+  &quot;isGreen&quot;: true,
+  &quot;isInDiamondJournal&quot;: false,
+  &quot;publiclyFunded&quot;: true,
+  &quot;indicators&quot;: {
+    &quot;citationImpact&quot;: {&quot;citationCount&quot;: ..., &quot;impulse&quot;: ..., ...}
+  },
+  ...
+}
+</code></pre>
+<p><strong>Organization (new <code>fundings</code> field):</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;__oaipool__...&quot;,
+  &quot;legalName&quot;: &quot;Utrecht University&quot;,
+  &quot;fundings&quot;: [{&quot;funder&quot;: &quot;...&quot;, &quot;fundingStream&quot;: &quot;...&quot;}],
+  ...
+}
+</code></pre>
+<p><strong>DataSource (5 new fields):</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;__oaipool__...&quot;,
+  &quot;eoscdatasourcetype&quot;: {&quot;code&quot;: &quot;pubsrepository::institutional&quot;, &quot;label&quot;: &quot;...&quot;},
+  &quot;jurisdiction&quot;: null,
+  &quot;links&quot;: [...],
+  &quot;odlanguages&quot;: [&quot;eng&quot;],
+  &quot;openaireCompatibilityId&quot;: &quot;...&quot;,
+  ...
+}
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="r1-add-missing-fields-to-researchproduct-model">R1: Add Missing Fields to ResearchProduct Model</h3>
+<p><strong>File:</strong> <code>src/aireloom/models/research_product.py</code></p>
+<p>Add these fields to the <code>ResearchProduct</code> class:</p>
+<pre><code class="language-python">eoscIfGuidelines: str | None = None
+green: bool = False
+inDiamondJournal: bool = False
+isGreen: bool | None = None
+isInDiamondJournal: bool | None = None
+publiclyFunded: bool | None = None
+</code></pre>
+<h3 id="r2-add-missing-fundings-field-to-organization-model">R2: Add Missing <code>fundings</code> Field to Organization Model</h3>
+<p><strong>File:</strong> <code>src/aireloom/models/organization.py</code></p>
+<pre><code class="language-python">fundings: list[dict] | None = None  # or define a proper Funding sub-model
+</code></pre>
+<h3 id="r3-add-5-missing-datasource-fields">R3: Add 5 Missing DataSource Fields</h3>
+<p><strong>File:</strong> <code>src/aireloom/models/data_source.py</code></p>
+<pre><code class="language-python">eoscdatasourcetype: ControlledField | None = None
+jurisdiction: ControlledField | None = None
+links: list[dict] | None = None
+odlanguages: list[str] | None = None
+openaireCompatibilityId: str | None = None
+</code></pre>
+<h3 id="r4-rename-filter-fields-in-endpointspy">R4: Rename Filter Fields in <code>endpoints.py</code></h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py</code></p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>85</td>
+<td><code>authorOrcid: str \| None = None</code></td>
+<td><code>authorId: str \| None = None</code></td>
+</tr>
+<tr>
+<td>87</td>
+<td><code>bestOpenAccessRightLabel: str \| None = None</code></td>
+<td><code>accessRightLabel: str \| None = None</code></td>
+</tr>
+<tr>
+<td>93</td>
+<td><code>sdg: list[str] \| None = None</code></td>
+<td><code>sdgLabel: list[str] \| None = None</code></td>
+</tr>
+</tbody>
+</table>
+<p>Update docstrings and the <code>model_config</code> line accordingly.</p>
+<h3 id="r5-update-ergonomics-layer-filter-references">R5: Update Ergonomics Layer Filter References</h3>
+<p><strong>File:</strong> <code>src/aireloom/queries.py</code></p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Old</th>
+<th>New</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>112</td>
+<td><code>filter_kwargs["bestOpenAccessRightLabel"]</code></td>
+<td><code>filter_kwargs["accessRightLabel"]</code></td>
+</tr>
+<tr>
+<td>150</td>
+<td><code>"orcid": "authorOrcid"</code></td>
+<td><code>"orcid": "authorId"</code></td>
+</tr>
+<tr>
+<td>256</td>
+<td><code>authorOrcid=author_orcid</code></td>
+<td><code>authorId=author_orcid</code></td>
+</tr>
+<tr>
+<td>259</td>
+<td><code>bestOpenAccessRightLabel="OPEN"</code></td>
+<td><code>accessRightLabel="OPEN"</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="r6-implement-auto-quoting-for-filter-values">R6: Implement Auto-Quoting for Filter Values</h3>
+<p><strong>File:</strong> <code>src/aireloom/resources/base_resource.py</code> (or wherever <code>model_dump</code> is called)</p>
+<p>Before calling <code>filters.model_dump()</code>, detect values containing spaces, parentheses, <code>OR</code>, <code>AND</code>, <code>NOT</code> and wrap them in <code>%22...%22</code>. Implementation options:</p>
+<ol>
+<li><strong>Pydantic validator</strong> on each filter model field — complex, repetitive</li>
+<li><strong>Custom serializer</strong> in <code>model_dump()</code> via <code>serializer</code> decorator — cleanest</li>
+<li><strong>Post-processing function</strong> applied after <code>model_dump()</code> before URL encoding — simplest, most maintainable</li>
+</ol>
+<p>Recommended approach: Option 3 — add a helper function:</p>
+<pre><code class="language-python">def _quote_filter_values(params: dict[str, Any]) -&gt; dict[str, Any]:
+    &quot;&quot;&quot;Wrap filter values containing spaces/parens/operators in double quotes.&quot;&quot;&quot;
+    import re
+    out = {}
+    for k, v in params.items():
+        if isinstance(v, str) and re.search(r'[\s()\w+(OR|AND|NOT)\b]', v):
+            v = f'&quot;{v}&quot;'
+        elif isinstance(v, list):
+            v = [f'&quot;{item}&quot; if isinstance(item, str) and re.search(r'[\s()]', item) else item for item in v]
+        out[k] = v
+    return out
+</code></pre>
+<p>Apply at <code>research_products_client.py:98</code> and equivalent points.</p>
+<h3 id="r7-consider-adding-new-v3-only-filter-parameters">R7: Consider Adding New V3-Only Filter Parameters</h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py</code> — <code>ResearchProductsFilters</code></p>
+<p>High-value additions:
+- <code>fromPublicationYear: int | None = None</code>
+- <code>toPublicationYear: int | None = None</code>
+- <code>publicationYear: str | None = None</code>
+- <code>relFunder: str | None = None</code>
+- <code>includeStats: bool | None = None</code></p>
+<h3 id="r8-update-development-status-classifier">R8: Update Development Status Classifier</h3>
+<p><strong>File:</strong> <code>pyproject.toml</code></p>
+<p>Change <code>"Development Status :: 3 - Alpha"</code> → <code>"Development Status :: 4 - Beta"</code> after V3 migration completes.</p>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li>
+<p><strong><code>impulseClass</code>, <code>popularityClass</code>, <code>instanceType</code>, <code>isInDiamondJournal</code>, <code>isPubliclyFunded</code> as filters</strong>: These appear in the V3 OpenAPI spec but were NOT listed in the live API's "valid parameters" error message. They may be accepted silently or may cause 400s. Needs individual live testing.</p>
+</li>
+<li>
+<p><strong><code>relCollectedFromDatasourceId</code> filter</strong>: Not in V3's valid-parameter list from the error message. May have been renamed to something else in V3.</p>
+</li>
+<li>
+<p><strong>SDG label values changed format</strong>: V3 uses full text labels (<code>"4. Education"</code>) rather than numeric codes. Code passing numeric SDG values must be updated.</p>
+</li>
+<li>
+<p><strong>Quoting edge cases</strong>: Need to test whether simple alphanumeric values like <code>"OPEN"</code> for <code>accessRightLabel</code> work without quoting. If they do, only user-facing values need auto-quoting.</p>
+</li>
+<li>
+<p><strong><code>description</code> filter</strong>: Present in current <code>ResearchProductsFilters</code> but absent from both V3 error-message param list AND OpenAPI spec. Likely dead code for V3.</p>
+</li>
+<li>
+<p><strong>Backward compatibility</strong>: Users constructing <code>ResearchProductsFilters(authorOrcid=...)</code> directly will get Pydantic errors after rename unless aliases are added. Recommend adding <code>Field(alias="authorOrcid")</code> during transition or making a hard break for the major version bump.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1693 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="S. Mok">
+      
+      
+        <link rel="canonical" href="https://utsmok.github.io/aireloom/v3-migration/02-organizations/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.50">
+    
+    
+      
+        <title>V3 Migration Research — Organizations Endpoint (/v3/organizations) - AIREloom Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v3-migration-research-organizations-endpoint-v3organizations" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="AIREloom Docs" class="md-header__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AIREloom Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V3 Migration Research — Organizations Endpoint (/v3/organizations)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="AIREloom Docs" class="md-nav__button md-logo" aria-label="AIREloom Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AIREloom Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/utsmok/aireloom/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage_basics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Basic Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ergonomics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Entities
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Entities
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    OpenAIRE Endpoints
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            OpenAIRE Endpoints
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/research_products/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Research Products
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/data_sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data Sources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/organizations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Organizations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/projects/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Projects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/persons/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Persons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/links/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../endpoints/scholix/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Scholix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Advanced
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Advanced
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/caching/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Caching
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/rate_limiting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Limiting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/hooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Request Hooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/error_handling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Error Handling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api_reference/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../authentication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../migration-to-v3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migration to v3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scope
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Findings
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-filter-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Filter Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Filter Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logicaloperator-not-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      logicalOperator NOT behavior
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sort-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Sort Fields
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-response-model-field-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Response Model — Field Comparison
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Response Model — Field Comparison">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#missing-field-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      Missing Field Details
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-pagination-routing" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Pagination &amp; Routing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#live-verification-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      Live Verification Log
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Verification Log">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-search-full-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic search + full response
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filter-by-filter-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Filter-by-filter verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Sort verification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logicaloperator-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      logicalOperator NOT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-by-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Get-by-ID
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommendations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommendations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#r1-add-not-to-logicaloperator-literal-priority-low" class="md-nav__link">
+    <span class="md-ellipsis">
+      R1. Add "NOT" to logicalOperator Literal (Priority: Low)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r2-add-missing-v3-response-fields-to-organization-model-priority-medium" class="md-nav__link">
+    <span class="md-ellipsis">
+      R2. Add missing V3 response fields to Organization model (Priority: Medium)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#r3-no-changes-needed-for-sort-pagination-or-routing-priority-na" class="md-nav__link">
+    <span class="md-ellipsis">
+      R3. No changes needed for sort, pagination, or routing (Priority: N/A)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#open-questions-risks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Open Questions / Risks
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="v3-migration-research-organizations-endpoint-v3organizations">V3 Migration Research — Organizations Endpoint (<code>/v3/organizations</code>)</h1>
+<h2 id="scope">Scope</h2>
+<p>The organizations endpoint: filter parameters, sort fields, response model (Organization entity), resource client routing, and pagination behavior. Compared current AIREloom code against V3 OpenAPI spec, V3 documentation, and live V3 API at <code>https://api.openaire.eu/graph/v3/organizations</code>.</p>
+<h2 id="method">Method</h2>
+<ol>
+<li>Parsed V3 OpenAPI spec (<code>reference/v3-investigation/graph_v3_openapi.json</code>) for <code>/v3/organizations</code> and <code>/v3/organizations/{id}</code> endpoints.</li>
+<li>Read V3 documentation pages for organizations filtering, sorting, and general endpoint info.</li>
+<li>Ran 12+ live API queries via <code>v3_live.py</code> covering every filter parameter, sort values, invalid inputs, get-by-id, and inline logical operators.</li>
+<li>Compared all findings to current source code: <code>OrganizationsFilters</code> (endpoints.py:115–140), <code>Organization</code> model (models/organization.py:53–105), <code>OrganizationsClient</code> (resources/organizations_client.py:9–25), and <code>ENDPOINT_DEFINITIONS[ORGANIZATIONS]</code> (endpoints.py:340–343).</li>
+</ol>
+<hr />
+<h2 id="findings">Findings</h2>
+<h3 id="1-filter-parameters">1. Filter Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>V1/V2 Current Code</th>
+<th>V3 Spec Enum</th>
+<th>Live Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>legalName</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>legalShortName</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>id</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>pid</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>countryCode</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>relCommunityId</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>relCollectedFromDatasourceId</code></td>
+<td><code>str \| None</code></td>
+<td>string (no enum)</td>
+<td><strong>200 OK</strong></td>
+<td>Works identically</td>
+</tr>
+<tr>
+<td><code>logicalOperator</code></td>
+<td><code>Literal["AND", "OR"]</code></td>
+<td><strong><code>["AND", "OR", "NOT"]</code></strong></td>
+<td><strong>See note below</strong></td>
+<td><strong>GAP: "NOT" missing from Literal</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Verdict:</strong> Filter parameter set is otherwise identical between V1 and V3. No new filter params added in V3. The sole difference is <code>logicalOperator</code> gaining <code>"NOT"</code> as an accepted value.</p>
+<h4 id="logicaloperator-not-behavior">logicalOperator NOT behavior</h4>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Status</th>
+<th>numFound</th>
+<th>Observation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>countryCode=US&amp;logicalOperator=NOT</code></td>
+<td>200</td>
+<td>61,082</td>
+<td>Same count as <code>countryCode=US</code> alone — NOT appears silently ignored or no-op when used as top-level operator</td>
+</tr>
+<tr>
+<td><code>countryCode=("US" AND NOT "GB")</code> (inline)</td>
+<td>200</td>
+<td>61,082</td>
+<td>Inline NOT within filter value works per docs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Doc/spec discrepancy:</strong> The V3 docs main page state <code>logicalOperator</code> accepts <code>AND</code> or <code>OR</code> only. The V3 OpenAPI spec lists <code>enum=["AND", "OR", "NOT"]</code>. The filtering sub-page documents <code>NOT</code> as an <strong>inline</strong> operator <em>within</em> filter values (e.g., <code>search="institute" NOT "medical"</code>), not as a top-level <code>logicalOperator</code> value. The live API accepts <code>logicalOperator=NOT</code> without error but produces identical results to omitting it entirely — suggesting it may be accepted but treated as a no-op at the top level.</p>
+<p><strong>Recommendation:</strong> Add <code>"NOT"</code> to the <code>LogicalOperator</code> literal for forward compatibility, since the spec allows it and it costs nothing. Document that NOT is primarily useful as an inline operator within filter values.</p>
+<h3 id="2-sort-fields">2. Sort Fields</h3>
+<table>
+<thead>
+<tr>
+<th>Sort Field</th>
+<th>Current Code</th>
+<th>V3 Spec</th>
+<th>V3 Docs</th>
+<th>Live Verified</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>relevance</code></td>
+<td><code>{"relevance": {}}</code></td>
+<td>Only valid field</td>
+<td>Only valid field; default <code>relevance DESC</code></td>
+<td><strong>200 OK</strong> (ASC and DESC both work)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Invalid sort test:</strong></p>
+<pre><code>GET /v3/organizations?sortBy=invalidField+DESC&amp;pageSize=2
+→ STATUS 400
+→ ERROR: &quot;The field should be in the format 'fieldname ASC|DESC', organizations can be only sorted by the 'relevance'.&quot;
+</code></pre>
+<p><strong>Verdict:</strong> Sort is relevance-only, correctly modeled. No change needed.</p>
+<h3 id="3-response-model-field-comparison">3. Response Model — Field Comparison</h3>
+<p>V3 live response (from <code>search=Harvard University</code> with <code>--full</code>):</p>
+<pre><code class="language-json">{
+  &quot;legalShortName&quot;: &quot;IQSS&quot;,
+  &quot;legalName&quot;: &quot;Harvard University, Institute of Quantitative Social Science&quot;,
+  &quot;websiteUrl&quot;: &quot;https://www.iq.harvard.edu&quot;,
+  &quot;alternativeNames&quot;: [&quot;IQSS&quot;],
+  &quot;country&quot;: {&quot;code&quot;: &quot;US&quot;, &quot;label&quot;: &quot;United States&quot;},
+  &quot;id&quot;: &quot;pending_org_::18aa4d8d7ea282fe0246903a8c2d3aa2&quot;,
+  &quot;pids&quot;: null,
+  &quot;originalIds&quot;: [&quot;pending_org_::abde8d72214cd15facc2fb7cab6e50b9&quot;],
+  &quot;fundings&quot;: [],
+  &quot;collectedFrom&quot;: [{&quot;key&quot;: &quot;openaire____::0362fcdb3076765d9c0041ad331553e8&quot;, &quot;value&quot;: &quot;OpenOrgs Database&quot;}]
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>V3 Live Field</th>
+<th>Current Model Field</th>
+<th>Type</th>
+<th>Gap?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>id</code> (inherited from BaseEntity)</td>
+<td><code>str</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>legalName</code></td>
+<td><code>legalName</code></td>
+<td><code>SafeStr</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>legalShortName</code></td>
+<td><code>legalShortName</code></td>
+<td><code>SafeStr</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>websiteUrl</code></td>
+<td><code>websiteUrl</code></td>
+<td><code>str \| None</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>alternativeNames</code></td>
+<td><code>alternativeNames</code></td>
+<td><code>SafeList[str]</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>country</code></td>
+<td><code>country</code> (with <code>.code</code>, <code>.label</code>)</td>
+<td><code>SafeCountry</code> → <code>Country</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><code>pids</code></td>
+<td><code>pids</code> (with <code>.scheme</code>, <code>.value</code>)</td>
+<td><code>SafeList[OrganizationPid]</code></td>
+<td>OK</td>
+</tr>
+<tr>
+<td><strong><code>originalIds</code></strong></td>
+<td><strong>ABSENT</strong></td>
+<td><code>list[str]</code></td>
+<td><strong>GAP</strong></td>
+</tr>
+<tr>
+<td><strong><code>fundings</code></strong></td>
+<td><strong>ABSENT</strong></td>
+<td><code>list[Funding]</code> (nested: funder, level0, level1, level2)</td>
+<td><strong>GAP</strong></td>
+</tr>
+<tr>
+<td><strong><code>collectedFrom</code></strong></td>
+<td><strong>ABSENT</strong></td>
+<td><code>list[CfHbKeyValue]</code> (key, value)</td>
+<td><strong>GAP</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Three fields are missing from the current <code>Organization</code> model.</strong> All three are present in the V3 OpenAPI schema (<code>ApiOrganizationResponse</code>). Since the model uses <code>ConfigDict(extra="allow")</code>, these fields are silently absorbed into <code>__pydantic_extra__</code> and not lost on deserialization — but they are not type-accessible.</p>
+<h4 id="missing-field-details">Missing Field Details</h4>
+<p><strong><code>originalIds</code>: <code>list[str]</code></strong>
+- Array of original/source IDs for the organization.
+- Example value: <code>["pending_org_::abde8d72214cd15facc2fb7cab6e50b9"]</code>
+- Present even on sparse records (the first pageSize=1 result had this populated).</p>
+<p><strong><code>fundings</code>: <code>list[Funding]</code></strong>
+- Complex nested structure. Each Funding object contains:
+  - <code>funder</code>: <code>{id, shortname, name, jurisdiction: {code, label}, pid}</code>
+  - <code>level0</code>: <code>{id, description, name}</code>
+  - <code>level1</code>: <code>{id, description, name}</code>
+  - <code>level2</code>: <code>{id, description, name}</code>
+- Empty array <code>[]</code> on organizations without funding data.
+- This is a significant structural addition — the Funding sub-model does not exist anywhere in the current codebase.</p>
+<p><strong><code>collectedFrom</code>: <code>list[CfHbKeyValue]</code></strong>
+- Simple key-value pairs identifying the datasource(s) the organization was collected from.
+  - <code>key</code>: OpenAIRE datasource ID (e.g., <code>"openaire____::0362fcdb3076765d9c0041ad331553e8"</code>)
+  - <code>value</code>: Human-readable datasource name (e.g., <code>"OpenOrgs Database"</code>)</p>
+<h3 id="4-pagination-routing">4. Pagination &amp; Routing</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Current Code</th>
+<th>V3 Behavior</th>
+<th>Match?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base path</td>
+<td><code>ORGANIZATIONS = "organizations"</code></td>
+<td><code>/v3/organizations</code></td>
+<td>Yes — path unchanged</td>
+</tr>
+<tr>
+<td>Page indexing</td>
+<td>Uses bibliofabric default (1-indexed)</td>
+<td>1-indexed (page=0 → 400)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>pageSize range</td>
+<td>Not explicitly constrained client-side</td>
+<td>1–100 (&gt;100 → 400)</td>
+<td>N/A (server-enforced)</td>
+</tr>
+<tr>
+<td>Cursor pagination</td>
+<td>Supported via bibliofabric mixin</td>
+<td><code>cursor=*</code> with <code>nextCursor</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Base URL override</td>
+<td><strong>None</strong> (uses default)</td>
+<td>Should route to <code>/graph/v3/...</code> once default base changes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>_batch_fields</code></td>
+<td><code>{"pid": "pid", "openaire_id": "id"}</code></td>
+<td>Unchanged</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Routing verdict:</strong> <code>OrganizationsClient</code> has NO <code>_base_url_override</code> (cf. <code>ResearchProductsClient</code> which overrides to v2). It inherits the default base URL from <code>AireloomClient</code>. Once the default base is updated from <code>/graph/v1</code> to <code>/graph/v3</code>, organizations will route correctly with zero changes to the client file.</p>
+<hr />
+<h2 id="live-verification-log">Live Verification Log</h2>
+<p>All commands run from repo root via <code>python3 reference/v3-investigation/v3_live.py</code>.</p>
+<h3 id="basic-search-full-response">Basic search + full response</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;pageSize=1&quot; --full
+</code></pre>
+<p><strong>STATUS: 200</strong>, numFound=496,636. Response confirmed all 10 fields including <code>originalIds</code>, <code>fundings</code>, <code>collectedFrom</code>.</p>
+<h3 id="filter-by-filter-verification">Filter-by-filter verification</h3>
+<pre><code class="language-bash"># search
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;search=Harvard&amp;pageSize=2&quot;
+# → STATUS 200, numFound=627
+
+# legalName
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;legalName=Harvard+University&amp;pageSize=2&quot;
+# → STATUS 200, numFound=13
+
+# legalShortName
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;legalShortName=MIT&amp;pageSize=2&quot;
+# → STATUS 200, numFound=23,849
+
+# id
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;id=openaire____::Universities&amp;pageSize=2&quot;
+# → STATUS 200, numFound=0 (valid query, no matches)
+
+# pid
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;pid=10.5555/12345&amp;pageSize=2&quot;
+# → STATUS 200, numFound=0 (valid query, no matches)
+
+# countryCode
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;countryCode=US&amp;pageSize=2&quot;
+# → STATUS 200, numFound=61,082
+
+# relCommunityId
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;relCommunityId=openaire____::ec&amp;pageSize=2&quot;
+# → STATUS 200, numFound=0 (valid query)
+
+# relCollectedFromDatasourceId
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;relCollectedFromDatasourceId=openaire____::6ac933301a3933c8a22ceebea7000326&amp;pageSize=2&quot;
+# → STATUS 200, numFound=496,636
+</code></pre>
+<h3 id="sort-verification">Sort verification</h3>
+<pre><code class="language-bash"># Valid sort
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;sortBy=relevance+DESC&amp;pageSize=2&quot;
+# → STATUS 200
+
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;sortBy=relevance+ASC&amp;pageSize=2&quot;
+# → STATUS 200
+
+# Invalid sort
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;sortBy=invalidField+DESC&amp;pageSize=2&quot;
+# → STATUS 400, ERROR: &quot;The field should be in the format 'fieldname ASC|DESC',
+#    organizations can be only sorted by the 'relevance'.&quot;
+</code></pre>
+<h3 id="logicaloperator-not">logicalOperator NOT</h3>
+<pre><code class="language-bash"># Top-level NOT (accepted by API)
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;countryCode=%22US%22&amp;logicalOperator=NOT&amp;pageSize=2&quot;
+# → STATUS 200, numFound=61,082 (same as without NOT — appears no-op)
+
+# Inline NOT within filter value
+python3 reference/v3-investigation/v3_live.py graph &quot;organizations&quot; &quot;countryCode=(%22US%22+AND+NOT+%22GB%22)&amp;pageSize=2&quot;
+# → STATUS 200, numFound=61,082
+</code></pre>
+<h3 id="get-by-id">Get-by-ID</h3>
+<pre><code class="language-bash">python3 reference/v3-investigation/v3_live.py graph &quot;organizations/aka_________::74be16979710d4c4e7c6647856088456&quot; &quot;&quot; --full
+# → STATUS 200, full record returned with fundings and collectedFrom populated
+</code></pre>
+<hr />
+<h2 id="recommendations">Recommendations</h2>
+<h3 id="r1-add-not-to-logicaloperator-literal-priority-low">R1. Add <code>"NOT"</code> to <code>logicalOperator</code> Literal (Priority: Low)</h3>
+<p><strong>File:</strong> <code>src/aireloom/endpoints.py:138</code></p>
+<p>Change:</p>
+<pre><code class="language-python">logicalOperator: Literal[&quot;AND&quot;, &quot;OR&quot;] | None = None
+</code></pre>
+<p>To:</p>
+<pre><code class="language-python">logicalOperator: Literal[&quot;AND&quot;, &quot;OR&quot;, &quot;NOT&quot;] | None = None
+</code></pre>
+<p>Rationale: V3 OpenAPI spec lists <code>NOT</code> in the enum. The cost of adding it is zero (one string in a Literal). Even if top-level NOT behaves as a no-op today, future API changes may activate it.</p>
+<h3 id="r2-add-missing-v3-response-fields-to-organization-model-priority-medium">R2. Add missing V3 response fields to Organization model (Priority: Medium)</h3>
+<p><strong>File:</strong> <code>src/aireloom/models/organization.py</code></p>
+<p>Add three new fields to the <code>Organization</code> class:</p>
+<ol>
+<li>
+<p><strong><code>originalIds: SafeList[str] = Field(default_factory=list)</code></strong> — trivial addition, flat list of strings.</p>
+</li>
+<li>
+<p><strong><code>collectedFrom: SafeList[CfHbKeyValue] = Field(default_factory=list)</code></strong> — requires importing or defining <code>CfHbKeyValue</code> (a simple <code>{key: str, value: str}</code> model). Check if this model already exists elsewhere in the codebase (used by other entities). If not, define it in <code>organization.py</code> or extract to a shared location.</p>
+</li>
+<li>
+<p><strong><code>fundings: SafeList[Funding] = Field(default_factory=list)</code></strong> — requires creating a new <code>Funding</code> model with nested <code>Funder</code> (itself containing <code>Jurisdiction</code>) and <code>FundingLevel</code> (level0/1/2) sub-models. This is the most complex addition. The <code>Funding</code> structure mirrors what likely exists (or will be needed) for projects. Investigate whether a shared <code>Funding</code> model already exists or is planned.</p>
+</li>
+</ol>
+<h3 id="r3-no-changes-needed-for-sort-pagination-or-routing-priority-na">R3. No changes needed for sort, pagination, or routing (Priority: N/A)</h3>
+<ul>
+<li>Sort is correctly modeled as relevance-only.</li>
+<li>Pagination behavior matches V3 expectations.</li>
+<li>Resource client needs no code changes — will inherit correct base URL automatically.</li>
+</ul>
+<hr />
+<h2 id="open-questions-risks">Open Questions / Risks</h2>
+<ol>
+<li>
+<p><strong><code>logicalOperator=NOT</code> semantics unclear</strong>: The API accepts it without error but appears to produce identical results to omitting it. Is NOT intended only as an inline filter-value operator (as the docs emphasize), with the top-level enum entry being speculative? Recommend documenting this ambiguity rather than relying on top-level NOT behavior.</p>
+</li>
+<li>
+<p><strong><code>Funding</code> model cross-entity consistency</strong>: The <code>fundings</code> field on organizations uses the same Funding/funder structure as projects. If a <code>Funding</code> model is created here, it should be coordinated with the Projects migration to avoid duplicate divergent definitions. Check if <code>ResearchProducts</code> also gains a <code>fundings</code> field in V3.</p>
+</li>
+<li>
+<p><strong><code>CfHbKeyValue</code> reuse</strong>: The <code>collectedFrom</code> field uses <code>{key, value}</code> objects. Other entities (research products, datasources) likely also have <code>collectedFrom</code>. A shared model should be preferred over per-entity definitions.</p>
+</li>
+<li>
+<p><strong>Backward compatibility risk LOW</strong>: Since <code>extra="allow"</code> is set on both <code>Organization</code> and <code>BaseEntity</code>, existing code deserializing V3 responses will not crash — new fields are silently stored in <code>__pydantic_extra__</code>. The gap is purely one of type-accessibility, not data loss.</p>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.60a45f97.min.js"></script>
+      
+    
+  </body>
+</html>
