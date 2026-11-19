@@ -51,6 +51,7 @@ generate-hashes = true
 # Ruff config kept identical across the bibliofabric family repos.
 [tool.ruff]
 line-length = 88
+extend-exclude = ["archive"]
 
 [tool.ruff.format]
 docstring-code-format = true
@@ -87,6 +88,7 @@ combine-as-imports = true
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"tests/*" = ["PLR2004"]  # literal HTTP statuses and counts are the point of the assertions
 
 [tool.pytest.ini_options]
 pythonpath = [
@@ -100,4 +102,4 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "live_api: marks tests that hit the live OpenAIRE API (requires credentials, skipped in CI)",
 ]
-addopts = "-m 'not live_api' --ignore=tests/_legacy"
+addopts = "-m 'not live_api'"
