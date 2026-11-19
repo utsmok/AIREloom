@@ -2,7 +2,9 @@
 
 import functools
 import logging
+from typing import Any
 
+import httpx
 from bibliofabric.auth import AuthStrategy, ClientCredentialsAuth, NoAuth
 from bibliofabric.client import BaseApiClient
 
@@ -101,6 +103,30 @@ class AireloomClient(BaseApiClient):
         logger.debug(
             "AireloomClient initialized (%s).",
             "anonymous" if isinstance(strategy, NoAuth) else "client credentials",
+        )
+
+    async def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: Any | None = None,
+        json: Any | None = None,
+        headers: Any | None = None,
+    ) -> httpx.Response:
+        """Send a request through the core retry pipeline.
+
+        V4 accepts ``mailto`` for polite-pool admission (V3 rejects it), so the
+        configured contact address is attached to ``v4/`` requests only.
+        """
+        if (
+            path.startswith("v4/")
+            and self._settings.mailto
+            and not (params and "mailto" in params)
+        ):
+            params = {"mailto": self._settings.mailto, **(params or {})}
+        return await super().request(
+            method, path, params=params, json=json, headers=headers
         )
 
     @functools.cached_property
