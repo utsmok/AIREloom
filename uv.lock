@@ -40,7 +40,7 @@ dev = [
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", specifier = ">=0.26.0" },
     { name = "pytest-httpx", specifier = ">=0.35.0" },
-    { name = "ruff", specifier = ">=0.17.6" },
+    { name = "ruff", specifier = "==0.17.6" },
     { name = "ty", specifier = "==0.0.107" },
 ]
 docs = [
