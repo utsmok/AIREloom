@@ -1,74 +1,37 @@
-# Research Product Links
+# Links
 
-Discover **relationships between research products** within the OpenAIRE Graph — citations, supplements, versions, and more.
-
-
-!!! note "Pagination"
-    The Links endpoint uses **0-indexed pagination** (first page is `page=0`). Page size is silently capped at **99** by the server — AIREloom clamps requests to 99 automatically.
-
-## Access
-
-Links are part of the Research Products client — no separate client is needed:
+The `/v3/research-products/links` route returns relations between research
+products as individual query parameters (not the V4 filter expression).
 
 ```python
-async with AireloomSession() as session:
-    await session.research_products.search_links(
-        filters=LinksFilters(sourcePid="10.1234/example")
-    )
+from aireloom import LinksFilters
+
+page = await client.research_products.search_links(
+    LinksFilters(relation="IsSupplementTo", sourceType="publication"),
+    page=0,
+    page_size=99,
+)
+page.results  # list[Relation]
+page.total  # totalLinks from the header
+
+async for relation in client.research_products.iterate_links(limit=1000):
+    ...
 ```
 
-## Filter Reference
+Pages are 0-indexed and page sizes cap at 99; sizes of 100 or more silently
+return 10 results (see [upstream quirks](../quirks.md)).
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `sourcePid` | `str` | Source persistent identifier (e.g. DOI) |
-| `targetPid` | `str` | Target persistent identifier |
-| `sourcePublisher` | `str` | Source publisher name |
-| `targetPublisher` | `str` | Target publisher name |
-| `sourceType` | `str` | `publication`, `dataset`, `software`, `other` |
-| `targetType` | `str` | Target entity type |
-| `relation` | `str` | Relationship type name |
-| `fromDate` | `str` | Start date (YYYY or YYYY-MM-DD) |
-| `toDate` | `str` | End date (YYYY or YYYY-MM-DD) |
+The route has no cursor and no sort parameter, so page windows are not
+pinned: if the upstream ordering changes between requests, pages can shift
+and relations can be skipped or duplicated. The iterator stops on an empty
+page or when the reported total has been fetched, which bounds the walk but
+cannot remove that hazard.
 
-See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
-
-## Key Fields
-
-Each link is a `Relation` instance:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `source` | `Node \| None` | Source entity |
-| `target` | `Node \| None` | Target entity |
-| `relType` | `RelType \| None` | Relationship type with `name`, `type`, `typeSchema` |
-
-### Node Fields
-
-Each `Node` (source or target) contains:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `title` | `str` | Entity title |
-| `type` | `str \| None` | Entity type |
-| `publicationDate` | `str \| None` | Publication date |
-| `identifiers` | `SafeList[Identifier]` | PIDs with `id`, `idScheme`, `idUrl` |
-| `authors` | `SafeList[EntityRef]` | Author names with identifiers |
-
-See [Features](../ergonomics.md) for an overview of `SafeList`.
-
-## Getting Relation Types
-
-Discover which relationship types the API supports:
+## Relation types
 
 ```python
-async with AireloomSession() as session:
-    relation_types = await session.research_products.get_relations_info()
+info = await client.research_products.get_relations_info()
+info[0].relation  # "Cites"
+info[0].inverse  # "IsCitedBy"
+info[0].description
 ```
-
-## Links vs Scholix
-
-AIREloom provides two link-discovery mechanisms:
-
-- **Graph Links** (this page) — Relationships between research products **within** the OpenAIRE Graph. Accessed via `session.research_products.search_links()`.
-- **Scholix** — Cross-platform scholarly links from the Scholexplorer service. Accessed via `session.scholix`. Best for discovering dataset–publication relationships across external repositories.

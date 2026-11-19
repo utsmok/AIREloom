@@ -1,18 +1,10 @@
 # AIREloom
 
-**Async Python client for the [OpenAIRE Graph API](https://graph.openaire.eu/).**
-
-[![PyPI](https://img.shields.io/pypi/v/aireloom)](https://pypi.org/project/aireloom/)
-
-Built on [bibliofabric](https://github.com/afuetterer/bibliofabric), AIREloom provides a modern, typed interface to the OpenAIRE research graph — research products, projects, organizations, data sources, persons, and Scholix links.
-
-## Features
-
-- **Async/await first** -- native asyncio client with context-manager sessions
-- **Typed models** -- Pydantic v2 for every response, with IDE autocomplete everywhere
-- **Cursor pagination** -- `iterate()`, `collect()`, `count()`, `first()` on every resource
-- **Ergonomics** -- computed properties, safe types (`SafeList`, `SafeStr`), convenience queries
-- **Full coverage** -- research products, projects, organizations, data sources, persons, Scholix links
+AIREloom is an async Python client for the OpenAIRE Graph API and the
+Scholexplorer API. It is built on the shared
+[bibliofabric](https://github.com/utsmok/bibliofabric) core, which provides
+retries, rate limiting, and pagination; AIREloom adds the OpenAIRE query
+dialect, typed filter models, and response parsing.
 
 ## Install
 
@@ -20,8 +12,53 @@ Built on [bibliofabric](https://github.com/afuetterer/bibliofabric), AIREloom pr
 uv add aireloom
 ```
 
-## Quick Start
+Python 3.12 or later is required.
 
-<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/simple_example.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+## Quick start
 
-[Get started](getting_started.md)
+```python
+import asyncio
+
+from aireloom import AireloomClient
+
+
+async def main() -> None:
+    async with AireloomClient() as client:
+        page = await client.research_products.search(query="quantum dots", page_size=10)
+        for product in page.results:
+            print(product.id, product.mainTitle)
+
+
+asyncio.run(main())
+```
+
+Without credentials the client is anonymous. For the registered-service
+quota, set `AIRELOOM_OPENAIRE_CLIENT_ID` and
+`AIRELOOM_OPENAIRE_CLIENT_SECRET` (environment variables or a `.env` file);
+the client then fetches a bearer token from the OpenAIRE Keycloak endpoint
+and reuses it until it expires.
+
+## The client
+
+| Attribute | Resource | Host |
+|---|---|---|
+| `client.research_products` | V4 research products plus link helpers | Graph |
+| `client.projects` | V4 projects | Graph |
+| `client.organizations` | V4 organizations | Graph |
+| `client.data_sources` | V4 data sources | Graph |
+| `client.persons` | V4 persons | Graph |
+| `client.research_products.search_links` | V3 relations between products | Graph |
+| `client.scholix` | Scholexplorer `Links` (V3, V2 for dates) | Scholexplorer |
+
+Every entity resource supports `search`, `iterate`, `collect`, `first`,
+`count`, `facets`, and `group_by`. `get(id)` reads the V3 by-id route
+because V4 has none. See the usage pages for each resource family.
+
+## Documentation
+
+- [Research products](usage/research_products.md)
+- [Projects, organizations, data sources, persons](usage/projects.md)
+- [Links](usage/links.md) and [Scholix](usage/scholix.md)
+- [Errors, retries, and rate limits](errors.md)
+- [Upstream quirks](quirks.md)
+- [API reference](api.md)

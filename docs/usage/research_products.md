@@ -1,71 +1,96 @@
-# Research Products
+# Research products
 
-Research products are the core entities in the OpenAIRE Graph — publications, datasets, software, and other research outputs.
+`client.research_products` queries `/v4/research-products`. All criteria go
+into one V4 `filter` expression; see the
+[filter syntax](#filter-syntax) below.
 
-## Access
+## Search
 
 ```python
-async with AireloomSession() as session:
-    client = session.research_products  # ResearchProductsResource
+from aireloom import ResearchProductsFilters
+
+page = await client.research_products.search(
+    ResearchProductsFilters(type="publication", is_green=True),
+    query="graph neural networks",
+    sort="citation_count:desc",
+    select=["id", "mainTitle", "publicationDate"],
+    page_size=50,
+)
+page.total  # numFound from the response header
+page.results  # list[ResearchProduct]
+page.next_cursor  # cursor for iterate/resume
 ```
 
-## Filter Reference
+## Filter syntax
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `search` | `str` | Full-text search query |
-| `type` | `str` | `publication`, `dataset`, `software`, `other` |
-| `mainTitle` | `str` | Filter by main title |
-| `pid` | `str` | Persistent identifier (e.g. DOI) |
-| `fromPublicationDate` | `date` | Start of publication date range |
-| `toPublicationDate` | `date` | End of publication date range |
-| `subjects` | `list[str]` | Subject keywords |
-| `countryCode` | `str` | Two-letter country code |
-| `authorFullName` | `str` | Author full name |
-| `authorOrcid` | `str` | Author ORCID |
-| `publisher` | `str` | Publisher name |
-| `bestOpenAccessRightLabel` | `str` | Access right label (e.g. `OPEN`) |
-| `isPeerReviewed` | `bool` | Peer-reviewed only |
-| `relProjectId` | `str` | Linked project OpenAIRE ID |
-| `relOrganizationId` | `str` | Linked organization OpenAIRE ID |
+Each set field becomes one `field:value` entry:
 
-See the [full filter reference](../endpoints/research_products.md) for all available fields. See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
+- a model attribute with a dotted alias sends the dotted name
+  (`ids_doi` sends `ids.doi`);
+- list values join with `|` (OR within one field), commas between fields
+  are AND;
+- a leading `!` negates, `>` and `<` compare on numeric and date fields;
+- booleans encode as `true`/`false`.
 
-## Sort Fields
+```python
+ResearchProductsFilters(
+    subjects=["chemistry", "biology"],  # subjects:chemistry|biology
+    impact_citation_count=">100",  # impact.citation_count:>100
+    oa_color="!gold",  # oa_color:!gold
+)
+```
 
-`relevance`, `publicationDate`, `dateOfCollection`, `influence`, `citationCount`, `impulse`. Use `"field asc"` or `"field desc"`.
+Plain dictionaries work the same way:
+`search({"type": "dataset", "language": "!ger"})`.
 
-## Key Fields
+## Iterate
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `mainTitle` | `str` | Primary title |
-| `type` | `str` | `publication`, `dataset`, `software`, `other` |
-| `publicationDate` | `str` | Publication date (YYYY-MM-DD) |
-| `pids` | `SafeList[Pid]` | Persistent identifiers (DOI, Handle, etc.) |
-| `authors` | `SafeList[Author]` | Author list with `fullName`, `orcid` |
-| `bestAccessRight` | `BestAccessRight` | Best available access status |
-| `indicators` | `Indicator` | Citation counts, usage metrics |
-| `instances` | `SafeList[Instance]` | Hosted versions with URLs and licenses |
-| `subjects` | `SafeList[Subject]` | Subject classifications |
-| `container` | `Container` | Journal or book series info |
+`iterate` walks all matches at 100 per page and stops when the API stops
+returning `nextCursor` or echoes the current cursor:
 
-## Computed Properties
+```python
+async for product in client.research_products.iterate(
+    ResearchProductsFilters(type="dataset"), limit=500
+):
+    ...
+```
 
-| Property | Return | Description |
-|----------|--------|-------------|
-| `doi` | `str \| None` | First DOI from the `pids` list |
-| `all_dois` | `list[str]` | All DOI values |
-| `is_open_access` | `bool` | `True` when best access right is OPEN |
-| `open_access_url` | `str \| None` | URL of the first open access instance |
-| `publication_year` | `int \| None` | Year parsed from `publicationDate` |
-| `citation_count` | `int \| None` | Citation count from indicators |
-| `journal_name` | `str \| None` | Container/journal name |
-| `author_names` | `list[str]` | Non-empty full names of all authors |
-| `license` | `str \| None` | First license found across instances |
+Pass `on_page(number, next_cursor)` to checkpoint progress, and feed a saved
+cursor back through `cursor=` to resume an interrupted harvest.
 
-See [Features](../ergonomics.md) for an overview of computed properties and `SafeList`.
+## Single record
 
-## Example Notebook
+```python
+product = await client.research_products.get("doi_dedup___::<identifier>")
+```
 
-<iframe src="https://marimo.app/github/utsmok/AIREloom/blob/main/examples/03_research_product_analysis.py/wasm?embed=true&mode=read" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-forms" style="width:100%;height:500px;border:none;border-radius:8px;"></iframe>
+`get` reads `/v3/research-products/{id}`; colons in the identifier stay
+unencoded.
+
+## Batch lookups
+
+```python
+by_id = await client.research_products.batch_get(["id_1", "id_2"])
+by_doi = await client.research_products.batch_get_by_doi(
+    ["10.1038/nature12373", "https://doi.org/10.5281/zenodo.1234"]
+)
+```
+
+DOIs are normalized before lookup and as result keys; missing DOIs are
+absent from the result. Requests go out in chunks of 50 as OR expressions.
+
+## Aggregations
+
+```python
+counts = await client.research_products.group_by("type")
+facets = await client.research_products.facets("type", "result_hosts", page_size=1)
+```
+
+`group_by` fetches no records; `facets` fetches records plus aggregations,
+so bound it with `page_size`. See [upstream quirks](../quirks.md) for the
+uneven `group_by` totals.
+
+## Relations
+
+`search_links`, `iterate_links`, and `get_relations_info` use the separate
+`/v3/research-products/links` route; see [Links](links.md).
