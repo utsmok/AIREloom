@@ -19,7 +19,8 @@ async for relation in client.research_products.iterate_links(limit=1000):
 ```
 
 Pages are 0-indexed and page sizes cap at 99; sizes of 100 or more silently
-return 10 results (see [upstream quirks](../quirks.md)).
+return 10 results (see [upstream quirks](../quirks.md)). The route requires
+one of the pid, publisher, or type parameters; a bare query returns 400.
 
 The route has no cursor and no sort parameter, so page windows are not
 pinned: if the upstream ordering changes between requests, pages can shift

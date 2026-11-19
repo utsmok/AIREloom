@@ -15,6 +15,9 @@ page = await client.scholix.search_links(
 page.results  # list[ScholixRelationship]
 ```
 
+The API requires one of `sourcePid`, `targetPid`, `sourcePublisher`,
+`targetPublisher`, `sourceType`, or `targetType`; a bare query returns 400.
+
 ## Versions
 
 V3 is the default endpoint. Queries with `from_date` or `to_date` are

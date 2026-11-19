@@ -8,7 +8,7 @@ read-only calls.
 
 import pytest
 
-from aireloom import AireloomClient
+from aireloom import AireloomClient, LinksFilters, ScholixFilters
 
 pytestmark = pytest.mark.live_api
 
@@ -55,7 +55,9 @@ async def test_persons_search(live_client):
 
 
 async def test_links_search(live_client):
-    page = await live_client.research_products.search_links(page_size=1)
+    page = await live_client.research_products.search_links(
+        LinksFilters(sourcePid="10.1038/nature12373"), page_size=1
+    )
     assert page.total is not None
 
 
@@ -65,7 +67,9 @@ async def test_relations_info(live_client):
 
 
 async def test_scholix_links(live_client):
-    page = await live_client.scholix.search_links(page_size=1)
+    page = await live_client.scholix.search_links(
+        ScholixFilters(sourcePid="10.1038/nature12373"), page_size=1
+    )
     assert page.results
 
 
