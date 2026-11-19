@@ -94,9 +94,13 @@ class GraphResource[E: BaseModel](ResourceClient[E]):
         return {"filter": f"{field}:{'|'.join(values)}"}
 
     def item_path(self, id: str) -> str:
-        """Return the V3 by-id path for ``id``; V4 has no by-id route."""
+        """Return the V3 by-id path for ``id``; V4 has no by-id route.
+
+        Colons stay unencoded: the V3 by-id routes expect the raw
+        ``prefix::suffix`` identifiers and reject the percent-encoded form.
+        """
         entity = self.path.partition("/")[2]
-        return f"v3/{entity}/{quote(self.normalize_id(id), safe='')}"
+        return f"v3/{entity}/{quote(self.normalize_id(id), safe=':')}"
 
     def iterate(
         self,
