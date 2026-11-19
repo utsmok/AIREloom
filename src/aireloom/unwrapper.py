@@ -1,150 +1,89 @@
-# aireloom/unwrapper.py
-"""OpenAIRE-specific response unwrapper implementation.
-
-This module provides the OpenAIRE implementation of the ResponseUnwrapper
-protocol from bibliofabric, enabling the generic framework to work with
-OpenAIRE's specific JSON response structure.
-"""
+"""Unwrappers that teach bibliofabric how to read OpenAIRE response envelopes."""
 
 from typing import Any
 
-from bibliofabric.models import ResponseUnwrapper
 
+class OpenAireUnwrapper:
+    """Reads the Graph API envelope ``{"header": ..., "results": [...]}``.
 
-class OpenAireUnwrapper(ResponseUnwrapper):
-    """OpenAIRE-specific implementation of the ResponseUnwrapper protocol.
-
-    This class handles the specific JSON response structure used by OpenAIRE APIs,
-    which typically follow this pattern:
-
-    ```json
-    {
-        "header": {
-            "numFound": 1000,
-            "nextCursor": "abc123",
-            "queryTime": 50,
-            "pageSize": 10
-        },
-        "results": [
-            {"id": "1", "title": "Paper 1"},
-            {"id": "2", "title": "Paper 2"}
-        ]
-    }
-    ```
-
-    The unwrapper extracts the relevant information from this structure
-    to enable generic pagination and result handling in the bibliofabric framework.
+    Also covers the ``/research-products/links`` variant, whose header carries
+    ``totalLinks``/``totalPages`` instead of ``numFound`` and has no cursor.
     """
 
-    def unwrap_results(self, response_json: dict[str, Any]) -> list[dict[str, Any]]:
-        """Extract the list of result items from an OpenAIRE API response.
+    @staticmethod
+    def _header(body: Any) -> dict[str, Any]:
+        if isinstance(body, dict) and isinstance(body.get("header"), dict):
+            return body["header"]
+        return {}
 
-        OpenAIRE APIs return results in a top-level "results" array.
-        If the "results" key is missing or None, returns an empty list
-        to handle edge cases gracefully.
+    def results(self, body: Any) -> list[dict[str, Any]]:
+        """Return the list of raw result records in a search/list response."""
+        if isinstance(body, dict) and isinstance(body.get("results"), list):
+            return body["results"]
+        return []
 
-        Args:
-            response_json: The complete JSON response from the OpenAIRE API.
+    def item(self, body: Any) -> dict[str, Any]:
+        """Return the raw record for a single-entity response.
 
-        Returns:
-            list[dict[str, Any]]: A list of result items, or empty list if none found.
-
-        Raises:
-            ValueError: If response_json is None or not a dictionary.
+        The V3 by-id routes return the record itself, unwrapped.
         """
-        if response_json is None:
-            raise ValueError("Response JSON cannot be None")
-        if not isinstance(response_json, dict):
-            raise ValueError(
-                f"Response JSON must be a dictionary, got {type(response_json)}"
-            )
+        if isinstance(body, dict) and isinstance(body.get("results"), list):
+            records = body["results"]
+            if records and isinstance(records[0], dict):
+                return records[0]
+        if isinstance(body, dict):
+            return body
+        raise ValueError("Response body is not a JSON object.")
 
-        results = response_json.get("results")
-        if results is None:
-            # Future-proofing: some V3 paths wrap results under a singular "result" key.
-            result = response_json.get("result")
-            if isinstance(result, list):
-                return result
-            if isinstance(result, dict):
-                return [result]
-            return []
-        if not isinstance(results, list):
-            raise ValueError(f"Expected results to be a list, got {type(results)}")
+    def total(self, body: Any) -> int | None:
+        """Return the total number of matching records, or ``None`` if unknown."""
+        header = self._header(body)
+        total = header.get("numFound", header.get("totalLinks"))
+        return int(total) if total is not None else None
 
-        return results
+    def next_cursor(self, body: Any) -> str | None:
+        """Return the cursor for the next page, or ``None`` on the last page."""
+        cursor = self._header(body).get("nextCursor")
+        return str(cursor) if cursor else None
 
-    def unwrap_single_item(self, response_json: dict[str, Any]) -> dict[str, Any]:
-        """Extract a single item from an OpenAIRE API response.
+    def meta(self, body: Any) -> dict[str, Any]:
+        """Return the envelope minus the results (header, facets, group-by)."""
+        if isinstance(body, dict):
+            return {key: value for key, value in body.items() if key != "results"}
+        return {}
 
-        For single-item requests (like GET by ID), OpenAIRE typically returns
-        the item as the first element in the "results" array.
 
-        Args:
-            response_json: The complete JSON response from the OpenAIRE API.
+class ScholixUnwrapper:
+    """Reads the Scholexplorer envelope ``{"currentPage", "totalLinks",
+    "totalPages", "result": [...]}`` — note ``result``, not ``results``."""
 
-        Returns:
-            dict[str, Any]: The single result item's data.
+    def results(self, body: Any) -> list[dict[str, Any]]:
+        """Return the list of raw link records in a search response."""
+        if isinstance(body, dict) and isinstance(body.get("result"), list):
+            return body["result"]
+        return []
 
-        Raises:
-            ValueError: If response_json is invalid or no results found.
-        """
-        results = self.unwrap_results(response_json)
-        if not results:
-            raise ValueError("No results found in response for single item request")
+    def item(self, body: Any) -> dict[str, Any]:
+        """Return the raw record for a single-entity response."""
+        if isinstance(body, dict) and isinstance(body.get("result"), list):
+            records = body["result"]
+            if records and isinstance(records[0], dict):
+                return records[0]
+        if isinstance(body, dict):
+            return body
+        raise ValueError("Response body is not a JSON object.")
 
-        return results[0]
+    def total(self, body: Any) -> int | None:
+        """Return the total number of matching links, or ``None`` if unknown."""
+        total = body.get("totalLinks") if isinstance(body, dict) else None
+        return int(total) if total is not None else None
 
-    def get_next_page_token(self, response_json: dict[str, Any]) -> str | None:
-        """Extract the pagination token for the next page from an OpenAIRE API response.
+    def next_cursor(self, body: Any) -> str | None:
+        """Scholexplorer has no cursor paging; always ``None``."""
+        return None
 
-        OpenAIRE uses cursor-based pagination with a "nextCursor" field in the
-        response header. If no nextCursor is present, there are no more pages.
-
-        Args:
-            response_json: The complete JSON response from the OpenAIRE API.
-
-        Returns:
-            str | None: The next page cursor token, or None if no more pages.
-        """
-        if not isinstance(response_json, dict):
-            return None
-
-        header = response_json.get("header")
-        if not isinstance(header, dict):
-            return None
-
-        next_cursor = header.get("nextCursor")
-        if next_cursor is None:
-            return None
-
-        cursor_str = str(next_cursor).strip()
-        return cursor_str or None
-
-    def get_total_results(self, response_json: dict[str, Any]) -> int | None:
-        """Extract the total count of results from an OpenAIRE API response.
-
-        OpenAIRE typically provides the total number of available results
-        in the "numFound" field within the response header.
-
-        Args:
-            response_json: The complete JSON response from the OpenAIRE API.
-
-        Returns:
-            int | None: The total number of results across all pages, or None
-                if this information is not available.
-        """
-        if not isinstance(response_json, dict):
-            return None
-
-        header = response_json.get("header")
-        if not isinstance(header, dict):
-            return None
-
-        num_found = header.get("numFound")
-        if num_found is None:
-            return None
-
-        try:
-            return int(num_found)
-        except (ValueError, TypeError):
-            return None
+    def meta(self, body: Any) -> dict[str, Any]:
+        """Return the envelope minus the result list."""
+        if isinstance(body, dict):
+            return {key: value for key, value in body.items() if key != "result"}
+        return {}

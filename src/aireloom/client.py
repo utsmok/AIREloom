@@ -1,259 +1,177 @@
-from typing import Self
+"""The AIREloom client for the OpenAIRE Graph and Scholexplorer APIs."""
 
-from bibliofabric.auth import (
-    AuthStrategy,
-    ClientCredentialsAuth,
-    NoAuth,
-    StaticTokenAuth,
-)
+import functools
+import logging
+from typing import Any
+
+import httpx
+from bibliofabric.auth import AuthStrategy, ClientCredentialsAuth, NoAuth
 from bibliofabric.client import BaseApiClient
-from bibliofabric.log_config import logger
 
-from .config import ApiSettings, get_settings
-from .constants import (
-    OPENAIRE_GRAPH_API_BASE_URL,
-    OPENAIRE_SCHOLIX_API_BASE_URL,
-)
+from .config import AireloomSettings, get_settings
 from .resources import (
-    DataSourcesClient,
-    OrganizationsClient,
-    PersonsClient,
-    ProjectsClient,
-    ResearchProductsClient,
-    ScholixClient,
+    DataSourcesResource,
+    LinksResource,
+    OrganizationsResource,
+    PersonsResource,
+    ProjectsResource,
+    ResearchProductsResource,
+    ScholixResource,
 )
-from .unwrapper import OpenAireUnwrapper
+from .unwrapper import OpenAireUnwrapper, ScholixUnwrapper
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_auth(settings: AireloomSettings) -> AuthStrategy:
+    """Resolve the auth strategy: client credentials, else anonymous."""
+    if settings.openaire_client_id and settings.openaire_client_secret:
+        return ClientCredentialsAuth(
+            settings.openaire_client_id,
+            settings.openaire_client_secret,
+            settings.token_url,
+            user_agent=settings.effective_user_agent(),
+        )
+    return NoAuth()
 
 
 class AireloomClient(BaseApiClient):
-    """Asynchronous client for interacting with the OpenAIRE Graph and Scholix APIs.
+    """Async client for the OpenAIRE Graph API (V4) and the Scholexplorer API.
 
-    This client provides a high-level interface to various OpenAIRE API endpoints,
-    handling authentication, request retries, caching, and rate limiting.
-    It builds upon the generic `bibliofabric.client.BaseApiClient` and is configured
-    specifically for OpenAIRE services.
+    Entity resources are available as typed attributes; single-entity lookups
+    go through the V3 by-id routes because V4 has none. Authentication
+    resolves in the constructor: set ``openaire_client_id`` and
+    ``openaire_client_secret`` (settings or ``AIRELOOM_OPENAIRE_CLIENT_ID`` /
+    ``AIRELOOM_OPENAIRE_CLIENT_SECRET``) for OAuth2 client-credentials access
+    against the Keycloak token endpoint; without credentials the client is
+    anonymous. An explicit ``auth`` strategy always wins.
 
-    Resource clients for different OpenAIRE entities (e.g., research products,
-    projects, organizations) are available as properties of this client.
+    The Scholix resource talks to the Scholexplorer host through a second
+    internal client that shares settings and credentials but throttles itself
+    to one request per second.
 
-    Authentication is handled automatically based on provided settings or can be
-    customized by passing an `auth_strategy`. If no credentials or strategy are
-    provided, requests will be made without authentication.
-
-    Typical usage:
-    ```python
-    async with AireloomClient() as client:
-        product = await client.research_products.get(
-            "some_product_id"
-        )
-        async for project in client.projects.iterate(
-            filters=ProjectFilters(...)
-        ):
-            print(project.title)
-    ```
-
-    Attributes:
-        research_products (ResearchProductsClient): Client for research product endpoints.
-        organizations (OrganizationsClient): Client for organization endpoints.
-        projects (ProjectsClient): Client for project endpoints.
-        data_sources (DataSourcesClient): Client for data source endpoints.
-        scholix (ScholixClient): Client for Scholix (scholarly link exchange) endpoints.
-        _settings (ApiSettings): The resolved API settings for this client instance.
-        _scholix_base_url (str): The base URL for the Scholix API.
+    Example:
+        ```python
+        async with AireloomClient() as client:
+            product = await client.research_products.get(
+                "doi_dedup___::abc123"
+            )
+            async for project in client.projects.iterate():
+                print(project.title)
+        ```
     """
 
     def __init__(
         self,
-        settings: ApiSettings | None = None,
-        auth_strategy: AuthStrategy | None = None,
+        settings: AireloomSettings | None = None,
+        auth: AuthStrategy | None = None,
         *,
-        api_token: str | None = None,
-        client_id: str | None = None,
-        client_secret: str | None = None,
-        base_url: str = OPENAIRE_GRAPH_API_BASE_URL,
-        scholix_base_url: str = OPENAIRE_SCHOLIX_API_BASE_URL,
-    ):
-        """Initializes the AireloomClient.
+        base_url: str | None = None,
+        scholix_base_url: str | None = None,
+    ) -> None:
+        """Build the client from settings, resolving credentials immediately.
 
-        This constructor sets up the client with necessary configurations,
-        determines the authentication strategy, and initializes resource-specific
-        sub-clients.
-
-        Authentication Strategy Resolution:
-        - If `auth_strategy` is explicitly provided, it is used.
-        - Otherwise, credentials (api_token, client_id, client_secret) passed
-          directly to this constructor take precedence over those in `settings`.
-        - If credentials are not passed directly, they are sourced from `settings`
-          (which are loaded from environment variables or .env files).
-        - The order of preference for automatic strategy selection is:
-            1. Client Credentials (if client_id & client_secret are available)
-            2. Static Token (if api_token is available)
-            3. No Authentication (if no credentials are found)
-
-        Args:
-            settings: An optional `ApiSettings` instance. If `None`, global settings
-                are loaded via `aireloom.config.get_settings()`. These settings
-                can be a source for authentication credentials and other client behaviors.
-            auth_strategy: An optional explicit `AuthStrategy` instance. If provided,
-                it overrides automatic authentication resolution.
-            api_token: An optional static API token. If provided, it takes precedence
-                over `settings.openaire_api_token` for StaticTokenAuth.
-            client_id: An optional client ID for ClientCredentialsAuth. Takes
-                precedence over `settings.openaire_client_id`.
-            client_secret: An optional client secret for ClientCredentialsAuth. Takes
-                precedence over `settings.openaire_client_secret`.
-            base_url: The base URL for the OpenAIRE Graph API. Defaults to the
-                production OpenAIRE Graph API URL.
-            scholix_base_url: The base URL for the OpenAIRE Scholix API. Defaults
-                to the production OpenAIRE Scholix API URL.
+        ``settings`` defaults to :func:`aireloom.config.get_settings`, which
+        reads ``AIRELOOM_*`` environment variables and ``.env``. The ``base_url``
+        and ``scholix_base_url`` arguments override the settings values.
         """
-        self._settings: ApiSettings = settings or get_settings()
-        self._scholix_base_url: str = scholix_base_url.rstrip("/")
-
-        _cid = self._settings.openaire_client_id
-        _cid_display = (
-            f"***{_cid[-4:]}" if _cid and len(_cid) > 4 else ("***" if _cid else "None")  # noqa: PLR2004
-        )
-        logger.debug(
-            f"AireloomClient.__init__ settings: id={id(self._settings)}, "
-            f"client_id={_cid_display}, "
-            f"token={'***' if self._settings.openaire_api_token else 'None'}, "
-            f"timeout={self._settings.request_timeout}"
-        )
-
-        self._auth_strategy = self._resolve_auth_strategy(
-            auth_strategy, api_token, client_id, client_secret, _cid_display
-        )
-
-        # Create the OpenAIRE response unwrapper
-        unwrapper = OpenAireUnwrapper()
-
-        # Initialize the base client with all the generic functionality
+        resolved = settings or get_settings()
+        overrides: dict[str, str] = {}
+        if base_url is not None:
+            overrides["base_url"] = base_url
+        if scholix_base_url is not None:
+            overrides["scholix_base_url"] = scholix_base_url
+        if overrides:
+            resolved = resolved.model_copy(update=overrides)
+        strategy = auth if auth is not None else _resolve_auth(resolved)
         super().__init__(
-            base_url=base_url,
-            settings=self._settings,
-            auth_strategy=self._auth_strategy,
-            response_unwrapper=unwrapper,
+            base_url=resolved.base_url,
+            settings=resolved,
+            unwrapper=OpenAireUnwrapper(),
+            auth=strategy,
+        )
+        self._scholix_api = BaseApiClient(
+            base_url=resolved.scholix_base_url,
+            settings=resolved.model_copy(
+                update={
+                    "max_requests_per_second": resolved.scholix_max_requests_per_second
+                }
+            ),
+            unwrapper=ScholixUnwrapper(),
+            auth=strategy,
+        )
+        logger.debug(
+            "AireloomClient initialized (%s).",
+            "anonymous" if isinstance(strategy, NoAuth) else "client credentials",
         )
 
-        # Initialize OpenAIRE-specific resource clients
-        self._research_products = ResearchProductsClient(api_client=self)
-        self._organizations = OrganizationsClient(api_client=self)
-        self._projects = ProjectsClient(api_client=self)
-        self._persons = PersonsClient(api_client=self)
-        self._data_sources = DataSourcesClient(api_client=self)
-        self._scholix = ScholixClient(
-            api_client=self, scholix_base_url=self._scholix_base_url
-        )
-
-        logger.debug("AireloomClient initialized successfully.")
-
-    def _resolve_auth_strategy(
+    async def request(
         self,
-        auth_strategy: AuthStrategy | None,
-        api_token: str | None,
-        client_id: str | None,
-        client_secret: str | None,
-        _cid_display: str,
-    ) -> AuthStrategy:
-        """Resolve the authentication strategy from explicit strategy or credentials.
+        method: str,
+        path: str,
+        *,
+        params: Any | None = None,
+        json: Any | None = None,
+        headers: Any | None = None,
+    ) -> httpx.Response:
+        """Send a request through the core retry pipeline.
 
-        Args:
-            auth_strategy: An explicit AuthStrategy, if provided.
-            api_token: Optional static API token override.
-            client_id: Optional client ID override.
-            client_secret: Optional client secret override.
-            _cid_display: Masked display string for logging.
-
-        Returns:
-            The resolved AuthStrategy instance.
+        V4 accepts ``mailto`` for polite-pool admission (V3 rejects it), so the
+        configured contact address is attached to ``v4/`` requests only.
         """
-        if auth_strategy:
-            logger.debug(
-                f"Using explicitly provided authentication strategy: {type(auth_strategy).__name__}"
-            )
-            return auth_strategy
-
-        logger.debug("Determining auth type based on provided parameters or settings.")
-        _client_id = client_id or self._settings.openaire_client_id
-        _client_secret = client_secret or self._settings.openaire_client_secret
-        _api_token = api_token or self._settings.openaire_api_token
-        _token_url = self._settings.effective_token_url
-
-        logger.debug(
-            f"Auth decision: client_id_param={'***' if client_id else None}, "
-            f"settings_client_id={_cid_display}, "
-            f"api_token_param={'***' if api_token else None}, "
-            f"settings_api_token={'***' if self._settings.openaire_api_token else None}"
+        if (
+            path.startswith("v4/")
+            and self._settings.mailto
+            and not (params and "mailto" in params)
+        ):
+            params = {"mailto": self._settings.mailto, **(params or {})}
+        return await super().request(
+            method, path, params=params, json=json, headers=headers
         )
 
-        if _client_id and _client_secret:
-            logger.debug("Using Client Credentials authentication.")
-            if client_id and client_secret:
-                logger.debug("Client ID and secret were directly passed as parameters.")
-            else:
-                logger.debug(
-                    "Client ID and secret were loaded from settings or environment variables."
-                )
-            return ClientCredentialsAuth(
-                client_id=_client_id,
-                client_secret=_client_secret,
-                token_url=_token_url,
-            )
+    @functools.cached_property
+    def _links(self) -> LinksResource:
+        return LinksResource(self)
 
-        if _api_token:
-            logger.debug("Using Static Token authentication.")
-            return StaticTokenAuth(token=_api_token)
+    @functools.cached_property
+    def research_products(self) -> ResearchProductsResource:
+        """Search, iterate, and batch-fetch research products; links helpers."""
+        return ResearchProductsResource(self, self._links)
 
-        logger.debug("No authentication credentials found, using NoAuth.")
-        return NoAuth()
+    @functools.cached_property
+    def projects(self) -> ProjectsResource:
+        """Search and iterate OpenAIRE projects."""
+        return ProjectsResource(self)
 
-    @property
-    def research_products(self) -> ResearchProductsClient:
-        """Provides access to the ResearchProductsClient for OpenAIRE research product APIs."""
-        return self._research_products
+    @functools.cached_property
+    def organizations(self) -> OrganizationsResource:
+        """Search and iterate OpenAIRE organizations."""
+        return OrganizationsResource(self)
 
-    @property
-    def organizations(self) -> OrganizationsClient:
-        """Provides access to the OrganizationsClient for OpenAIRE organization APIs."""
-        return self._organizations
+    @functools.cached_property
+    def data_sources(self) -> DataSourcesResource:
+        """Search and iterate OpenAIRE data sources."""
+        return DataSourcesResource(self)
 
-    @property
-    def projects(self) -> ProjectsClient:
-        """Provides access to the ProjectsClient for OpenAIRE project APIs."""
-        return self._projects
+    @functools.cached_property
+    def persons(self) -> PersonsResource:
+        """Search and iterate OpenAIRE persons."""
+        return PersonsResource(self)
 
-    @property
-    def persons(self) -> PersonsClient:
-        """Provides access to the PersonsClient for OpenAIRE person APIs."""
-        return self._persons
+    @functools.cached_property
+    def scholix(self) -> ScholixResource:
+        """Search Scholix links on the Scholexplorer host (V3, V2 for dates)."""
+        return ScholixResource(self._scholix_api)
 
-    @property
-    def data_sources(self) -> DataSourcesClient:
-        """Provides access to the DataSourcesClient for OpenAIRE data source APIs."""
-        return self._data_sources
+    async def aclose(self) -> None:
+        """Close both the Graph and the Scholix HTTP clients."""
+        await super().aclose()
+        await self._scholix_api.aclose()
 
-    @property
-    def scholix(self) -> ScholixClient:
-        """Provides access to the ScholixClient for OpenAIRE Scholix (scholarly link) APIs."""
-        return self._scholix
-
-    async def __aenter__(self) -> Self:
-        """Async context manager entry."""
-        logger.debug(
-            f"AireloomClient.__aenter__() called. Client ID: {id(self)}. "
-            f"HTTP client closed: {self._http_client.is_closed if self._http_client else 'N/A'}"
-        )
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Async context manager exit."""
-        logger.debug(
-            f"AireloomClient.__aexit__() called. Client ID: {id(self)}. "
-            f"HTTP client closed before aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
-        )
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object | None,
+    ) -> None:
         await self.aclose()
-        logger.debug(
-            f"AireloomClient.__aexit__() finished. Client ID: {id(self)}. "
-            f"HTTP client closed after aclose: {self._http_client.is_closed if self._http_client else 'N/A'}"
-        )

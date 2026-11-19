@@ -2,13 +2,14 @@
 """Pydantic models for representing OpenAIRE Project entities and related structures.
 
 This module defines the Pydantic model for an OpenAIRE Project,
-including nested models for funding details, grants, and H2020 programme information,
-based on the OpenAIRE data model documentation.
+including nested models for funding details, grants, and H2020 programme
+information, based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/project
 """
 
 from typing import Annotated, Any
 
+from bibliofabric import SafeList, SafeStr
 from pydantic import (
     BaseModel,
     BeforeValidator,
@@ -18,148 +19,21 @@ from pydantic import (
     field_validator,
 )
 
-from .base import ApiResponse, BaseEntity
-from .safe_types import SafeList, SafeStr
-
-
-class FundingJurisdiction(BaseModel):
-    """Jurisdiction info within the hierarchical V3 ``funding`` field."""
-
-    code: SafeStr = ""
-    label: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeFundingJurisdiction = Annotated[
-    FundingJurisdiction,
-    BeforeValidator(lambda v: FundingJurisdiction() if v is None else v),
-]
-
-
-class FundingFunder(BaseModel):
-    """Funder details within the hierarchical V3 ``funding`` field."""
-
-    id: SafeStr = ""
-    shortname: SafeStr = ""
-    name: SafeStr = ""
-    jurisdiction: SafeFundingJurisdiction = Field(
-        default_factory=FundingJurisdiction,
-    )
-    pid: SafeStr | None = None
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeFundingFunder = Annotated[
-    FundingFunder, BeforeValidator(lambda v: FundingFunder() if v is None else v)
-]
-
-
-class FundingLevel(BaseModel):
-    """A single hierarchy level (level0/level1/level2) in the V3 ``funding`` field."""
-
-    id: SafeStr = ""
-    description: SafeStr = ""
-    name: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeFundingLevel = Annotated[
-    FundingLevel, BeforeValidator(lambda v: FundingLevel() if v is None else v)
-]
-
-
-class ProjectFunding(BaseModel):
-    """Hierarchical funding structure from V3 responses (``Project.funding``).
-
-    Distinct from the flat plural ``fundings: SafeList[Funding]`` — this carries
-    the full funder → level0 → level1 → level2 taxonomy tree.
-    """
-
-    funder: SafeFundingFunder = Field(default_factory=FundingFunder)
-    level0: SafeFundingLevel = Field(default_factory=FundingLevel)
-    level1: SafeFundingLevel = Field(default_factory=FundingLevel)
-    level2: SafeFundingLevel = Field(default_factory=FundingLevel)
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeProjectFunding = Annotated[
-    ProjectFunding, BeforeValidator(lambda v: ProjectFunding() if v is None else v)
-]
-
-
-class ProjectLinkHeader(BaseModel):
-    """Header inside a V3 ``Project.links[]`` entry."""
-
-    relationType: SafeStr = ""
-    relationClass: SafeStr = ""
-    relatedIdentifier: SafeStr = ""
-    relatedRecordType: SafeStr = ""
-    trust: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeProjectLinkHeader = Annotated[
-    ProjectLinkHeader,
-    BeforeValidator(lambda v: ProjectLinkHeader() if v is None else v),
-]
-
-
-class ProjectLinkCountry(BaseModel):
-    """Country code/label inside a V3 ``Project.links[]`` entry."""
-
-    code: SafeStr = ""
-    label: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeProjectLinkCountry = Annotated[
-    ProjectLinkCountry,
-    BeforeValidator(lambda v: ProjectLinkCountry() if v is None else v),
-]
-
-
-class ProjectLinkPid(BaseModel):
-    """PID entry inside a V3 ``Project.links[]`` item (value + optional type)."""
-
-    value: SafeStr = ""
-    type: SafeStr = ""
-    typeLabel: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeProjectLinkPid = Annotated[
-    ProjectLinkPid,
-    BeforeValidator(lambda v: {"value": v} if isinstance(v, str) else v),
-]
-
-
-class ProjectLink(BaseModel):
-    """A related-entity link entry from V3 ``Project.links`` (e.g. participant orgs)."""
-
-    header: SafeProjectLinkHeader = Field(default_factory=ProjectLinkHeader)
-    legalname: SafeStr = ""
-    pid: SafeList[SafeProjectLinkPid] = Field(default_factory=list)
-    country: SafeProjectLinkCountry = Field(default_factory=ProjectLinkCountry)
-
-    model_config = ConfigDict(extra="allow")
+from .base import (
+    BaseEntity,
+    CodeLabel,
+    FundingHierarchy,
+    RelatedRecordHeader,
+    TypedPid,
+)
 
 
 class FundingStream(BaseModel):
-    """Represents details about a specific funding stream for a project.
-
-    description: A description of the funding stream.
-    id: The unique identifier of the funding stream.
-    """
+    """A funding stream: ``{"id", "description"}``."""
 
     description: SafeStr = ""
     id: str | None = None
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -169,101 +43,81 @@ SafeFundingStream = Annotated[
 
 
 class Funding(BaseModel):
-    """Represents funding information for a project, including the source and stream.
-
-    Attributes:
-        fundingStream: A `FundingStream` object detailing the specific stream.
-        jurisdiction: The jurisdiction associated with the funding (e.g., country code).
-        name: The name of the funding body or organization.
-        shortName: An optional short name or acronym for the funding body.
-    """
+    """Flat funding entry in ``Project.fundings[]``."""
 
     fundingStream: SafeFundingStream = Field(default_factory=FundingStream)
     jurisdiction: str | None = None
     name: SafeStr = ""
     shortName: SafeStr = ""
+
     model_config = ConfigDict(extra="allow")
 
 
 class Grant(BaseModel):
-    """Represents details about the grant amounts associated with a project.
-
-    Attributes:
-        currency: The currency code for the amounts (e.g., "EUR", "USD").
-        fundedAmount: The amount of funding awarded.
-        totalCost: The total cost of the project.
-    """
+    """Grant amounts for a project (``Project.granted``)."""
 
     currency: SafeStr = ""
     fundedAmount: float | None = None
     totalCost: float | None = None
+
     model_config = ConfigDict(extra="allow")
-
-
-SafeGrant = Annotated[Grant, BeforeValidator(lambda v: Grant() if v is None else v)]
 
 
 class H2020Programme(BaseModel):
-    """Represents details about an H2020 programme related to a project.
-
-    Attributes:
-        code: The code of the H2020 programme.
-        description: A description of the H2020 programme.
-    """
+    """An H2020 programme related to a project."""
 
     code: str | None = None
     description: SafeStr = ""
+
     model_config = ConfigDict(extra="allow")
+
+
+SafeCodeLabel = Annotated[
+    CodeLabel, BeforeValidator(lambda v: CodeLabel() if v is None else v)
+]
+SafeRelatedRecordHeader = Annotated[
+    RelatedRecordHeader,
+    BeforeValidator(lambda v: RelatedRecordHeader() if v is None else v),
+]
+
+
+class ProjectLink(BaseModel):
+    """A related-entity link entry in ``Project.links`` (e.g. participant orgs)."""
+
+    header: SafeRelatedRecordHeader = Field(default_factory=RelatedRecordHeader)
+    legalname: SafeStr = ""
+    pid: SafeList[TypedPid] = Field(default_factory=list)
+    country: SafeCodeLabel = Field(default_factory=CodeLabel)
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingHierarchy = Annotated[
+    FundingHierarchy, BeforeValidator(lambda v: FundingHierarchy() if v is None else v)
+]
+
+SafeGrant = Annotated[Grant, BeforeValidator(lambda v: Grant() if v is None else v)]
 
 
 class Project(BaseEntity):
     """Model representing an OpenAIRE Project entity.
 
-    Captures comprehensive information about a research project, including its
-    identifiers, title, funding, duration, and related metadata. Inherits the
-    `id` field from `BaseEntity`.
-
-    Attributes:
-        code: The project code or grant number.
-        acronym: The acronym of the project.
-        title: The official title of the project.
-        callIdentifier: Identifier for the funding call.
-        fundings: A list of `Funding` objects detailing the project's funding sources.
-        funding: Hierarchical ``ProjectFunding`` object (V3) carrying the full
-                 funder → level0 → level1 → level2 taxonomy tree. Distinct from
-                 the flat plural ``fundings`` array.
-        granted: A `Grant` object with information about the awarded grant amounts.
-        h2020Programmes: A list of `H2020Programme` objects if the project is part of H2020.
-        keywords: A list of keywords describing the project.
-                  A validator attempts to parse comma or semicolon-separated strings.
-        openAccessMandateForDataset: Boolean indicating if there's an open access
-                                     mandate for datasets produced by the project.
-        openAccessMandateForPublications: Boolean indicating if there's an open access
-                                          mandate for publications from the project.
-        startDate: The start date of the project (typically "YYYY-MM-DD" string).
-        endDate: The end date of the project (typically "YYYY-MM-DD" string).
-        subjects: A list of subject classifications for the project.
-        summary: A summary or abstract of the project.
-        websiteUrl: The URL of the project's official website.
-        links: V3 array of related-entity link entries (e.g. participating
-               organizations), each with header metadata and inline entity data.
+    Captures identifiers, title, funding, duration, and related metadata.
+    Inherits the ``id`` field from ``BaseEntity``.
     """
 
-    # id is inherited from BaseEntity
     code: str | None = None
     acronym: SafeStr = ""
     title: SafeStr = ""
     callIdentifier: str | None = None
     fundings: SafeList[Funding] = Field(default_factory=list)
-    funding: SafeProjectFunding = Field(default_factory=ProjectFunding)
+    funding: SafeFundingHierarchy = Field(default_factory=FundingHierarchy)
     granted: SafeGrant = Field(default_factory=Grant)
     h2020Programmes: SafeList[H2020Programme] = Field(default_factory=list)
-    # Keywords might be a single string or a delimited string. Attempt parsing.
     keywords: SafeList[str] = Field(default_factory=list)
     openAccessMandateForDataset: bool | None = None
     openAccessMandateForPublications: bool | None = None
-    # Dates are kept as string for safety due to potential missing parts or nulls.
-    # Expected format is typically YYYY-MM-DD.
+    # Dates are kept as strings: parts may be missing or null.
     startDate: str | None = None
     endDate: str | None = None
     subjects: SafeList[str] = Field(default_factory=list)
@@ -289,7 +143,7 @@ class Project(BaseEntity):
     @computed_field
     @property
     def start_year(self) -> int | None:
-        if self.startDate and len(self.startDate) >= 4:
+        if self.startDate:
             try:
                 return int(self.startDate[:4])
             except ValueError:
@@ -299,7 +153,7 @@ class Project(BaseEntity):
     @computed_field
     @property
     def end_year(self) -> int | None:
-        if self.endDate and len(self.endDate) >= 4:
+        if self.endDate:
             try:
                 return int(self.endDate[:4])
             except ValueError:
@@ -316,36 +170,17 @@ class Project(BaseEntity):
             parts.append(f"funded by {self.funder_name}")
         return " | ".join(parts) if parts else f"Project(id={self.id!r})"
 
-    model_config = ConfigDict(extra="allow")
-
     @field_validator("keywords", mode="before")
     @classmethod
-    def parse_keywords_string(cls, v: Any) -> list[str]:
-        """Attempts to parse a keyword string into a list of strings.
-
-        If the input `v` is a string, this validator tries to split it by common
-        delimiters (comma, then semicolon). If splitting produces any parts,
-        a list of stripped parts is returned. Otherwise an empty list is returned.
-        If `v` is not a string (e.g., already a list or None), it's returned as is.
-
-        Args:
-            v: The value to parse, expected to be a string, list, or None.
-
-        Returns:
-            A list of strings. Returns [] if input was empty or unparseable.
-        """
+    def parse_keywords_string(cls, v: Any) -> Any:
+        """Split a delimited keyword string (comma, then semicolon) into a list."""
         if isinstance(v, str):
-            # Prioritize comma, then semicolon
-            delimiters = [",", ";"]
-            for delimiter in delimiters:
+            for delimiter in (",", ";"):
                 parts = [part.strip() for part in v.split(delimiter) if part.strip()]
                 if parts:
                     return parts
             return []
-        # If not a string (e.g., already a list or None), return as is
         return v
 
 
 # Define the specific response type for projects
-ProjectResponse = ApiResponse[Project]
-"""Type alias for an API response containing a list of `Project` entities."""

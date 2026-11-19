@@ -1,18 +1,21 @@
-# aireloom/resources/__init__.py
-"""Exposes the resource client classes."""
+"""Resource clients for the OpenAIRE Graph and Scholexplorer APIs."""
 
-from .data_sources_client import DataSourcesClient
-from .organizations_client import OrganizationsClient
-from .persons_client import PersonsClient
-from .projects_client import ProjectsClient
-from .research_products_client import ResearchProductsClient
-from .scholix_client import ScholixClient
+from .base import GraphResource
+from .data_sources import DataSourcesResource
+from .links import LinksResource
+from .organizations import OrganizationsResource
+from .persons import PersonsResource
+from .projects import ProjectsResource
+from .research_products import ResearchProductsResource
+from .scholix import ScholixResource
 
 __all__ = [
-    "DataSourcesClient",
-    "OrganizationsClient",
-    "PersonsClient",
-    "ProjectsClient",
-    "ResearchProductsClient",
-    "ScholixClient",
+    "DataSourcesResource",
+    "GraphResource",
+    "LinksResource",
+    "OrganizationsResource",
+    "PersonsResource",
+    "ProjectsResource",
+    "ResearchProductsResource",
+    "ScholixResource",
 ]

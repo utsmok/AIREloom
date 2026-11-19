@@ -1,77 +1,67 @@
-# Projects
+# Projects, organizations, data sources, persons
 
-Projects represent funded research initiatives — EU Framework Programme grants, national funding calls, and more.
-
-## Access
-
-```python
-async with AireloomSession() as session:
-    client = session.projects  # ProjectsResource
-```
-
-## Filter Reference
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `search` | `str` | Full-text search query |
-| `title` | `str` | Project title |
-| `keywords` | `list[str]` | Keywords |
-| `acronym` | `str` | Project acronym |
-| `code` | `str` | Project code or grant number |
-| `grantID` | `str` | Grant identifier |
-| `fundingShortName` | `str` | Funder short name (e.g. `EC`, `NSF`) |
-| `fundingStreamId` | `str` | Funding stream identifier |
-| `fromStartDate` | `date` | Start of start-date range |
-| `toStartDate` | `date` | End of start-date range |
-| `fromEndDate` | `date` | Start of end-date range |
-| `toEndDate` | `date` | End of end-date range |
-| `relOrganizationId` | `str` | Linked organization ID |
-| `relOrganizationName` | `str` | Linked organization name |
-| `relOrganizationCountryCode` | `str` | Linked organization country |
-
-See the [full filter reference](../endpoints/projects.md) for all available fields. See [Basic Usage](../usage_basics.md) for common search/iterate/collect patterns.
-
-## Sort Fields
-
-`relevance`, `startDate`, `endDate`. Use `"field asc"` or `"field desc"`.
-
-## Key Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `title` | `str` | Project title |
-| `acronym` | `str` | Short acronym |
-| `code` | `str \| None` | Project code or grant number |
-| `startDate` | `str \| None` | Start date (YYYY-MM-DD) |
-| `endDate` | `str \| None` | End date (YYYY-MM-DD) |
-| `fundings` | `SafeList[Funding]` | Funding sources with funder details |
-| `granted` | `Grant` | Awarded grant amounts |
-| `keywords` | `SafeList[str]` | Keywords |
-| `summary` | `str` | Project abstract |
-| `websiteUrl` | `str \| None` | Official website |
-| `openAccessMandateForPublications` | `bool \| None` | OA mandate for publications |
-| `openAccessMandateForDataset` | `bool \| None` | OA mandate for datasets |
-
-## Computed Properties
-
-| Property | Return | Description |
-|----------|--------|-------------|
-| `funder_name` | `str \| None` | First funder short name or name |
-| `funder_jurisdiction` | `str \| None` | First funder jurisdiction |
-| `start_year` | `int \| None` | Year parsed from `startDate` |
-| `end_year` | `int \| None` | Year parsed from `endDate` |
-
-See [Features](../ergonomics.md) for an overview of computed properties and `SafeList`.
-
-## Linked Entities
-
-Find research outputs linked to a project using `relProjectId`:
+These four resources share the research-product machinery: one V4 `filter`
+expression, the same `search`/`iterate`/`count` helpers, and V3 by-id
+lookups. They differ in filter fields, sort fields, and models.
 
 ```python
-from aireloom.endpoints import ResearchProductsFilters
+from aireloom import (
+    DataSourcesFilters,
+    OrganizationsFilters,
+    PersonsFilters,
+    ProjectsFilters,
+)
 
-async with AireloomSession() as session:
-    outputs = await session.research_products.collect(
-        filters=ResearchProductsFilters(relProjectId=project.id), limit=50,
-    )
+page = await client.projects.search(
+    ProjectsFilters(funder="EC", project_status="ongoing"), page_size=25
+)
+org = await client.organizations.get("wtso__________::1234")
+sources = await client.data_sources.search(
+    DataSourcesFilters(jurisdiction="Governmental"), page_size=10
+)
+persons = await client.persons.search(
+    PersonsFilters(given_name="Ada", last_name="Lovelace")
+)
 ```
+
+## Sort fields
+
+Only these fields sort. Anything else raises `ConfigurationError` before a
+request is sent:
+
+- research products: `relevance`, `publication_date`, `date_of_collection`,
+  `citation_count`, `influence`, `popularity`, `impulse`
+- projects, organizations, data sources, persons: `relevance`
+
+Directions are `asc`/`desc`; the default direction depends on the field.
+`sort="relevance"` sorts by match score for free-text queries.
+
+## Valid filter fields
+
+The filter models list exactly the fields the V4 endpoints accept; extra
+attributes are rejected by pydantic. The dotted aliases mirror the API
+field names (`organizations.id`, `compatibility.name`,
+`collected_from.id`). Unknown V4 fields raise a server-side error, which is
+how the models stay honest.
+
+## Counts and aggregations
+
+```python
+n = await client.projects.count()
+by_status = await client.projects.group_by("project_status")
+facets = await client.organizations.facets("country", page_size=1)
+```
+
+## Organization name variants
+
+```python
+orgs = await client.organizations.find_variants(
+    ["universiteit twente", "university of twente"], country="NL"
+)
+```
+
+Each fragment becomes one free-text search; results are deduplicated by
+exact `id`, keeping the first occurrence. Records with `pending_org_::`
+identifiers are kept on purpose: they carry organization-project links
+that the canonical merged record lost, which makes them the main source
+of undercounted org-project links. Merging them is the caller's decision.

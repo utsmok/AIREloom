@@ -1,100 +1,53 @@
-# aireloom/config.py
+"""Settings for the AIREloom client, loaded from the environment or ``.env``."""
+
 from functools import lru_cache
 
 from bibliofabric.config import BaseApiSettings
-from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
-# Import OpenAIRE-specific constants
-from .constants import (
-    DEFAULT_USER_AGENT,
-    REGISTERED_SERVICE_API_TOKEN_URL,
-    REGISTERED_SERVICE_API_TOKEN_URL_V2,
+DEFAULT_GRAPH_BASE_URL = "https://api.openaire.eu/graph"
+DEFAULT_SCHOLIX_BASE_URL = "https://api.scholexplorer.openaire.eu"
+"""OpenAIRE identity-platform (Keycloak) endpoint; the legacy
+``https://aai.openaire.eu/oidc/token`` endpoint was retired on 2026-11-02 and
+returns 410 Gone."""
+DEFAULT_TOKEN_URL = (
+    "https://aai.openaire.eu/auth/realms/openaire/protocol/openid-connect/token"
 )
 
 
-class ApiSettings(BaseApiSettings):
-    """
-    OpenAIRE-specific settings for the AIREloom client.
+class AireloomSettings(BaseApiSettings):
+    """Tunable client behavior for the OpenAIRE Graph and Scholexplorer APIs.
 
-    Inherits all generic API client settings from BaseApiSettings and adds
-    OpenAIRE-specific authentication and configuration fields.
-
-    Settings are loaded from environment variables (prefixed with 'AIRELOOM_')
-    or .env/secrets.env files.
+    Every field can be set through an environment variable prefixed with
+    ``AIRELOOM_`` (for example ``AIRELOOM_OPENAIRE_CLIENT_ID``) or a ``.env``
+    file in the working directory.
     """
 
     model_config = SettingsConfigDict(
-        env_file=(".env", "secrets.env"),  # Look in both .env and secrets.env
-        env_file_encoding="utf-8",
-        # Environment variables should be prefixed, e.g., AIRELOOM_OPENAIRE_API_TOKEN
         env_prefix="AIRELOOM_",
-        extra="ignore",  # Ignore extra fields found in environment
-        case_sensitive=False,  # Allow AIRELOOM_openaire_api_token etc.
-        arbitrary_types_allowed=True,  # Required for hook callables
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
-    # Override the default user agent to use OpenAIRE-specific value
-    user_agent: str = Field(
-        default=DEFAULT_USER_AGENT,
-        description="User-Agent header for requests",
-    )
+    base_url: str = DEFAULT_GRAPH_BASE_URL
+    scholix_base_url: str = DEFAULT_SCHOLIX_BASE_URL
 
-    # --- OpenAIRE-specific Authentication Settings ---
-    # Option 1: Static API Token
-    openaire_api_token: str | None = Field(
-        default=None, description="Static OpenAIRE API Token (optional)"
-    )
+    # OAuth2 client credentials (registered service). Both must be set for
+    # authenticated access; without them the client stays anonymous.
+    openaire_client_id: str | None = None
+    openaire_client_secret: str | None = None
+    token_url: str = DEFAULT_TOKEN_URL
 
-    # Option 2: Client Credentials for OAuth2 Token Fetching
-    openaire_client_id: str | None = Field(
-        default=None,
-        description="OpenAIRE Client ID for OAuth2 (required for client_credentials)",
-    )
-    openaire_client_secret: str | None = Field(
-        default=None,
-        description="OpenAIRE Client Secret for OAuth2 (required for client_credentials)",
-    )
-    # Token URL is fetched from constants, but could be overridden via env if needed
-    openaire_token_url: str = Field(
-        default=REGISTERED_SERVICE_API_TOKEN_URL,
-        description="OAuth2 Token Endpoint URL",
-    )
-    # OpenAIRE retired the legacy endpoint on 2026-11-02 (now returns 410 Gone);
-    # the Keycloak endpoint is the default and AIRELOOM_NEW_TOKEN_ENDPOINT=0
-    # restores the retired legacy URL.
-    new_token_endpoint: bool = Field(
-        default=True,
-        description=(
-            "Request tokens from the OpenAIRE Keycloak endpoint "
-            "(default since the 2026-11-02 migration). Set to 0 only to fall "
-            "back to the retired legacy endpoint. Ignored when "
-            "openaire_token_url is set explicitly."
-        ),
-    )
+    # D-15: OpenAIRE allows about 7200 requests per rolling hour.
+    max_requests_per_second: float | None = 2.0
+    max_concurrency: int = 4
 
-    @property
-    def effective_token_url(self) -> str:
-        """Token endpoint in effect: explicit override wins, then the toggle."""
-        if self.openaire_token_url != REGISTERED_SERVICE_API_TOKEN_URL:
-            return self.openaire_token_url
-        if self.new_token_endpoint:
-            return REGISTERED_SERVICE_API_TOKEN_URL_V2
-        return self.openaire_token_url
+    # The Scholexplorer host sends no rate-limit headers, so self-throttle.
+    scholix_max_requests_per_second: float | None = 1.0
 
 
-# Create a single, cached instance of settings
 @lru_cache
-def get_settings() -> ApiSettings:
-    """
-    Provides access to the application settings.
-
-    Settings are loaded from environment variables (prefixed with 'AIRELOOM_')
-    or .env/secrets.env files. The instance is cached for performance.
-
-    Returns:
-        ApiSettings: The application settings instance.
-    """
-    # Check if running in a test environment and potentially load test-specific env
-    # For now, relies on standard .env/.secrets.env loading
-    return ApiSettings()
+def get_settings() -> AireloomSettings:
+    """Return the process-wide settings instance, loaded from the environment."""
+    return AireloomSettings()

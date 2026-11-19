@@ -6,75 +6,11 @@ response headers, base entity identifiers, and generic API response envelopes.
 These models provide data validation and a clear structure for API data.
 """
 
-import logging
-from typing import Annotated, Any, TypeVar
+from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, Field, HttpUrl, field_validator
-from pydantic.config import ConfigDict  # Added ConfigDict
-
-from .safe_types import SafeStr
-
-# Generic type for the entity contained within the response results
-EntityType = TypeVar("EntityType", bound="BaseEntity")
-logger = logging.getLogger(__name__)
-
-
-class Header(BaseModel):
-    """Represents the 'header' section commonly found in OpenAIRE API responses.
-
-    This model captures metadata about the API response, such as status,
-    query time, total number of results found (`numFound`), pagination details
-    like `nextCursor`, and page size. It includes validators to coerce
-    numeric fields that might be returned as strings by the API.
-
-    Attributes:
-        status: Optional status message from the API.
-        code: Optional status code from the API.
-        message: Optional descriptive message from the API.
-        queryTime: Time taken by the API to process the query, in milliseconds.
-        nextCursor: The cursor string to use for fetching the next page of results.
-                    Can be a string or an HttpUrl.
-        pageSize: The number of results included in the current page.
-        page: The current page number.
-        maxScore: The maximum score among all matching results.
-        totalPages: Total number of pages of results.
-        totalLinks: Total number of links (used by /research-products/links endpoint).
-    """
-
-    # Note: status, code, message are typically expected, but optional for robustness.
-    status: str | None = None
-    code: str | None = None
-    message: str | None = None
-    # total and count are often strings in the API response, needs validation/coercion
-    queryTime: int | None = None
-    numFound: int | None = None  # next/prev can be full URLs or just the cursor string
-    nextCursor: str | HttpUrl | None = Field(default=None)  # API returns "nextCursor"
-    pageSize: int | None = None
-    page: int | None = None
-    maxScore: float | None = None
-    totalPages: int | None = None
-    totalLinks: int | None = None
-
-    @field_validator(
-        "queryTime", "numFound", "pageSize", "totalPages", "totalLinks", mode="before"
-    )
-    @classmethod
-    def coerce_str_to_int(cls, v: Any) -> int | None:
-        """Coerce string representations of numbers to integers, logging on failure."""
-        if isinstance(v, str):
-            try:
-                return int(v)
-            except (ValueError, TypeError):
-                logger.warning(f"Could not coerce header value '{v}' to int.")
-                return None
-        # Allow integers through if they somehow bypass 'before' validation or API changes
-        if isinstance(v, int):
-            return v
-        # Handle other unexpected types if necessary
-        logger.warning(f"Unexpected type {type(v)} for header numeric value '{v}'.")
-        return None
-
-    model_config = ConfigDict(extra="allow")
+from bibliofabric import SafeList, SafeStr
+from pydantic import BaseModel, BeforeValidator, Field
+from pydantic.config import ConfigDict
 
 
 class BaseEntity(BaseModel):
@@ -90,7 +26,7 @@ class BaseEntity(BaseModel):
     """
 
     # Common identifier across most entities
-    id: str
+    id: SafeStr = ""
 
     def __repr__(self) -> str:
         cls = type(self).__name__
@@ -101,6 +37,126 @@ class BaseEntity(BaseModel):
         if type_val:
             parts.append(f"type={type_val!r}")
         return f"{cls}({', '.join(parts)})"
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+
+class Pid(BaseModel):
+    """A scheme/value persistent identifier (``{"scheme": "doi", "value": ...}`)."""
+
+    scheme: SafeStr = ""
+    value: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class TypedPid(BaseModel):
+    """A typed identifier: ``{"value", "typeCode", "typeLabel"}`` (person/project pids)."""
+
+    value: SafeStr = ""
+    typeCode: SafeStr = ""
+    typeLabel: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+
+class CodeLabel(BaseModel):
+    """A code/label pair (countries, jurisdictions, EOSC types, communities)."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class Provenance(BaseModel):
+    """Provenance/trust metadata attached to subjects, author pids and links."""
+
+    provenance: SafeStr = ""
+    trust: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class DsRef(BaseModel):
+    """A data-source reference in related-record ``collectedfrom`` entries."""
+
+    dsId: SafeStr = ""
+    dsName: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class RelatedRecordHeader(BaseModel):
+    """Header of a related-record link entry (RP ``links[]``, Project ``links[]``)."""
+
+    relationType: SafeStr = ""
+    relationClass: SafeStr = ""
+    relatedIdentifier: SafeStr = ""
+    relatedRecordType: SafeStr = ""
+    relationProvenance: SafeStr = ""
+    trust: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FundingJurisdiction(BaseModel):
+    """Jurisdiction info within the hierarchical ``funding`` field."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingJurisdiction = Annotated[
+    FundingJurisdiction,
+    BeforeValidator(lambda v: FundingJurisdiction() if v is None else v),
+]
+
+
+class FundingFunder(BaseModel):
+    """Funder details within the hierarchical ``funding`` field."""
+
+    id: SafeStr = ""
+    shortname: SafeStr = ""
+    name: SafeStr = ""
+    jurisdiction: SafeFundingJurisdiction = Field(default_factory=FundingJurisdiction)
+    pid: SafeList[Pid] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingFunder = Annotated[
+    FundingFunder, BeforeValidator(lambda v: FundingFunder() if v is None else v)
+]
+
+
+class FundingLevel(BaseModel):
+    """A single hierarchy level (level0/level1/level2) in the ``funding`` field."""
+
+    id: SafeStr = ""
+    description: SafeStr = ""
+    name: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+SafeFundingLevel = Annotated[
+    FundingLevel, BeforeValidator(lambda v: FundingLevel() if v is None else v)
+]
+
+
+class FundingHierarchy(BaseModel):
+    """Funder -> level0 -> level1 -> level2 taxonomy tree (``funding`` field).
+
+    Shared by Project.funding, Organization.fundings[] and related records.
+    """
+
+    funder: SafeFundingFunder = Field(default_factory=FundingFunder)
+    level0: SafeFundingLevel = Field(default_factory=FundingLevel)
+    level1: SafeFundingLevel = Field(default_factory=FundingLevel)
+    level2: SafeFundingLevel = Field(default_factory=FundingLevel)
 
     model_config = ConfigDict(extra="allow")
 
@@ -122,46 +178,3 @@ class CfHbKeyValue(BaseModel):
 SafeCfHbKeyValue = Annotated[
     CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
 ]
-
-
-class ApiResponse[EntityType: "BaseEntity"](BaseModel):
-    """Generic Pydantic model for standard OpenAIRE API list responses.
-
-    This model represents the common envelope structure for API responses that
-    return a list of entities. It includes a `header` (metadata) and a `results`
-    field containing the list of entities. It is generic over `EntityType` to
-    allow specific entity types to be used in the `results` list.
-
-    Attributes:
-        header: A `Header` object containing metadata about the response.
-        results: An optional list of entities of type `EntityType`. A validator
-                 ensures this field is a list or None, handling potential API
-                 inconsistencies gracefully.
-    """
-
-    header: Header
-    # Results can sometimes be null/absent, sometimes an empty list
-    results: list[EntityType] | None = None
-
-    @field_validator("results", mode="before")
-    @classmethod
-    def handle_null_results(cls, v: Any) -> list[EntityType] | None:
-        """Ensure 'results' is a list or None.
-
-        Handles potential None or unexpected formats from the API.
-        Logs a warning and returns an empty list for unexpected types.
-        """
-        if v is None:
-            return None  # Explicitly return None if API sends null
-        if isinstance(v, list):
-            return v  # Already a list
-
-        # Handle unexpected formats (e.g., dict wrappers like {'result': [...]})
-        # or other non-list types by logging and returning an empty list.
-        logger.warning(
-            f"Unexpected format for 'results' field: {type(v)}. "
-            f"Expected list or None, got {v!r}. Returning empty list."
-        )
-        return []
-
-    model_config = ConfigDict(extra="allow")

@@ -21,40 +21,17 @@ plugins:
         python:
           paths: [src]
 
-not_in_nav: |
-  v3-migration/*.md
 nav:
   - Home: index.md
-  - Getting Started: getting_started.md
-  - Installation: installation.md
-  - Basic Usage: usage_basics.md
-  - Features: ergonomics.md
-  - Entities:
-      - Research Products: usage/research_products.md
-      - Data Sources: usage/data_sources.md
-      - Organizations: usage/organizations.md
-      - Projects: usage/projects.md
-      - Persons: usage/persons.md
+  - Usage:
+      - Research products: usage/research_products.md
+      - Projects, organizations, data sources, persons: usage/projects.md
       - Links: usage/links.md
       - Scholix: usage/scholix.md
-  - OpenAIRE Endpoints:
-      - Research Products: endpoints/research_products.md
-      - Data Sources: endpoints/data_sources.md
-      - Organizations: endpoints/organizations.md
-      - Projects: endpoints/projects.md
-      - Persons: endpoints/persons.md
-      - Links: endpoints/links.md
-      - Scholix: endpoints/scholix.md
-  - Advanced:
-      - Configuration: advanced/configuration.md
-      - Caching: advanced/caching.md
-      - Rate Limiting: advanced/rate_limiting.md
-      - Request Hooks: advanced/hooks.md
-      - Error Handling: advanced/error_handling.md
-  - API Reference: api_reference.md
-  - Authentication: authentication.md
-  - Changelog: changelog.md
-  - Migration to v3: migration-to-v3.md
+  - Errors, retries, and rate limits: errors.md
+  - Upstream quirks: quirks.md
+  - API reference: api.md
   - Contributing: contributing.md
+  - Changelog: https://github.com/utsmok/aireloom/blob/main/CHANGELOG.md
 watch:
   - src/aireloom

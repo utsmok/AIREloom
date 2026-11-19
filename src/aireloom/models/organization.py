@@ -1,139 +1,49 @@
 # aireloom/models/organization.py
 """Pydantic models for representing OpenAIRE Organization entities.
 
-This module defines the Pydantic model for an OpenAIRE Organization,
-including nested models for country and persistent identifiers (PIDs),
-based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/organization
 """
 
 from typing import Annotated
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, computed_field
+from bibliofabric import SafeList, SafeStr
+from pydantic import BeforeValidator, Field, computed_field
 
-from .base import ApiResponse, BaseEntity, SafeCfHbKeyValue
-from .safe_types import SafeList, SafeStr
+from .base import (
+    BaseEntity,
+    CfHbKeyValue,
+    CodeLabel,
+    FundingHierarchy,
+    Pid,
+)
 
+Country = CodeLabel
+"""Alias keeping the historical export name; organizations carry ``{code, label}``."""
 
-class OrganizationFundingLevel(BaseModel):
-    """A funding hierarchy level (level0/1/2) in an Organization's funding record."""
-
-    id: SafeStr = ""
-    description: SafeStr = ""
-    name: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-class OrganizationFundingJurisdiction(BaseModel):
-    """Jurisdiction within an Organization funding funder."""
-
-    code: SafeStr = ""
-    label: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-SafeOrganizationFundingJurisdiction = Annotated[
-    OrganizationFundingJurisdiction,
-    BeforeValidator(lambda v: OrganizationFundingJurisdiction() if v is None else v),
-]
-
-
-class OrganizationFundingFunder(BaseModel):
-    """The funder entity within an Organization's funding record."""
-
-    id: SafeStr = ""
-    shortname: SafeStr = ""
-    name: SafeStr = ""
-    jurisdiction: SafeOrganizationFundingJurisdiction = Field(
-        default_factory=OrganizationFundingJurisdiction
-    )
-    # pid can be a dict or list; keep permissive for now
-    pid: SafeList[dict] | None = Field(default_factory=list)
-
-    model_config = ConfigDict(extra="allow")
-
-
-class OrganizationFunding(BaseModel):
-    """Funding information attached to an Organization (V3 shape).
-
-    Distinct from ``project.Funding`` — this uses funder/level0/1/2
-    rather than fundingStream/jurisdiction/name/shortName.
-    """
-
-    funder: OrganizationFundingFunder | None = None
-    level0: OrganizationFundingLevel | None = None
-    level1: OrganizationFundingLevel | None = None
-    level2: OrganizationFundingLevel | None = None
-
-    model_config = ConfigDict(extra="allow")
-
-
-class Country(BaseModel):
-    """Represents the country associated with an organization.
-
-    Attributes:
-        code: The ISO 3166-1 alpha-2 country code (e.g., "GR", "US").
-        label: The human-readable name of the country (e.g., "Greece").
-    """
-
-    code: SafeStr = ""
-    label: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-# Type alias for Country that defaults None to Country()
 SafeCountry = Annotated[
     Country, BeforeValidator(lambda v: Country() if v is None else v)
 ]
-
-
-class OrganizationPid(BaseModel):
-    """Represents a persistent identifier (PID) for an organization.
-
-    Attributes:
-        scheme: The scheme of the PID (e.g., "ror", "grid", "isni").
-        value: The value of the PID.
-    """
-
-    scheme: SafeStr = ""
-    value: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
+SafeCfHbKeyValue = Annotated[
+    CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
+]
 
 
 class Organization(BaseEntity):
     """Model representing an OpenAIRE Organization entity.
 
-    Captures details about an organization, including its names, website,
-    country, and various persistent identifiers. Inherits the `id` field
-    from `BaseEntity`.
-
-    Attributes:
-        legalShortName: The official short name or acronym of the organization.
-        legalName: The full official legal name of the organization.
-        alternativeNames: A list of other known names for the organization.
-        websiteUrl: The URL of the organization's official website.
-        country: A `Country` object representing the organization's country.
-        pids: A list of `OrganizationPid` objects representing various PIDs
-              associated with the organization.
-        originalIds: Array of original/source identifiers (V3).
-        collectedFrom: Datasource(s) the organization was collected from (V3).
-        fundings: Funding records attached to this organization (V3).
+    Captures names, website, country, persistent identifiers, funding records,
+    and provenance. Inherits the ``id`` field from ``BaseEntity``.
     """
 
-    # id is inherited from BaseEntity
     legalShortName: SafeStr = ""
     legalName: SafeStr = ""
     alternativeNames: SafeList[str] = Field(default_factory=list)
     websiteUrl: str | None = None
     country: SafeCountry = Field(default_factory=Country)
-    pids: SafeList[OrganizationPid] = Field(default_factory=list)
+    pids: SafeList[Pid] = Field(default_factory=list)
     originalIds: SafeList[str] = Field(default_factory=list)
     collectedFrom: SafeList[SafeCfHbKeyValue] = Field(default_factory=list)
-    fundings: SafeList[OrganizationFunding] = Field(default_factory=list)
+    fundings: SafeList[FundingHierarchy] = Field(default_factory=list)
 
     @computed_field
     @property
@@ -162,9 +72,5 @@ class Organization(BaseEntity):
             parts.append(f"ROR:{self.ror_id}")
         return " | ".join(parts) if parts else f"Organization(id={self.id!r})"
 
-    model_config = ConfigDict(extra="allow")
-
 
 # Define the specific response type for organizations
-OrganizationResponse = ApiResponse[Organization]
-"""Type alias for an API response containing a list of `Organization` entities."""
