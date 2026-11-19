@@ -10,12 +10,11 @@ AIREloom is an async Python client for the [OpenAIRE Graph API](https://graph.op
 
 ## Features
 
-- **Full API coverage** — Research Products (v3), Projects, Organizations, Data Sources, Persons, Research Product Links, and Scholexplorer (v1/v2/v3)
-- **Async by design** — built on `httpx` + `asyncio` with proper connection pooling
-- **Typed throughout** — Pydantic models for all inputs/outputs, PEP 561 `py.typed` marker
-- **Ergonomics layer** — computed properties, SafeStr/SafeList defaults, convenience queries, iterator helpers
-- **Flexible auth** — auto-detection from env vars, static tokens, OAuth2 client credentials, or no auth
-- **Resilient** — retries with backoff, rate-limit handling (`Retry-After`), optional client-side caching, hook system
+- **Graph API V4 for list operations** — the recommended filter-based queries (`filter=field:value`, `sort=field:dir`, `select`, `facets`, `group_by`, cursor paging up to 10000 per page); single-entity lookups use the stable V3 by-id routes
+- **Async by design** — built on `httpx` + `asyncio` with retries, a client-side rate limiter (2 req/s, concurrency 4), and typed errors
+- **Typed throughout** — Pydantic models for all inputs and outputs, PEP 561 `py.typed`; `search()` returns `bibliofabric.Page[E]`
+- **Scholix V3 (V2 for date filters)** — typed link records through a dedicated internal client for the Scholexplorer host
+- **Anonymous or OAuth2** — client credentials against the Keycloak endpoint, or no auth at all
 
 ## Installation
 
@@ -23,201 +22,186 @@ AIREloom is an async Python client for the [OpenAIRE Graph API](https://graph.op
 uv add aireloom
 ```
 
-Or with pip: `pip install aireloom`. Requires Python ≥3.12.
+Requires Python ≥3.12.
 
 ## Quick Start
 
 ```python
 import asyncio
-from aireloom import AireloomSession
-from aireloom.endpoints import ResearchProductsFilters
+from aireloom import AireloomClient, ResearchProductsFilters
+
 
 async def main():
-    async with AireloomSession() as session:
-        # Search publications
+    async with AireloomClient() as client:
+        # Search publications (V4 filter-based query)
         filters = ResearchProductsFilters(
-            type="article", mainTitle="climate change",
-            fromPublicationDate="2024-01-01",
+            type="publication",
+            title_search="climate change",
+            from_publication_year=2024,
         )
-        response = await session.research_products.search(
-            filters=filters, page_size=5, sortBy="publicationDate desc",
+        page = await client.research_products.search(
+            filters,
+            sort="publication_date:desc",
+            page_size=5,
         )
-        for product in response.results:
-            print(f"{product.title} — DOI: {product.doi or 'N/A'}")
+        for product in page.results:
+            print(f"{product.mainTitle} — DOI: {product.doi or 'N/A'}")
 
-        # Iterate all results (cursor-based auto-pagination)
-        filters2 = ResearchProductsFilters(type="dataset", countryCode="NL")
-        async for product in session.research_products.iterate(
-            filters=filters2, page_size=50,
+        # Iterate all results (cursor-based, resumable)
+        async for product in client.research_products.iterate(
+            ResearchProductsFilters(type="dataset", authorships_countries=["NL"]),
+            page_size=100,
         ):
-            print(product.title)
-            break  # stop when you want
+            print(product.mainTitle)
+            break  # stop whenever you want
 
-        # Get a single entity
-        product = await session.research_products.get("doi:10.1038/s41586-021-03964-9")
-        print(product.title, product.doi)
+        # Get a single entity by OpenAIRE id (V3 by-id route)
+        product = await client.research_products.get(
+            "dedup_wf_002::016e036dfe4204781ee9bf94c8b06c1b"
+        )
 
-        # Convenience queries
-        citations = await session.queries.citing_works("doi:10.1038/s41586-021-03964-9")
-        print(f"{len(citations)} citations")
+        # Batch-fetch by DOI (one OR filter per chunk of 50)
+        products = await client.research_products.batch_get_by_doi(
+            ["10.5281/zenodo.15069438", "10.1038/s41586-023-06221-2"]
+        )
+
+        # Aggregations
+        counts = await client.research_products.group_by("type")
+        print(counts)  # {'publication': 241566601, ...}
+
 
 asyncio.run(main())
 ```
 
-No authentication required — the OpenAIRE API works without it. For higher rate limits, see [Authentication](#authentication).
+No authentication required — the Graph API works without it. For higher rate limits, set credentials (see [Authentication](#authentication)).
 
 ## Core API
 
 ### Retrieval methods
 
-Every resource client (`session.research_products`, `session.organizations`, etc.) provides:
+Every entity resource (`client.research_products`, `client.projects`,
+`client.organizations`, `client.data_sources`, `client.persons`) provides:
 
 | Method | Description |
 |--------|-------------|
-| `get(id)` | Retrieve a single entity by ID |
-| `search(filters, page, page_size, sortBy)` | Paginated search |
-| `iterate(filters, page_size, sortBy)` | Auto-paginate all results (cursor-based) |
+| `get(id)` | Retrieve a single entity by OpenAIRE id (V3 by-id route) |
+| `search(filters, query, sort, select, page, page_size, cursor)` | One page as `Page[E]` |
+| `iterate(filters, page_size=100, limit, cursor, on_page)` | Auto-paginate all results (cursor-based, resumable) |
 | `collect(limit, ...)` | Collect results into a list |
-| `count(filters)` | Count matching entities |
+| `count(filters)` | Count matching entities cheaply |
 | `first(filters)` | Get first matching entity or `None` |
+| `facets(*fields, filters)` | Facet counts per field: `{field: {value: count}}` |
+| `group_by(field, filters)` | Counts per value without fetching records |
+| `batch_get(ids, field, batch_size)` | Fetch many ids via OR filters |
 
-### Resource clients
+`client.research_products` additionally has `batch_get_by_doi(dois)`,
+`search_links()`, `iterate_links()`, and `get_relations_info()`.
 
-| Client | API | Notes |
-|--------|-----|-------|
-| `session.research_products` | Graph API v2 | Enriched responses with related entities |
-| `session.projects` | Graph API v1 | |
-| `session.organizations` | Graph API v1 | |
-| `session.data_sources` | Graph API v1 | |
-| `session.persons` | Graph API v1 | `givenName`/`lastName` filters cause 500s (upstream bug) |
-| `session.scholix` | Scholix v3 | `search_links()` / `iterate_links()` |
+### Filters and sorting
 
-### Ergonomics
-
-**Computed properties** on models — derived fields that don't exist in the raw API response:
-
-```python
-product.doi              # → "10.1234/example" (extracted from pids)
-product.publication_year  # → 2024 (from publicationDate)
-product.is_open_access   # → True (from bestAccessRight)
-org.ror_id               # → "https://ror.org/..." (from rorId)
-project.funder_name      # → "EC" (from funding array)
-```
-
-**SafeStr/SafeList** — `None` is never returned for string/list fields; you get `""` or `[]` instead:
+Filters are typed Pydantic models in `aireloom.filters`, one per entity. Field
+names follow the V4 filter syntax; dotted API fields use underscores with
+aliases (`ids_doi` sends `ids.doi`). Lists become pipe-separated ORs, booleans
+become `true`/`false`, and string values pass through operators such as
+`">100"` or `"!other"`:
 
 ```python
-product.subjects  # [] instead of None
-product.title     # "" instead of None
-```
-
-**Convenience queries** via `session.queries`:
-
-```python
-session.queries.publications_by_doi("10.1234/example")
-session.queries.citing_works("doi:10.1234/example")
-session.queries.datasets_by_organization("openaire____::orgID:grid.5522.e")
-session.queries.projects_by_funder("EC")
-```
-
-See [Ergonomics docs](https://utsmok.github.io/AIREloom/ergonomics/) for the full list.
-
-### Filters & Sorting
-
-Filters are Pydantic models — import from `aireloom.endpoints`:
-
-```python
-from aireloom.endpoints import ResearchProductsFilters, ProjectsFilters
+from aireloom.filters import ResearchProductsFilters
 
 filters = ResearchProductsFilters(
-    type="article",
-    mainTitle="machine learning",
-    fromPublicationDate="2024-01-01",
-    countryCode="NL",
+    type="publication",
+    title_search="machine learning",
+    from_publication_year=2024,
+    authorships_countries=["NL", "BE"],
+    impact_citation_count=">100",
 )
 ```
 
-Sort with `sortBy="field asc"` or `sortBy="field desc"`. Valid fields depend on the endpoint (see [`ENDPOINT_DEFINITIONS`](src/aireloom/endpoints.py)).
+Sort with `sort="citation_count:desc"` (`asc`/`desc`, comma-separate several
+fields). Valid fields are validated client-side per entity and raise
+`ConfigurationError`.
+
+Full-text search is a separate parameter: `search(filters, query="...")`.
 
 ## Authentication
 
-AIREloom auto-detects auth from environment variables or `.env` files (prefixed with `AIRELOOM_`). No auth is the default if nothing is configured.
+AIREloom reads `AIRELOOM_`-prefixed environment variables or a `.env` file.
+Without credentials the client is anonymous:
 
 ```dotenv
-# Option 1: Static token
-AIRELOOM_OPENAIRE_API_TOKEN=your_token
-
-# Option 2: OAuth2 client credentials
 AIRELOOM_OPENAIRE_CLIENT_ID=your_id
 AIRELOOM_OPENAIRE_CLIENT_SECRET=your_secret
 ```
 
-Or pass explicitly:
+Both set → OAuth2 client credentials against the OpenAIRE Keycloak endpoint
+(`https://aai.openaire.eu/auth/realms/openaire/protocol/openid-connect/token`;
+the legacy `oidc/token` endpoint is retired). You can also pass any
+`bibliofabric` auth strategy explicitly:
 
 ```python
-from bibliofabric.auth import NoAuth, StaticTokenAuth, ClientCredentialsAuth
+from bibliofabric.auth import NoAuth, StaticTokenAuth
 
-session = AireloomSession(auth_strategy=StaticTokenAuth(token="..."))
+client = AireloomClient(auth=StaticTokenAuth(token="..."))
 ```
 
-See [Authentication docs](https://utsmok.github.io/AIREloom/authentication/) for details.
+## Scholix
+
+`client.scholix` searches the Scholexplorer host (own rate limit: 1 req/s):
+
+```python
+from aireloom.filters import ScholixFilters
+
+page = await client.scholix.search_links(
+    ScholixFilters(sourcePid="10.1038/s41586-023-06221-2")
+)
+async for link in client.scholix.iterate_links(
+    ScholixFilters(sourcePid="10.1038/s41586-023-06221-2")
+):
+    print(link.relationship_type.name, link.target.titles[0])
+```
+
+V3 serves all queries; queries with `from_date`/`to_date` are routed to V2
+automatically because the V3 endpoint returns zero rows for date filters.
+`search_links_v2` / `iterate_links_v2` target V2 directly, and
+`list_link_providers` / `list_link_publishers` cover the V2 directory
+endpoints. The V1 endpoints were removed.
 
 ## Error Handling
 
 ```python
-from bibliofabric.exceptions import (
-    BibliofabricError, APIError, NotFoundError, RateLimitError,
-    TimeoutError, NetworkError, AuthError, ValidationError,
+from aireloom import (
+    BibliofabricError,
+    APIError,
+    AuthError,
+    ConfigurationError,
+    NetworkError,
+    NotFoundError,
+    RateLimitError,
+    TimeoutError,
+    ValidationError,
 )
 ```
 
-See [Error Handling docs](https://utsmok.github.io/AIREloom/advanced/error_handling/) for the full hierarchy.
-
-## Examples
-
-All examples in [`examples/`](examples/) are dual-purpose — run as scripts or as interactive [marimo](https://marimo.io) notebooks:
-
-```bash
-# As a script
-uv run examples/simple_example.py
-
-# As an interactive notebook
-uv run marimo edit examples/simple_example.py
-```
-
-| Script | Description |
-|--------|-------------|
-| `simple_example.py` | Search, iterate, get research products |
-| `02_scholix_link_discovery.py` | Discover publication–dataset links via Scholexplorer |
-| `03_research_product_analysis.py` | Deep-dive into product metadata |
-| `04_organization_projects.py` | Organizations and their projects |
-| `05_advanced_filtering.py` | Complex filter combinations |
-| `06_persons_discovery.py` | Person search and co-authorship |
-| `07_ergonomics_showcase.py` | Before/after: raw API vs ergonomics layer |
-| `08_iterator_helpers.py` | `collect()`, `count()`, `first()` |
-| `09_computed_fields_and_safe_types.py` | Computed properties and SafeStr/SafeList |
-| `10_convenience_queries.py` | All convenience query functions |
-
-See [`examples/README.md`](examples/README.md) for marimo embedding and WASM details.
+`request()` raises on every status ≥ 400 (404 → `NotFoundError`, 429 →
+`RateLimitError`), and validation failures raise `ValidationError` carrying
+the raw payload.
 
 ## Known OpenAIRE API Issues
 
-Full bug report with reproduction steps: [`OPENAIRE_BUG_REPORT.md`](OPENAIRE_BUG_REPORT.md).
-
-- **Persons `givenName`/`lastName` filters** — cause HTTP 500 despite being in the spec
-- **`pageSize=100`** on Links/Scholix — silently falls back to 10. Use `pageSize ≤ 99`
-- **Undocumented endpoints** — Persons has no filtering docs; Links (`/v1/researchProducts/links`) is entirely undocumented
-- **Sort field issues** — Persons only accepts `relevance`; Data Sources error messages say "organizations"
+- **Links and Scholix page sizes ≥ 100** silently return 10 results; AIREloom
+  caps both at 99.
+- **V4 `group_by` eligibility** is decided server-side per field: some fields
+  return 400 ("not eligible"), others (e.g. projects `funder_short_name`)
+  silently return empty counts.
+- **Page-based routes (`links`, Scholix) have no cursor or sort**, so page
+  windows can shift between requests during long iterations.
+- **V3 `from`/`to` date filters on `/v3/Links` return zero rows** (V2 works).
 
 ## Development
 
 ```bash
-uv sync                  # install dev deps
+uv sync --all-groups     # install dev deps
 uv run pytest -x -q      # run tests
-uvx ruff check src/      # lint
-uvx ty check src/        # type check
+uv run ruff check src/   # lint
+uv run ty check src/     # type check
 ```
-
-Pre-commit hooks for ruff format + lint are configured in `.pre-commit-config.yaml`.
-
-Contributions welcome — see [Contributing](https://utsmok.github.io/AIREloom/contributing/).

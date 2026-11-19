@@ -4,7 +4,106 @@ All notable changes to AIREloom are documented here. Format follows [Keep a Chan
 
 ## [Unreleased] - 0.8.0
 
-Overhaul onto bibliofabric 0.6; see migration notes.
+### Breaking
+
+Overhaul onto the rewritten bibliofabric 0.6 core, and migration of all Graph
+API list operations to the V4 filter-based queries (D-14).
+
+- `AireloomClient` replaces `AireloomSession`; there is no `Session` class and
+  no `session.queries` accessor. Helper queries became typed resource methods
+  with bounded defaults.
+- `search()` returns `bibliofabric.Page[E]` (`results`, `total`, `next_cursor`,
+  `page`, `meta`) instead of the aireloom response envelopes. The envelope
+  models (`ApiResponse`, `Header`, `*Response`, `LinksResponse`,
+  `ScholixResponse`) are deleted.
+- List operations hit `https://api.openaire.eu/graph/v4/{research-products,
+  projects,organizations,datasources,persons}` with the single `filter=`
+  expression; `get(id)` keeps the V3 by-id route because V4 has none.
+- Filter models moved from `aireloom.endpoints` to `aireloom.filters` and use
+  V4 field names (snake_case, dotted names as pydantic aliases). See the
+  migration table below.
+- Sorting is `sort="field:dir"` with snake_case fields (e.g.
+  `citation_count:desc`); invalid fields raise `ConfigurationError` instead of
+  an HTTP 400.
+- Scholix V1 endpoints (`links_from_pid`, `links_from_publisher`,
+  `links_from_datasource`, `list_datasources`, `ScholixV1Link`) are removed.
+  V3 is the default; `search_links_v2` / `iterate_links_v2` stay available and
+  date-filtered queries (`from_date`/`to_date`) are routed to V2 automatically
+  because V3 returns zero rows for them. Link methods return typed
+  `ScholixRelationship` records (`Page[ScholixRelationship]`).
+- Relations helpers return typed records: `get_relations_info()` returns
+  `list[RelationInfo]`, `iterate_links()` yields `Relation`.
+- Authentication is client credentials (Keycloak token endpoint) or anonymous;
+  the static-token setting (`AIRELOOM_OPENAIRE_API_TOKEN`), the
+  `new_token_endpoint` toggle, and `effective_token_url` are removed. Pass an
+  explicit `auth=StaticTokenAuth(...)` if you need a bearer token.
+- `client.scholix` runs on a dedicated internal client for the Scholexplorer
+  host (1 req/s limiter); Graph requests default to 2 req/s with concurrency 4.
+- Deleted modules: `session.py`, `queries.py`, `endpoints.py`, `constants.py`,
+  `resources/_batch.py`, `resources/_standard.py`. Logging is standard-library
+  `logging` (no loguru, no import-time configuration).
+- `iterate_links` / Scholix iteration stop on empty pages or the reported
+  total; both routes remain page-based without a cursor, so page windows can
+  shift between requests (upstream limitation, documented).
+
+### Migration from 0.7
+
+| 0.7 call | 0.8 call |
+|---|---|
+| `AireloomSession()` | `AireloomClient()` |
+| `session.research_products.search(filters, sortBy="publicationDate desc")` | `client.research_products.search(filters, sort="publication_date:desc")` |
+| `session.research_products.iterate(filters, page_size=50)` | `client.research_products.iterate(filters, page_size=100)` |
+| `session.queries.publications_by_doi(*dois)` | `client.research_products.batch_get_by_doi(dois)` |
+| `session.queries.citing_works(doi)` | `client.scholix.search_links(ScholixFilters(sourcePid=doi, relation="References"))` |
+| `session.scholix.search_links(...)` → `ScholixResponse` | `client.scholix.search_links(...)` → `Page[ScholixRelationship]` |
+| `response.results[i].title` | `page.results[i].mainTitle` |
+| `LinksFilters` import from `aireloom.endpoints` | from `aireloom.filters` |
+| `AIRELOOM_OPENAIRE_API_TOKEN=...` | `auth=StaticTokenAuth(token=...)` |
+| `AIRELOOM_NEW_TOKEN_ENDPOINT=1` | default behavior (Keycloak endpoint) |
+
+### V3 filter name → V4 filter field
+
+| V3 parameter (0.7 model field) | V4 filter field (0.8 model field) |
+|---|---|
+| `type` | `type` |
+| `mainTitle` | `title.search` (`title_search`) |
+| `id` / `pid` / `originalId` | `id` / `ids.pid` / `ids.original` (plus `ids.doi`, `ids.pmid`, ...) |
+| `fromPublicationDate` / `toPublicationDate` | `from_publication_date` / `to_publication_date` |
+| `fromPublicationYear` / `toPublicationYear` | `from_publication_year` / `to_publication_year` |
+| `countryCode` | `authorships.countries` (`authorships_countries`) |
+| `authorFullName` / `authorId` | `authorships.author.fullname` / `authorships.author.orcid` |
+| `accessRightLabel` | `best_oa.rights` (`best_oa_rights`) |
+| `openAccessColor` | `oa_color` |
+| `isGreen` / `isPeerReviewed` / `isInDiamondJournal` / `isPubliclyFunded` | `is_green` / `is_peer_reviewed` / `is_in_diamond_journal` / `is_publicly_funded` |
+| `influenceClass` / `popularityClass` / `impulseClass` / `citationCountClass` | `impact.influence_class` / `impact.popularity_class` / `impact.impulse_class` / `impact.citation_count_class` |
+| `instanceType` | `instance_type` |
+| `sdgLabel` / `fos` | `sdg` / `fos` |
+| `subjects` / `language` / `publisher` | `subjects` / `language` / `publisher` |
+| `relProjectId` / `relProjectCode` | `grants.project_id` / `grants.code` |
+| `relProjectFundingShortName` / `relProjectFundingStreamId` | `grants.funder_short_name` / `grants.funding_stream_id` |
+| `hasProjectRel` | `has_grant` |
+| `relOrganizationId` | `affiliations.organization_id` |
+| `relCommunityId` | `communities.id` |
+| `relHostingDataSourceId` / `relCollectedFromDatasourceId` | `host_datasource.id` / `collected_from.id` |
+| `rorId`, `relOrganization`, `relCommunityName`, `subCommunity`, `relFunder`, `excludePubDateRange`, `logicalOperator`, `source` | no V4 equivalent (dropped) |
+| Projects: `fundingShortName` / `fundingStreamId` / `fundinglevel0Id` | `funder_short_name` / `funding_stream_id` / `funding_level_0_id` |
+| Projects: `projectStatus` (0.8 adds) | `project_status` (`completed\|ongoing\|planned`) |
+| Projects: `fromStartDate` etc. | `from_start_date` / `to_start_date` / ... |
+| Projects: `relOrganizationId` / `relOrganizationName` | `organizations.id` / `organizations.name` |
+| Organizations: `legalName` / `legalShortName` | `legal_name.search` / `legal_short_name.search` |
+| Organizations/DS/Projects: `countryCode` / `country` | `country` (+ new `continent`) |
+| Data sources: `dataSourceTypeName` / `eoscdatasourcetype` | `type` / `eosc_datasource_type` |
+| Data sources: `compatibilityId` / `compatibilityName` | `compatibility.id` / `compatibility.name` |
+| Persons: `originalId` / `givenName` / `lastName` | `ids.original` / `given_name` / `last_name` |
+
+### Added
+
+- Typed `facets(*fields)` and `group_by(field)` helpers on every entity
+  resource, returning counts (`dict[str, dict[str, int]]` / `dict[str, int]`).
+- `select=` sparse fieldsets and the top-level `query=` full-text search on
+  every `search()` call.
+- Cursor-resumable iteration: `iterate(..., on_page=...)` reports
+  `next_cursor`, and `iterate(..., cursor=saved)` resumes a harvest.
 
 ## [0.7.0] - 2026-11-02
 
