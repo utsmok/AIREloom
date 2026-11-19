@@ -1,24 +1,19 @@
 """Shared base for the OpenAIRE Graph V4 entity resources."""
 
-import inspect
 import logging
-from collections.abc import AsyncIterator, Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any, ClassVar
 from urllib.parse import quote
 
 from bibliofabric.exceptions import ConfigurationError
 from bibliofabric.paging import QueryDialect
-from bibliofabric.resources import OnError, ResourceClient
+from bibliofabric.resources import ResourceClient
 from pydantic import BaseModel
 
 from ..dialect import GRAPH_DIALECT
 from ..filters import GraphFilters, encode_filter_value
 
 logger = logging.getLogger(__name__)
-
-
-class _CursorComplete(Exception):
-    """Internal signal: the API echoed the current cursor, so iteration is done."""
 
 
 class GraphResource[E: BaseModel](ResourceClient[E]):
@@ -31,7 +26,6 @@ class GraphResource[E: BaseModel](ResourceClient[E]):
 
     dialect: ClassVar[QueryDialect] = GRAPH_DIALECT
     sort_fields: ClassVar[frozenset[str]] = frozenset({"relevance"})
-    iterate_page_size: ClassVar[int] = 100
 
     def build_filter_params(
         self, filters: BaseModel | Mapping[str, Any] | None
@@ -101,62 +95,6 @@ class GraphResource[E: BaseModel](ResourceClient[E]):
         """
         entity = self.path.partition("/")[2]
         return f"v3/{entity}/{quote(self.normalize_id(id), safe=':')}"
-
-    def iterate(
-        self,
-        filters: BaseModel | Mapping[str, Any] | None = None,
-        *,
-        query: str | None = None,
-        sort: str | Sequence[str] | None = None,
-        select: Sequence[str] | None = None,
-        page_size: int | None = None,
-        limit: int | None = None,
-        cursor: str | None = None,
-        on_error: OnError = "raise",
-        failures: list[tuple[dict[str, Any], Exception]] | None = None,
-        on_page: Callable[[int, str | None], Any] | None = None,
-        params: Mapping[str, Any] | None = None,
-    ) -> AsyncIterator[E]:
-        """Iterate over all matching entities, 100 per page by default.
-
-        Cursor mode stops when the API stops returning ``nextCursor`` or
-        echoes the current cursor back. ``on_page(page_number, next_cursor)``
-        checkpoints progress, and a saved cursor passed as ``cursor=``
-        resumes the harvest.
-        """
-
-        async def _guard(page_number: int, next_cursor: str | None) -> None:
-            if on_page is not None:
-                result = on_page(page_number, next_cursor)
-                if inspect.isawaitable(result):
-                    await result
-            if next_cursor is not None and next_cursor == state["cursor"]:
-                raise _CursorComplete
-            state["cursor"] = next_cursor
-
-        state = {"cursor": cursor}
-        parent = super().iterate(
-            filters,
-            query=query,
-            sort=sort,
-            select=select,
-            page_size=page_size if page_size is not None else self.iterate_page_size,
-            limit=limit,
-            cursor=cursor,
-            on_error=on_error,
-            failures=failures,
-            on_page=_guard,
-            params=params,
-        )
-
-        async def _guarded() -> AsyncIterator[E]:
-            try:
-                async for entity in parent:
-                    yield entity
-            except _CursorComplete:
-                return
-
-        return _guarded()
 
     async def facets(
         self,

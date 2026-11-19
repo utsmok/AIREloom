@@ -6,6 +6,7 @@ GRAPH_DIALECT = QueryDialect(
     page_size_param="page_size",
     max_page_size=10000,
     default_page_size=25,
+    iterate_page_size=100,
     page_param="page",
     page_start=1,
     cursor_param="cursor",
@@ -15,7 +16,8 @@ GRAPH_DIALECT = QueryDialect(
     select_param="select",
 )
 """V4 filter-based entity endpoints: ``page`` is 1-indexed, ``page_size`` goes
-up to 10000, and cursor paging has no depth cap."""
+up to 10000, ``iterate()`` fetches 100 records per page by default, and cursor
+paging has no depth cap."""
 
 LINKS_DIALECT = QueryDialect(
     page_size_param="pageSize",
