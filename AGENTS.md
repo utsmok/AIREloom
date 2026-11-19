@@ -1,159 +1,57 @@
-# AIREloom — Project Guide
+# AIREloom
 
-## What It Is
+Async Python client for the OpenAIRE Graph API (V4) and the Scholexplorer
+API, built on the shared bibliofabric core (auth, retries, rate limiting,
+pagination). AIREloom supplies the OpenAIRE query dialect, typed filter
+models, response unwrapping, and pydantic models.
 
-AIREloom is an async Python client library for the [OpenAIRE Graph API](https://api.openaire.eu) and [Scholexplorer API](https://api.scholexplorer.openaire.eu). It provides typed, ergonomic access to research products, organizations, projects, data sources, and scholarly link relationships.
-
-Built on top of **bibliofabric** — a generic async API client framework providing auth, pagination, response unwrapping, and mixin-based resource operations.
-
-**Status:** Alpha. Published on PyPI as `aireloom`.
-
-## Architecture
-
-```
-AireloomSession          # User-facing async context manager (session.py)
- └─ AireloomClient       # Core HTTP client, auth resolution, resource orchestration (client.py)
-     ├─ ResearchProductsClient   # v3, mixin-based (bibliofabric)
-     ├─ ProjectsClient           # v3, mixin-based (bibliofabric)
-     ├─ OrganizationsClient      # v3, mixin-based (bibliofabric)
-     ├─ DataSourcesClient        # v3, mixin-based (bibliofabric)
-     ├─ PersonsClient            # v3, mixin-based (bibliofabric)
-     └─ ScholixClient            # v3, custom methods (different base URL, 0-indexed pagination)
-```
-
-### Key Layers
-
-| Layer | File(s) | Role |
-|-------|---------|------|
-| **Session** | `session.py` | Thin async context manager wrapper around `AireloomClient`. Entry point for users. |
-| **Client** | `client.py` | Extends `bibliofabric.BaseApiClient`. Resolves auth strategy, initializes resource clients. |
-| **Resources** | `resources/*.py` | Per-endpoint clients. All inherit from `bibliofabric.resources.BaseResourceClient`. Graph API clients use mixins (`GettableMixin`, `SearchableMixin`, `CursorIterableMixin`). `ResearchProductsClient` overrides `_base_url_override` to v2. Others use default v1. `ScholixClient` has custom `search_links()`/`iterate_links()` (0-indexed pages, `size` param, `_base_url_override`). |
-| **Models** | `models/*.py` | Pydantic v2 models for each entity type. All inherit `BaseEntity` (has `id` field). `ApiResponse[T]` is the generic list-response envelope with `Header` + `results`. All models use `extra="allow"` for forward compatibility. |
-| **Endpoints** | `endpoints.py` | Pydantic filter models per endpoint (`ResearchProductsFilters`, etc.) with `extra="forbid"`. `ENDPOINT_DEFINITIONS` maps endpoint paths to filter models and valid sort fields. |
-| **Unwrapper** | `unwrapper.py` | Implements `bibliofabric.ResponseUnwrapper` protocol. Extracts `results`, `header.nextCursor`, `header.numFound` from OpenAIRE's JSON envelope. |
-| **Config** | `config.py` | `ApiSettings(BaseApiSettings)` via pydantic-settings. Env prefix `AIRELOOM_`. Reads `.env`. Cached via `@lru_cache`. |
-| **Constants** | `constants.py` | Base URLs, defaults, version detection (`importlib.metadata`), enums (`SortOrder`). |
-
-
-### API Version Routing
-- **All Graph entities** (research products, projects, organizations, data sources, persons): `api.openaire.eu/graph/v3` — single base URL, kebab-case paths. V1/V2 are deprecated by OpenAIRE.
-- **Scholix API**: `api.scholexplorer.openaire.eu/v3` — different base URL, 0-indexed page-based pagination (`size` param). Requires either `sourcePid` or `targetPid` filter.
-
-### Auth
-
-Three strategies (from `bibliofabric.auth`), resolved in this priority:
-1. `ClientCredentialsAuth` — OAuth2 client credentials flow (client_id + client_secret)
-2. `StaticTokenAuth` — Bearer token
-3. `NoAuth` — unauthenticated (rate-limited)
-
-Credentials from: explicit params > env vars (`AIRELOOM_*`) > `.env`.
-
-## Tech Stack
-
-- **Python 3.12+**, `uv` for dependency management
-- **bibliofabric** — framework providing `BaseApiClient`, auth strategies, resource mixins, `ResponseUnwrapper` protocol
-- **pydantic v2** + **pydantic-settings** for models and config
-- **httpx** for async HTTP (via bibliofabric)
-- **pytest** + **pytest-asyncio** + **pytest-httpx** for testing
-- **ruff** for linting/formatting
-- **ty** for type checking
-- **mkdocs-material** + **mkdocstrings** for docs
-
-## Project Structure
+## Layout
 
 ```
 src/aireloom/
-  __init__.py           # Re-exports: client, session, models, exceptions
-  client.py             # AireloomClient (BaseApiClient subclass)
-  session.py            # AireloomSession (user-facing async context manager)
-  config.py             # ApiSettings (pydantic-settings)
-  constants.py          # URLs (v1 + v2), defaults, version detection
-  endpoints.py          # Filter models + ENDPOINT_DEFINITIONS (6 entity types + LinksFilters)
-  unwrapper.py          # OpenAireUnwrapper (ResponseUnwrapper protocol)
-  models/
-    base.py             # Header (numFound, page, maxScore, nextCursor, totalPages, totalLinks), BaseEntity, ApiResponse[T]
-    research_product.py # ResearchProduct — 40+ typed fields including v2 relationship fields
-    project.py          # Project + nested funding/grant models
-    organization.py     # Organization
-    data_source.py      # DataSource
-    person.py           # Person (givenName, familyName, biography, etc.)
-    relation.py         # Relation, Node, RelType, Identifier, EntityRef, LinksResponse
-    scholix.py          # ScholixRelationship + nested types
+  client.py             # AireloomClient(BaseApiClient): auth resolution, two hosts,
+                        # resources as cached properties, mailto on V4 requests
+  config.py             # AireloomSettings(BaseApiSettings), env prefix AIRELOOM_
+  dialect.py            # GRAPH_DIALECT (cursor, page_size, iterate 100/page),
+                        # LINKS_DIALECT and SCHOLIX_DIALECT (0-indexed, cap 99)
+  filters.py            # V4 filter models -> one filter= expression; encode_filter_value
+  unwrapper.py          # OpenAireUnwrapper (header/results/nextCursor), ScholixUnwrapper
+  models/               # pydantic models aligned with Graph API 1.6.0 + Scholix V2/V3
   resources/
-    research_products_client.py  # v2, mixin-based, _base_url_override + links methods (v1)
-    projects_client.py           # v1, mixin-based
-    organizations_client.py      # v1, mixin-based
-    data_sources_client.py       # v1, mixin-based
-    persons_client.py            # v1, mixin-based
-    scholix_client.py            # v3, custom methods, _base_url_override
-tests/
-  conftest.py           # Loads .env, provides api_token fixture
-  test_session.py       # Integration tests via mocked HTTP (httpx_mock)
-  test_auth.py          # Auth strategy unit tests
-  test_config.py        # Config/env override tests
-  test_unwrapper.py     # Response unwrapper unit tests
-  test_client.py        # Client unit tests + coverage
-  test_models.py        # Pydantic model validator tests
-  test_actual_data.py   # Live API tests (requires token, skipped by default)
-  resources/            # Per-resource client unit tests
-examples/
-  simple_example.py     # Basic usage demo
-  comprehensive_analysis.py  # Full analysis pipeline (DuckDB, matplotlib)
-  README.md             # Example descriptions
-docs/                   # MkDocs documentation
-.github/workflows/      # CI: lint, type check, test, build docs, publish on tag
+    base.py             # GraphResource: filter expression, sort validation, V3 by-id
+                        # item_path (colons unencoded), facets/group_by, batch OR chunks
+    research_products.py # batch_get_by_doi, links helpers
+    links.py            # /v3/research-products/links, relations-info
+    scholix.py          # ScholixResource facade: V3 default, V2 for date filters
 ```
 
-## Development Commands
+Both hosts share credentials: `openaire_client_id` + `openaire_client_secret`
+resolve to `ClientCredentialsAuth` against the Keycloak token endpoint,
+otherwise `NoAuth`. An explicit `auth=` strategy wins. The Scholix host runs
+on a second internal client throttled to 1 request per second.
+
+Iteration over graph entities defaults to 100 per page
+(`GRAPH_DIALECT.iterate_page_size`) and stops when the API stops returning
+`nextCursor` or echoes the request cursor; the core handles both.
+
+## Commands
 
 ```bash
-uv sync --all-groups --all-extras         # Install everything
-uv run ruff check src/ --fix              # Lint
-uv run ruff format src/                   # Format
-uvx ty check src/                         # Type check
-uv run pytest tests/                      # Run tests
-uv run pytest --cov=aireloom tests/       # Coverage (CI threshold: 95%)
-uv build                                  # Build package
-uv run mkdocs serve                       # Local docs
+uv sync --all-groups        # install
+uv run ruff check           # lint (archive/ excluded)
+uv run ruff format --check
+uv run ty check src
+uv run pytest               # mocked suite; live_api deselected by addopts
+uv run pytest -m live_api   # live smoke, needs credentials from .env
+uv run mkdocs build --strict
 ```
 
-## Key Patterns & Conventions
+Conventional commits, `uv` only, no AI attribution.
 
-- **All I/O is async.** Every resource method is `async`. Use `async with AireloomSession() as session:` or `async with AireloomClient() as client:`.
-- **Pydantic filter models** are passed to `search()` and `iterate()`. They serialize to query params. `extra="forbid"` on filters prevents typos.
-- **Sort validation** happens via overridable `_validate_sort_field()` in `bibliofabric.BaseResourceClient`. Default is no-op; AIREloom consumers can override to check against `ENDPOINT_DEFINITIONS`.
-- **Models use `extra="allow"`** everywhere to tolerate API field additions without breaking.
-- **Resource clients:** All inherit from `bibliofabric.resources.BaseResourceClient`. Graph API clients use mixins (~58 lines each) and share the single v3 base URL. `ScholixClient` has custom methods due to 0-indexed pagination and `size` param. Filter values with spaces/operators are auto-quoted via `GraphV3FilterSerializationMixin`.
+## Upstream behavior to remember
 
-## Known Issues & Gaps
-
-- **Cursor pagination ordering**: Solr's cursorMark uses deterministic internal ordering that ignores `sortBy`. The first pages of cursor results may surface records without PIDs even when filtering for DOI-rich records. Not a library issue — use page-based pagination (`search()`) when PIDs matter.
-- **No sub-endpoints**: The API does NOT support `/{entity}/{id}/related*`, `/{entity}/{id}/links`, or `/{entity}/count` — all return 405/404. Verified by live testing.
-- **Links & Scholix page-size cap**: the server silently caps page size at 99 (requesting 100 returns only 10). The library clamps to 99 and warns. Affects `/research-products/links` and Scholix. Links pagination is also **0-indexed** (first page `page=0`).
-- **Research products page-size cap**: `pageSize > 100` on `/v3/research-products` returns **HTTP 400** (page and cursor modes alike). Keep `page_size <= 100`.
-- **`funder` filter (Projects)**: returns 0 results for all known values as of 2026-07; prefer `fundingShortName`. Kept for forward-compat.
-- **Sort format**: `sortBy` takes `"fieldname ASC|DESC"` as a single string (e.g. `sortBy="relevance ASC"`). No separate `sortOrder` param exists.
-- **Unsorted page instability**: without `sortBy`, two back-to-back identical requests can return a page with different ordering *and membership* (observed on `/projects`, 2026-09). Pin `sortBy` when reproducible pages matter.
-## Resolved Issues
-
-- ~~Duplicate `BaseResourceClient`~~ — Removed. All resource clients now use `bibliofabric.resources.BaseResourceClient`.
-- ~~Root scripts clutter~~ — Moved to `examples/` directory.
-- ~~`secrets.env` references~~ — Fixed to `.env`.
-- ~~CI `--cov=myproj`~~ — Fixed to `--cov=aireloom`.
-- ~~Version triple source of truth~~ — Single source: `constants.py` via `importlib.metadata`.
-- ~~`EndpointName` enum~~ — Removed (unused).
-- ~~Duplicate base URL definitions~~ — Removed from `endpoints.py`.
-- ~~`test_actual_data.py` live API~~ — Guarded with `pytest.mark.live_api` marker, skipped by default.
-- ~~No type checking in CI~~ — `ty check src/` added.
-- ~~Single Python version in CI~~ — Matrix includes 3.12 + 3.13.
-- ~~Docs deploy on PRs~~ — Guarded to only deploy on pushes.
-- ~~No coverage enforcement~~ — `--cov-fail-under=95` in CI.
-- ~~`openaireCompatibility` filter~~ — Removed from `DataSourcesFilters`. Not a valid API parameter (returns 400 "Unknown parameter").
-- ~~Missing `logicalOperator` filter~~ — Added to all 5 Graph API filter models. Accepts `"AND"` or `"OR"`.
-- ~~Missing `rorId` filter~~ — Added to `ResearchProductsFilters`. ROR identifier for affiliated organization.
-- ~~`popularity` sort field~~ — Removed from RP sort fields. Not a valid sort field (API returns 400).
-- ~~Persons sort fields~~ — Added `startDate`, `endDate` (matching API validation).
-- ~~Person model incomplete~~ — Added `originalId`, `alternativeNames` fields, typed `consent` as `bool`, typed list elements.
-- ~~Person filter bug~~ — Fixed in v3: `givenName`/`lastName`/`familyName` now return 200 (no more HTTP 500).
-- ~~Graph API v3 not supported~~ — v3 is now the sole supported Graph API version (v1/v2 deprecated by OpenAIRE).
-- ~~V3 migration~~ — single v3 base URL + kebab-case paths; 41 new filters; auto-quoting of spaced/operator filter values; additive response-model fields; 0-indexed links pagination fix + page-size clamp.
+See `docs/quirks.md` for the full list. The ones that bite during
+development: Scholix V3 accepts date filters but returns zero rows (route
+those queries to V2), the links route silently truncates `pageSize >= 100`
+to 10 results, pages there are not pinned, and V3 by-id paths 404 when the
+`::` in identifiers is percent-encoded.
