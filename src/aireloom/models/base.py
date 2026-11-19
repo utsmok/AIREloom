@@ -9,10 +9,9 @@ These models provide data validation and a clear structure for API data.
 import logging
 from typing import Annotated, Any, TypeVar
 
+from bibliofabric import SafeList, SafeStr
 from pydantic import BaseModel, BeforeValidator, Field, HttpUrl, field_validator
 from pydantic.config import ConfigDict  # Added ConfigDict
-
-from .safe_types import SafeStr
 
 # Generic type for the entity contained within the response results
 EntityType = TypeVar("EntityType", bound="BaseEntity")
@@ -90,7 +89,7 @@ class BaseEntity(BaseModel):
     """
 
     # Common identifier across most entities
-    id: str
+    id: SafeStr = ""
 
     def __repr__(self) -> str:
         cls = type(self).__name__
@@ -101,6 +100,118 @@ class BaseEntity(BaseModel):
         if type_val:
             parts.append(f"type={type_val!r}")
         return f"{cls}({', '.join(parts)})"
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+
+def safe[T: BaseModel](model: type[T]) -> Annotated[T, BeforeValidator]:
+    """Annotated type that replaces an explicit wire ``null`` with an empty model.
+
+    Usage: ``container: safe(Container) = Field(default_factory=Container)``.
+    """
+    return Annotated[T, BeforeValidator(lambda v, m=model: m() if v is None else v)]
+
+
+class Pid(BaseModel):
+    """A scheme/value persistent identifier (``{"scheme": "doi", "value": ...}`)."""
+
+    scheme: SafeStr = ""
+    value: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class TypedPid(BaseModel):
+    """A typed identifier: ``{"value", "typeCode", "typeLabel"}`` (person/project pids)."""
+
+    value: SafeStr = ""
+    typeCode: SafeStr = ""
+    typeLabel: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+
+class CodeLabel(BaseModel):
+    """A code/label pair (countries, jurisdictions, EOSC types, communities)."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class Provenance(BaseModel):
+    """Provenance/trust metadata attached to subjects, author pids and links."""
+
+    provenance: SafeStr = ""
+    trust: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class DsRef(BaseModel):
+    """A data-source reference in related-record ``collectedfrom`` entries."""
+
+    dsId: SafeStr = ""
+    dsName: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class RelatedRecordHeader(BaseModel):
+    """Header of a related-record link entry (RP ``links[]``, Project ``links[]``)."""
+
+    relationType: SafeStr = ""
+    relationClass: SafeStr = ""
+    relatedIdentifier: SafeStr = ""
+    relatedRecordType: SafeStr = ""
+    relationProvenance: SafeStr = ""
+    trust: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FundingJurisdiction(BaseModel):
+    """Jurisdiction info within the hierarchical ``funding`` field."""
+
+    code: SafeStr = ""
+    label: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FundingFunder(BaseModel):
+    """Funder details within the hierarchical ``funding`` field."""
+
+    id: SafeStr = ""
+    shortname: SafeStr = ""
+    name: SafeStr = ""
+    jurisdiction: safe(FundingJurisdiction) = Field(default_factory=FundingJurisdiction)
+    pid: SafeList[Pid] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FundingLevel(BaseModel):
+    """A single hierarchy level (level0/level1/level2) in the ``funding`` field."""
+
+    id: SafeStr = ""
+    description: SafeStr = ""
+    name: SafeStr = ""
+
+    model_config = ConfigDict(extra="allow")
+
+
+class FundingHierarchy(BaseModel):
+    """Funder -> level0 -> level1 -> level2 taxonomy tree (``funding`` field).
+
+    Shared by Project.funding, Organization.fundings[] and related records.
+    """
+
+    funder: safe(FundingFunder) = Field(default_factory=FundingFunder)
+    level0: safe(FundingLevel) = Field(default_factory=FundingLevel)
+    level1: safe(FundingLevel) = Field(default_factory=FundingLevel)
+    level2: safe(FundingLevel) = Field(default_factory=FundingLevel)
 
     model_config = ConfigDict(extra="allow")
 

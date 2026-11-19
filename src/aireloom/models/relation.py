@@ -1,9 +1,9 @@
-"""Models for Graph API /research-products/links responses."""
+"""Models for Graph API relation endpoints (``/research-products/links``)."""
 
+from bibliofabric import SafeList, SafeStr
 from pydantic import BaseModel, ConfigDict, Field
 
 from .base import Header
-from .safe_types import SafeList, SafeStr
 
 
 class Identifier(BaseModel):
@@ -12,6 +12,7 @@ class Identifier(BaseModel):
     id: str | None = None
     idScheme: str | None = None
     idUrl: str | None = None
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -20,6 +21,7 @@ class EntityRef(BaseModel):
 
     name: SafeStr = ""
     identifiers: SafeList[Identifier] = Field(default_factory=list)
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -33,6 +35,7 @@ class Node(BaseModel):
     identifiers: SafeList[Identifier] = Field(default_factory=list)
     authors: SafeList[EntityRef] = Field(default_factory=list)
     collectedFrom: SafeList[EntityRef] = Field(default_factory=list)
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -42,6 +45,7 @@ class RelType(BaseModel):
     name: str | None = None
     type: str | None = None
     typeSchema: str | None = None
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -51,6 +55,19 @@ class Relation(BaseModel):
     source: Node | None = None
     target: Node | None = None
     relType: RelType | None = None
+    provenance: SafeList[str] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
+class RelationInfo(BaseModel):
+    """One entry of ``/research-products/links/relations-info``."""
+
+    relation: SafeStr = ""
+    inverse: SafeStr = ""
+    description: SafeStr = ""
+    descriptionInverse: SafeStr = ""
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -63,4 +80,5 @@ class LinksResponse(BaseModel):
 
     header: Header | None = None
     results: list[Relation] | None = None
+
     model_config = ConfigDict(extra="allow")

@@ -1,8 +1,26 @@
 """Pydantic models for OpenAIRE API entities and responses."""
 
-from .base import ApiResponse, BaseEntity, Header
-from .data_source import ControlledField, DataSource, DataSourceResponse
-from .organization import Country, Organization, OrganizationPid, OrganizationResponse
+from bibliofabric import SafeList, SafeStr
+
+from .base import (
+    ApiResponse,
+    BaseEntity,
+    CfHbKeyValue,
+    CodeLabel,
+    DsRef,
+    FundingFunder,
+    FundingHierarchy,
+    FundingJurisdiction,
+    FundingLevel,
+    Header,
+    Pid,
+    Provenance,
+    RelatedRecordHeader,
+    TypedPid,
+    safe,
+)
+from .data_source import DataSource, DataSourceResponse
+from .organization import Country, Organization, OrganizationResponse
 from .person import Person, PersonResponse
 from .project import (
     Funding,
@@ -10,6 +28,7 @@ from .project import (
     Grant,
     H2020Programme,
     Project,
+    ProjectLink,
     ProjectResponse,
 )
 from .relation import (
@@ -18,10 +37,21 @@ from .relation import (
     LinksResponse,
     Node,
     Relation,
+    RelationInfo,
     RelType,
 )
-from .research_product import ResearchProduct, ResearchProductResponse
-from .safe_types import SafeList, SafeStr
+from .research_product import (
+    Author,
+    AuthorPid,
+    Instance,
+    ProductCommunity,
+    ProductOrganization,
+    ProductProject,
+    RelatedRecord,
+    ResearchProduct,
+    ResearchProductResponse,
+    Subject,
+)
 from .scholix import (
     ScholixCreator,
     ScholixEntity,
@@ -29,53 +59,63 @@ from .scholix import (
     ScholixLinkProvider,
     ScholixPublisher,
     ScholixRelationship,
-    ScholixRelationshipNameValue,
     ScholixResponse,
-    ScholixV1Identifier,
-    ScholixV1Link,
-    ScholixV1Object,
-    ScholixV1RelationshipType,
 )
 
 __all__ = [
     "ApiResponse",
+    "Author",
+    "AuthorPid",
     "BaseEntity",
-    "SafeList",
-    "SafeStr",
-    "ControlledField",
+    "CfHbKeyValue",
+    "CodeLabel",
     "Country",
     "DataSource",
     "DataSourceResponse",
+    "DsRef",
     "EntityRef",
     "Funding",
+    "FundingFunder",
+    "FundingHierarchy",
+    "FundingJurisdiction",
+    "FundingLevel",
     "FundingStream",
     "Grant",
     "H2020Programme",
     "Header",
     "Identifier",
+    "Instance",
     "LinksResponse",
     "Node",
     "Organization",
-    "OrganizationPid",
     "OrganizationResponse",
     "Person",
     "PersonResponse",
+    "Pid",
+    "ProductCommunity",
+    "ProductOrganization",
+    "ProductProject",
     "Project",
+    "ProjectLink",
     "ProjectResponse",
+    "Provenance",
+    "RelatedRecord",
+    "RelatedRecordHeader",
     "Relation",
+    "RelationInfo",
     "RelType",
     "ResearchProduct",
     "ResearchProductResponse",
+    "SafeList",
+    "SafeStr",
     "ScholixCreator",
     "ScholixEntity",
     "ScholixIdentifier",
     "ScholixLinkProvider",
     "ScholixPublisher",
     "ScholixRelationship",
-    "ScholixRelationshipNameValue",
     "ScholixResponse",
-    "ScholixV1Identifier",
-    "ScholixV1Link",
-    "ScholixV1Object",
-    "ScholixV1RelationshipType",
+    "Subject",
+    "TypedPid",
+    "safe",
 ]
