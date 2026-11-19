@@ -44,10 +44,11 @@ class ResearchProductsResource(GraphResource[ResearchProduct]):
         super().__init__(client)
         self._links = links
 
-    def _record_key(self, entity: ResearchProduct, field: str) -> str | None:
+    def record_keys(self, entity: ResearchProduct, field: str) -> list[str]:
         if field == "ids.doi":
-            return normalize_doi(entity.doi) if entity.doi else None
-        return super()._record_key(entity, field)
+            # Deduplicated records carry several DOIs; batch_get keeps the requested one.
+            return [normalize_doi(doi) for doi in entity.all_dois]
+        return super().record_keys(entity, field)
 
     async def batch_get_by_doi(
         self,
