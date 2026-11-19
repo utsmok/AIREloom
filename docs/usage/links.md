@@ -36,3 +36,18 @@ info[0].relation  # "Cites"
 info[0].inverse  # "IsCitedBy"
 info[0].description
 ```
+
+## Relation vocabulary
+
+```python
+from aireloom import RELATION_INVERSES, RelationName, relation_inverse
+
+relation_inverse("Cites")  # "IsCitedBy"
+relation_inverse("IsRelatedTo")  # "IsRelatedTo" (symmetric)
+relation_inverse("nonsense")  # None
+```
+
+The vocabulary is static data mirroring the relations-info payload:
+`RelationName` is the union of both directions, and
+`RELATION_INVERSES`/`relation_inverse()` map each name to its inverse
+without a live request.

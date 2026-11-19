@@ -8,11 +8,13 @@ read-only calls.
 
 import pytest
 
-from aireloom import AireloomClient, LinksFilters, ScholixFilters
+from aireloom import AireloomClient, LinksFilters, ScholixFilters, relation_inverse
 
 pytestmark = pytest.mark.live_api
 
 DOI = "10.1038/nature12373"
+ORCID = "0000-0002-1825-0097"
+RP_ID = "06cdd3ff4700::3c8734759ca685b966b1d737c37daeed"
 
 
 @pytest.fixture
@@ -76,3 +78,26 @@ async def test_scholix_links(live_client):
 async def test_group_by(live_client):
     counts = await live_client.research_products.group_by("type")
     assert counts.get("publication")
+
+
+async def test_by_orcid(live_client):
+    results = await live_client.research_products.by_orcid(ORCID, limit=5)
+    assert isinstance(results, list)
+
+
+async def test_find_variants(live_client):
+    orgs = await live_client.organizations.find_variants(["university of twente"])
+    assert orgs
+    assert any(org.id.startswith("pending_org_::") for org in orgs)
+
+
+async def test_get_fields(live_client):
+    records = await live_client.research_products.get_fields(
+        [RP_ID], ["id", "mainTitle"]
+    )
+    assert records and records[0].id == RP_ID
+
+
+async def test_relation_vocabulary_matches_live(live_client):
+    for info in await live_client.research_products.get_relations_info():
+        assert relation_inverse(info.relation) == info.inverse

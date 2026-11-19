@@ -46,6 +46,20 @@ API list operations to the V4 filter-based queries (D-14).
   total; both routes remain page-based without a cursor, so page windows can
   shift between requests (upstream limitation, documented).
 
+### Added
+
+- Typed relation vocabulary from the links relations-info payload:
+  `RelationName`, `RELATION_INVERSES`, and `relation_inverse(name)`
+  (`Cites` -> `IsCitedBy`), exported from the package root.
+- `client.research_products.by_orcid(orcid, *, limit=100)` — normalizes the
+  ORCID and filters on the V4 `authorships.author.orcid` field.
+- `client.organizations.find_variants(names, *, country=None)` — one search
+  per name fragment, deduplicated by id, keeping `pending_org_::` records
+  because they carry org-project links the canonical records dropped.
+- `client.research_products.get_fields(ids, fields)` — sparse batch fetch in
+  one request via the V4 `select` parameter plus an `id` OR-filter
+  (verified live).
+
 ### Migration from 0.7
 
 | 0.7 call | 0.8 call |

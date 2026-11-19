@@ -51,3 +51,17 @@ n = await client.projects.count()
 by_status = await client.projects.group_by("project_status")
 facets = await client.organizations.facets("country", page_size=1)
 ```
+
+## Organization name variants
+
+```python
+orgs = await client.organizations.find_variants(
+    ["universiteit twente", "university of twente"], country="NL"
+)
+```
+
+Each fragment becomes one free-text search; results are deduplicated by
+exact `id`, keeping the first occurrence. Records with `pending_org_::`
+identifiers are kept on purpose: they carry organization-project links
+that the canonical merged record lost, which makes them the main source
+of undercounted org-project links. Merging them is the caller's decision.

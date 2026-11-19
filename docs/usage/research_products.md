@@ -79,6 +79,31 @@ by_doi = await client.research_products.batch_get_by_doi(
 DOIs are normalized before lookup and as result keys; missing DOIs are
 absent from the result. Requests go out in chunks of 50 as OR expressions.
 
+## By author ORCID
+
+```python
+works = await client.research_products.by_orcid(
+    "https://orcid.org/0000-0002-1825-0097", limit=50
+)
+```
+
+Any ORCID spelling works (bare, dashed, or URL); the request uses the
+hyphenated form in the `authorships.author.orcid` V4 filter and returns a
+plain list capped at `limit`.
+
+## Sparse batch fetch
+
+```python
+records = await client.research_products.get_fields(
+    ["06cdd3ff4700::3c8734759ca685b966b1d737c37daeed"],
+    ["id", "mainTitle", "publicationDate"],
+)
+```
+
+One request: an `id` OR-filter combined with the V4 `select` parameter.
+Records carry only the requested fields, so this is the cheap way to enrich
+local rows; unknown field names are the caller's responsibility.
+
 ## Aggregations
 
 ```python

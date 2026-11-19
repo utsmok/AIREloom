@@ -1,11 +1,11 @@
 """Resource client for OpenAIRE research products (V4) plus the links route."""
 
 import logging
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Sequence
 from typing import Any
 
 from bibliofabric.client import BaseApiClient
-from bibliofabric.ids import normalize_doi
+from bibliofabric.ids import normalize_doi, normalize_orcid
 from bibliofabric.paging import Page
 from bibliofabric.resources import OnError
 
@@ -66,6 +66,38 @@ class ResearchProductsResource(GraphResource[ResearchProduct]):
         return await self.batch_get(
             normalized, field="ids.doi", batch_size=batch_size, concurrency=concurrency
         )
+
+    async def by_orcid(self, orcid: str, *, limit: int = 100) -> list[ResearchProduct]:
+        """Return research products whose authorship carries ``orcid``.
+
+        Accepts any spelling ``bibliofabric.ids.normalize_orcid`` handles
+        (bare, dashed, or an ``https://orcid.org/`` URL); the filter sends
+        the hyphenated form via the V4 ``authorships.author.orcid`` field.
+        """
+        page = await self.search(
+            ResearchProductsFilters(authorships_author_orcid=normalize_orcid(orcid)),
+            page_size=limit,
+        )
+        return page.results
+
+    async def get_fields(
+        self, ids: Sequence[str], fields: Sequence[str]
+    ) -> list[ResearchProduct]:
+        """Sparse-fetch ``fields`` for known ids, ``batch_size`` ids per request.
+
+        Combines the V4 ``select`` parameter with an ``id`` OR-filter
+        (verified live on 2026-11-19). The returned records carry only the
+        requested fields; every other model field stays at its default.
+        """
+        wanted = list(dict.fromkeys(ids))
+        results: list[ResearchProduct] = []
+        for start in range(0, len(wanted), self.batch_size):
+            chunk = wanted[start : start + self.batch_size]
+            page = await self.search(
+                {"id": chunk}, select=list(fields), page_size=len(chunk)
+            )
+            results.extend(page.results)
+        return results
 
     async def search_links(
         self,

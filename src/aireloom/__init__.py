@@ -39,6 +39,11 @@ from .models import (
     ScholixPublisher,
     ScholixRelationship,
 )
+from .relations import (
+    RELATION_INVERSES,
+    RelationName,
+    relation_inverse,
+)
 
 try:
     __version__: str = version("aireloom")
@@ -66,10 +71,13 @@ __all__ = [
     "Project",
     "ProjectsFilters",
     "RateLimitError",
+    "RELATION_INVERSES",
     "Relation",
     "RelationInfo",
+    "RelationName",
     "ResearchProduct",
     "ResearchProductsFilters",
+    "relation_inverse",
     "ScholixFilters",
     "ScholixLinkProvider",
     "ScholixPublisher",
