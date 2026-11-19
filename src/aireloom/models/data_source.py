@@ -4,11 +4,24 @@
 Reference: https://graph.openaire.eu/docs/data-model/entities/data-source
 """
 
-from bibliofabric import SafeList, SafeStr
-from pydantic import Field, computed_field
+from typing import Annotated
 
-from .base import ApiResponse, BaseEntity, CfHbKeyValue, CodeLabel, Pid, safe
+from bibliofabric import SafeList, SafeStr
+from pydantic import BeforeValidator, Field, computed_field
+
+from .base import BaseEntity, CfHbKeyValue, CodeLabel, Pid
 from .research_product import Container, RelatedRecord
+
+SafePid = Annotated[Pid, BeforeValidator(lambda v: Pid() if v is None else v)]
+SafeContainer = Annotated[
+    Container, BeforeValidator(lambda v: Container() if v is None else v)
+]
+SafeCfHbKeyValue = Annotated[
+    CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
+]
+SafeCodeLabel = Annotated[
+    CodeLabel, BeforeValidator(lambda v: CodeLabel() if v is None else v)
+]
 
 
 class DataSource(BaseEntity):
@@ -20,7 +33,7 @@ class DataSource(BaseEntity):
 
     originalIds: SafeList[str] = Field(default_factory=list)
     pids: SafeList[Pid] = Field(default_factory=list)
-    type: safe(Pid) = Field(default_factory=Pid)
+    type: SafePid = Field(default_factory=Pid)
     openaireCompatibility: str | None = None
     officialName: SafeStr = ""
     englishName: SafeStr = ""
@@ -43,14 +56,14 @@ class DataSource(BaseEntity):
     certificates: str | None = None
     policies: SafeList[str] = Field(default_factory=list)
     missionStatementUrl: str | None = None
-    journal: safe(Container) = Field(default_factory=Container)
+    journal: SafeContainer = Field(default_factory=Container)
     # Harvesting endpoints (e.g. OAI-PMH base URL), added upstream in 1.5.0.
     endpoints: SafeList[str] = Field(default_factory=list)
-    # V3 fields
-    collectedFrom: SafeList[safe(CfHbKeyValue)] = Field(default_factory=list)
+    # V3 field)
+    collectedFrom: SafeList[SafeCfHbKeyValue] = Field(default_factory=list)
     thematic: bool | None = None
-    eoscdatasourcetype: safe(CodeLabel) = Field(default_factory=CodeLabel)
-    jurisdiction: safe(CodeLabel) = Field(default_factory=CodeLabel)
+    eoscdatasourcetype: SafeCodeLabel = Field(default_factory=CodeLabel)
+    jurisdiction: SafeCodeLabel = Field(default_factory=CodeLabel)
     odlanguages: SafeList[str] = Field(default_factory=list)
     openaireCompatibilityId: str | None = None
     links: SafeList[RelatedRecord] = Field(default_factory=list)
@@ -68,5 +81,3 @@ class DataSource(BaseEntity):
 
 
 # Define the specific response type for data sources
-DataSourceResponse = ApiResponse[DataSource]
-"""Type alias for an API response containing a list of `DataSource` entities."""

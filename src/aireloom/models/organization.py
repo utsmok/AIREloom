@@ -4,21 +4,28 @@
 Reference: https://graph.openaire.eu/docs/data-model/entities/organization
 """
 
+from typing import Annotated
+
 from bibliofabric import SafeList, SafeStr
-from pydantic import Field, computed_field
+from pydantic import BeforeValidator, Field, computed_field
 
 from .base import (
-    ApiResponse,
     BaseEntity,
     CfHbKeyValue,
     CodeLabel,
     FundingHierarchy,
     Pid,
-    safe,
 )
 
 Country = CodeLabel
 """Alias keeping the historical export name; organizations carry ``{code, label}``."""
+
+SafeCountry = Annotated[
+    Country, BeforeValidator(lambda v: Country() if v is None else v)
+]
+SafeCfHbKeyValue = Annotated[
+    CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
+]
 
 
 class Organization(BaseEntity):
@@ -32,10 +39,10 @@ class Organization(BaseEntity):
     legalName: SafeStr = ""
     alternativeNames: SafeList[str] = Field(default_factory=list)
     websiteUrl: str | None = None
-    country: safe(Country) = Field(default_factory=Country)
+    country: SafeCountry = Field(default_factory=Country)
     pids: SafeList[Pid] = Field(default_factory=list)
     originalIds: SafeList[str] = Field(default_factory=list)
-    collectedFrom: SafeList[safe(CfHbKeyValue)] = Field(default_factory=list)
+    collectedFrom: SafeList[SafeCfHbKeyValue] = Field(default_factory=list)
     fundings: SafeList[FundingHierarchy] = Field(default_factory=list)
 
     @computed_field
@@ -67,5 +74,3 @@ class Organization(BaseEntity):
 
 
 # Define the specific response type for organizations
-OrganizationResponse = ApiResponse[Organization]
-"""Type alias for an API response containing a list of `Organization` entities."""

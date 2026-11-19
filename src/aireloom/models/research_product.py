@@ -9,14 +9,13 @@ lists, matching the current Graph API V3/V4 response shape (1.6.0).
 Reference: https://graph.openaire.eu/docs/data-model/entities/research-product
 """
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from bibliofabric import SafeList, SafeStr
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, computed_field
 
 from .._helpers import extract_all_pids_by_scheme, extract_pid_by_scheme
 from .base import (
-    ApiResponse,
     BaseEntity,
     CfHbKeyValue,
     CodeLabel,
@@ -25,8 +24,24 @@ from .base import (
     Pid,
     Provenance,
     RelatedRecordHeader,
-    safe,
 )
+
+SafeFundingHierarchy = Annotated[
+    FundingHierarchy, BeforeValidator(lambda v: FundingHierarchy() if v is None else v)
+]
+
+SafeCodeLabel = Annotated[
+    CodeLabel, BeforeValidator(lambda v: CodeLabel() if v is None else v)
+]
+
+SafeRelatedRecordHeader = Annotated[
+    RelatedRecordHeader,
+    BeforeValidator(lambda v: RelatedRecordHeader() if v is None else v),
+]
+
+SafeCfHbKeyValue = Annotated[
+    CfHbKeyValue, BeforeValidator(lambda v: CfHbKeyValue() if v is None else v)
+]
 
 OpenAccessRouteType = Literal["gold", "green", "hybrid", "bronze"]
 """Type alias for allowed Open Access routes (e.g., gold, green)."""
@@ -70,6 +85,11 @@ class BestAccessRight(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeBestAccessRight = Annotated[
+    BestAccessRight, BeforeValidator(lambda v: BestAccessRight() if v is None else v)
+]
+
+
 class CitationImpact(BaseModel):
     """Citation-based impact metrics (BIP indicators)."""
 
@@ -85,6 +105,11 @@ class CitationImpact(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeCitationImpact = Annotated[
+    CitationImpact, BeforeValidator(lambda v: CitationImpact() if v is None else v)
+]
+
+
 class UsageCounts(BaseModel):
     """Usage counts for a research product (downloads and views)."""
 
@@ -94,13 +119,23 @@ class UsageCounts(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeUsageCounts = Annotated[
+    UsageCounts, BeforeValidator(lambda v: UsageCounts() if v is None else v)
+]
+
+
 class Indicator(BaseModel):
     """Container for the impact indicators of a research product."""
 
-    citationImpact: safe(CitationImpact) = Field(default_factory=CitationImpact)
-    usageCounts: safe(UsageCounts) = Field(default_factory=UsageCounts)
+    citationImpact: SafeCitationImpact = Field(default_factory=CitationImpact)
+    usageCounts: SafeUsageCounts = Field(default_factory=UsageCounts)
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeIndicator = Annotated[
+    Indicator, BeforeValidator(lambda v: Indicator() if v is None else v)
+]
 
 
 class AccessRight(BaseModel):
@@ -112,6 +147,11 @@ class AccessRight(BaseModel):
     scheme: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeAccessRight = Annotated[
+    AccessRight, BeforeValidator(lambda v: AccessRight() if v is None else v)
+]
 
 
 class ArticleProcessingCharge(BaseModel):
@@ -129,14 +169,14 @@ class Instance(BaseModel):
     pids: SafeList[Pid] = Field(default_factory=list)
     alternateIdentifiers: SafeList[Pid] = Field(default_factory=list)
     license: str | None = None
-    accessRight: safe(AccessRight) = Field(default_factory=AccessRight)
+    accessRight: SafeAccessRight = Field(default_factory=AccessRight)
     type: SafeStr = ""
     urls: SafeList[str] = Field(default_factory=list)
     articleProcessingCharge: ArticleProcessingCharge | None = None
     publicationDate: str | None = None
     refereed: RefereedType | None = None
-    hostedBy: safe(CfHbKeyValue) = Field(default_factory=CfHbKeyValue)
-    collectedFrom: safe(CfHbKeyValue) = Field(default_factory=CfHbKeyValue)
+    hostedBy: SafeCfHbKeyValue = Field(default_factory=CfHbKeyValue)
+    collectedFrom: SafeCfHbKeyValue = Field(default_factory=CfHbKeyValue)
     distributionLocation: str | None = None
     instanceId: str | None = None
     embargoEndDate: str | None = None
@@ -151,6 +191,11 @@ class Language(BaseModel):
     label: SafeStr = ""
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeLanguage = Annotated[
+    Language, BeforeValidator(lambda v: Language() if v is None else v)
+]
 
 
 class Subject(BaseModel):
@@ -178,6 +223,11 @@ class Container(BaseModel):
     conferenceDate: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeContainer = Annotated[
+    Container, BeforeValidator(lambda v: Container() if v is None else v)
+]
 
 
 class GeoLocation(BaseModel):
@@ -214,7 +264,7 @@ class RelatedRecord(BaseModel):
     declared below and unrecognised inline fields stay in ``model_extra``.
     """
 
-    header: safe(RelatedRecordHeader) = Field(default_factory=RelatedRecordHeader)
+    header: SafeRelatedRecordHeader = Field(default_factory=RelatedRecordHeader)
     title: SafeStr = ""
     websiteurl: str | None = None
     pid: SafeList[Pid] = Field(default_factory=list)
@@ -227,17 +277,17 @@ class RelatedRecord(BaseModel):
     resulttype: str | None = None
     instances: SafeList[Instance] = Field(default_factory=list)
     officialname: SafeStr = ""
-    datasourcetype: safe(CodeLabel) = Field(default_factory=CodeLabel)
-    datasourcetypeui: safe(CodeLabel) = Field(default_factory=CodeLabel)
-    openairecompatibility: safe(CodeLabel) = Field(default_factory=CodeLabel)
+    datasourcetype: SafeCodeLabel = Field(default_factory=CodeLabel)
+    datasourcetypeui: SafeCodeLabel = Field(default_factory=CodeLabel)
+    openairecompatibility: SafeCodeLabel = Field(default_factory=CodeLabel)
     legalname: SafeStr = ""
     legalshortname: SafeStr = ""
-    country: safe(CodeLabel) = Field(default_factory=CodeLabel)
+    country: SafeCodeLabel = Field(default_factory=CodeLabel)
     projectTitle: str | None = None
     code: str | None = None
     acronym: str | None = None
-    contracttype: safe(CodeLabel) = Field(default_factory=CodeLabel)
-    funding: safe(FundingHierarchy) = Field(default_factory=FundingHierarchy)
+    contracttype: SafeCodeLabel = Field(default_factory=CodeLabel)
+    funding: SafeFundingHierarchy = Field(default_factory=FundingHierarchy)
     validationDate: str | None = None
     startDate: str | None = None
     endDate: str | None = None
@@ -302,7 +352,7 @@ class ResearchProduct(BaseEntity):
     subTitle: SafeStr = ""
     otherTitles: SafeList[str] = Field(default_factory=list)
     authors: SafeList[Author] = Field(default_factory=list)
-    bestAccessRight: safe(BestAccessRight) = Field(default_factory=BestAccessRight)
+    bestAccessRight: SafeBestAccessRight = Field(default_factory=BestAccessRight)
     countries: SafeList[CodeLabel] = Field(default_factory=list)
     descriptions: SafeList[str] = Field(default_factory=list)
     publicationDate: str | None = None
@@ -314,11 +364,11 @@ class ResearchProduct(BaseEntity):
     coverages: SafeList[str] = Field(default_factory=list)
     dateOfCollection: str | None = None
     lastUpdateTimeStamp: int | None = None
-    indicators: safe(Indicator) = Field(default_factory=Indicator)
+    indicators: SafeIndicator = Field(default_factory=Indicator)
     instances: SafeList[Instance] = Field(default_factory=list)
-    language: safe(Language) = Field(default_factory=Language)
+    language: SafeLanguage = Field(default_factory=Language)
     subjects: SafeList[Subject] = Field(default_factory=list)
-    container: safe(Container) = Field(default_factory=Container)
+    container: SafeContainer = Field(default_factory=Container)
     geoLocations: SafeList[GeoLocation] = Field(default_factory=list)
 
     # Open Access fields
@@ -432,8 +482,3 @@ class ResearchProduct(BaseEntity):
         if self.doi:
             parts.append(f"DOI:{self.doi}")
         return " | ".join(parts) if parts else f"ResearchProduct(id={self.id!r})"
-
-
-# Define the specific response type for ResearchProduct results
-ResearchProductResponse = ApiResponse[ResearchProduct]
-"""Type alias for an API response containing a list of `ResearchProduct` entities."""

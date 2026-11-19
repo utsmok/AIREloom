@@ -7,19 +7,24 @@ information, based on the OpenAIRE data model documentation.
 Reference: https://graph.openaire.eu/docs/data-model/entities/project
 """
 
-from typing import Any
+from typing import Annotated, Any
 
 from bibliofabric import SafeList, SafeStr
-from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+)
 
 from .base import (
-    ApiResponse,
     BaseEntity,
     CodeLabel,
     FundingHierarchy,
     RelatedRecordHeader,
     TypedPid,
-    safe,
 )
 
 
@@ -32,10 +37,15 @@ class FundingStream(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeFundingStream = Annotated[
+    FundingStream, BeforeValidator(lambda v: FundingStream() if v is None else v)
+]
+
+
 class Funding(BaseModel):
     """Flat funding entry in ``Project.fundings[]``."""
 
-    fundingStream: safe(FundingStream) = Field(default_factory=FundingStream)
+    fundingStream: SafeFundingStream = Field(default_factory=FundingStream)
     jurisdiction: str | None = None
     name: SafeStr = ""
     shortName: SafeStr = ""
@@ -62,15 +72,31 @@ class H2020Programme(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+SafeCodeLabel = Annotated[
+    CodeLabel, BeforeValidator(lambda v: CodeLabel() if v is None else v)
+]
+SafeRelatedRecordHeader = Annotated[
+    RelatedRecordHeader,
+    BeforeValidator(lambda v: RelatedRecordHeader() if v is None else v),
+]
+
+
 class ProjectLink(BaseModel):
     """A related-entity link entry in ``Project.links`` (e.g. participant orgs)."""
 
-    header: safe(RelatedRecordHeader) = Field(default_factory=RelatedRecordHeader)
+    header: SafeRelatedRecordHeader = Field(default_factory=RelatedRecordHeader)
     legalname: SafeStr = ""
     pid: SafeList[TypedPid] = Field(default_factory=list)
-    country: safe(CodeLabel) = Field(default_factory=CodeLabel)
+    country: SafeCodeLabel = Field(default_factory=CodeLabel)
 
     model_config = ConfigDict(extra="allow")
+
+
+SafeFundingHierarchy = Annotated[
+    FundingHierarchy, BeforeValidator(lambda v: FundingHierarchy() if v is None else v)
+]
+
+SafeGrant = Annotated[Grant, BeforeValidator(lambda v: Grant() if v is None else v)]
 
 
 class Project(BaseEntity):
@@ -85,8 +111,8 @@ class Project(BaseEntity):
     title: SafeStr = ""
     callIdentifier: str | None = None
     fundings: SafeList[Funding] = Field(default_factory=list)
-    funding: safe(FundingHierarchy) = Field(default_factory=FundingHierarchy)
-    granted: safe(Grant) = Field(default_factory=Grant)
+    funding: SafeFundingHierarchy = Field(default_factory=FundingHierarchy)
+    granted: SafeGrant = Field(default_factory=Grant)
     h2020Programmes: SafeList[H2020Programme] = Field(default_factory=list)
     keywords: SafeList[str] = Field(default_factory=list)
     openAccessMandateForDataset: bool | None = None
@@ -158,5 +184,3 @@ class Project(BaseEntity):
 
 
 # Define the specific response type for projects
-ProjectResponse = ApiResponse[Project]
-"""Type alias for an API response containing a list of `Project` entities."""

@@ -1,4 +1,6 @@
-"""AIREloom: A Python client for the OpenAIRE Graph API."""
+"""AIREloom: a Python client for the OpenAIRE Graph and Scholexplorer APIs."""
+
+from importlib.metadata import PackageNotFoundError, version
 
 from bibliofabric.exceptions import (
     APIError,
@@ -11,44 +13,68 @@ from bibliofabric.exceptions import (
     TimeoutError,
     ValidationError,
 )
+from bibliofabric.paging import Page
 
 from .client import AireloomClient
-from .constants import __version__
+from .config import AireloomSettings
+from .filters import (
+    DataSourcesFilters,
+    LinksFilters,
+    OrganizationsFilters,
+    PersonsFilters,
+    ProjectsFilters,
+    ResearchProductsFilters,
+    ScholixFilters,
+)
 from .models import (
-    ApiResponse,
     BaseEntity,
     DataSource,
-    Header,
     Organization,
     Person,
     Project,
+    Relation,
+    RelationInfo,
     ResearchProduct,
+    ScholixLinkProvider,
+    ScholixPublisher,
     ScholixRelationship,
 )
-from .session import AireloomSession
+
+try:
+    __version__: str = version("aireloom")
+except PackageNotFoundError:  # pragma: no cover - package not installed
+    __version__: str = "0.0.0"
 
 __all__ = [
-    # Core Client/Session
-    "AireloomClient",
-    "AireloomSession",
-    # Core Exceptions
-    "BibliofabricError",
     "APIError",
     "AuthError",
+    "AireloomClient",
+    "AireloomSettings",
+    "BaseEntity",
+    "BibliofabricError",
     "ConfigurationError",
+    "DataSourcesFilters",
+    "DataSource",
+    "LinksFilters",
     "NetworkError",
     "NotFoundError",
+    "Organization",
+    "OrganizationsFilters",
+    "Page",
+    "Person",
+    "PersonsFilters",
+    "Project",
+    "ProjectsFilters",
     "RateLimitError",
+    "Relation",
+    "RelationInfo",
+    "ResearchProduct",
+    "ResearchProductsFilters",
+    "ScholixFilters",
+    "ScholixLinkProvider",
+    "ScholixPublisher",
+    "ScholixRelationship",
     "TimeoutError",
     "ValidationError",
-    # Key Models (consider reducing if needed)
-    "ApiResponse",
-    "BaseEntity",
-    "DataSource",
-    "Header",
-    "Organization",
-    "Person",
-    "Project",
-    "ResearchProduct",
-    "ScholixRelationship",
+    "__version__",
 ]

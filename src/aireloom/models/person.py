@@ -8,7 +8,7 @@ from bibliofabric import SafeList, SafeStr
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from .._helpers import extract_orcid
-from .base import ApiResponse, BaseEntity, CodeLabel, TypedPid
+from .base import BaseEntity, CodeLabel, TypedPid
 
 
 class PersonTopic(BaseModel):
@@ -85,5 +85,3 @@ class Person(BaseEntity):
 
 
 # Define the specific response type for persons
-PersonResponse = ApiResponse[Person]
-"""Type alias for an API response containing a list of `Person` entities."""

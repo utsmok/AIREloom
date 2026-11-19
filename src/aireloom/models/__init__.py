@@ -1,9 +1,8 @@
-"""Pydantic models for OpenAIRE API entities and responses."""
+"""Pydantic models for OpenAIRE API entities and Scholix links."""
 
 from bibliofabric import SafeList, SafeStr
 
 from .base import (
-    ApiResponse,
     BaseEntity,
     CfHbKeyValue,
     CodeLabel,
@@ -12,16 +11,14 @@ from .base import (
     FundingHierarchy,
     FundingJurisdiction,
     FundingLevel,
-    Header,
     Pid,
     Provenance,
     RelatedRecordHeader,
     TypedPid,
-    safe,
 )
-from .data_source import DataSource, DataSourceResponse
-from .organization import Country, Organization, OrganizationResponse
-from .person import Person, PersonResponse
+from .data_source import DataSource
+from .organization import Country, Organization
+from .person import Person
 from .project import (
     Funding,
     FundingStream,
@@ -29,12 +26,10 @@ from .project import (
     H2020Programme,
     Project,
     ProjectLink,
-    ProjectResponse,
 )
 from .relation import (
     EntityRef,
     Identifier,
-    LinksResponse,
     Node,
     Relation,
     RelationInfo,
@@ -49,7 +44,6 @@ from .research_product import (
     ProductProject,
     RelatedRecord,
     ResearchProduct,
-    ResearchProductResponse,
     Subject,
 )
 from .scholix import (
@@ -59,11 +53,9 @@ from .scholix import (
     ScholixLinkProvider,
     ScholixPublisher,
     ScholixRelationship,
-    ScholixResponse,
 )
 
 __all__ = [
-    "ApiResponse",
     "Author",
     "AuthorPid",
     "BaseEntity",
@@ -71,7 +63,6 @@ __all__ = [
     "CodeLabel",
     "Country",
     "DataSource",
-    "DataSourceResponse",
     "DsRef",
     "EntityRef",
     "Funding",
@@ -82,22 +73,17 @@ __all__ = [
     "FundingStream",
     "Grant",
     "H2020Programme",
-    "Header",
     "Identifier",
     "Instance",
-    "LinksResponse",
     "Node",
     "Organization",
-    "OrganizationResponse",
     "Person",
-    "PersonResponse",
     "Pid",
     "ProductCommunity",
     "ProductOrganization",
     "ProductProject",
     "Project",
     "ProjectLink",
-    "ProjectResponse",
     "Provenance",
     "RelatedRecord",
     "RelatedRecordHeader",
@@ -105,7 +91,6 @@ __all__ = [
     "RelationInfo",
     "RelType",
     "ResearchProduct",
-    "ResearchProductResponse",
     "SafeList",
     "SafeStr",
     "ScholixCreator",
@@ -114,8 +99,6 @@ __all__ = [
     "ScholixLinkProvider",
     "ScholixPublisher",
     "ScholixRelationship",
-    "ScholixResponse",
     "Subject",
     "TypedPid",
-    "safe",
 ]

@@ -3,8 +3,6 @@
 from bibliofabric import SafeList, SafeStr
 from pydantic import BaseModel, ConfigDict, Field
 
-from .base import Header
-
 
 class Identifier(BaseModel):
     """An identifier with id, scheme, and url."""
@@ -67,18 +65,5 @@ class RelationInfo(BaseModel):
     inverse: SafeStr = ""
     description: SafeStr = ""
     descriptionInverse: SafeStr = ""
-
-    model_config = ConfigDict(extra="allow")
-
-
-class LinksResponse(BaseModel):
-    """Response envelope for /research-products/links endpoint.
-
-    Unlike standard ApiResponse, this is a standalone model because Relation
-    entities don't carry an id field required by BaseEntity.
-    """
-
-    header: Header | None = None
-    results: list[Relation] | None = None
 
     model_config = ConfigDict(extra="allow")
