@@ -53,7 +53,7 @@ nav:
       - Error Handling: advanced/error_handling.md
   - API Reference: api_reference.md
   - Authentication: authentication.md
-  - Changelog: changelog.md
+  - Changelog: https://github.com/utsmok/aireloom/blob/main/CHANGELOG.md
   - Migration to v3: migration-to-v3.md
   - Contributing: contributing.md
 watch:

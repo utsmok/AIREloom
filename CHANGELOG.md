@@ -2,6 +2,35 @@
 
 All notable changes to AIREloom are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 0.8.0
+
+Overhaul onto bibliofabric 0.6; see migration notes.
+
+## [0.7.0] - 2026-11-02
+
+### Changed
+
+- The default token endpoint is now the OpenAIRE Keycloak URL; the legacy
+  `aai.openaire.eu/oidc/token` endpoint was retired on 2026-11-02 and returns
+  410 Gone. `AIRELOOM_NEW_TOKEN_ENDPOINT=0` falls back to the retired legacy
+  URL.
+
+## [0.6.0] - 2026-10-27
+
+### Added
+
+- Opt-in toggle for the new OpenAIRE token endpoint
+  (`AIRELOOM_NEW_TOKEN_ENDPOINT=1` switches the client-credentials token
+  request to the post-2026-11-02 Keycloak endpoint; off by default). An
+  explicit `AIRELOOM_OPENAIRE_TOKEN_URL` still wins.
+
+### Fixed
+
+- Invalid-mutable-override diagnostics from newer `ty`: base class
+  annotations matched for `_entity_model`/`_search_response_model`, and the
+  two intentional schema-field shadowing overrides are suppressed.
+
+
 ## [0.5.2] - 2026-09-08
 
 Scholix compatibility and metadata fidelity release.
@@ -41,7 +70,7 @@ Dependency alignment release; no API changes.
 ## [0.5.0] - 2026-09-04
 
 Stable promotion of the v3 line: identical feature set and breaking changes as
-0.5.0a1 (see [Migration to v3](migration-to-v3.md)), plus the additions below.
+0.5.0a1 (see [Migration to v3](docs/migration-to-v3.md)), plus the additions below.
 
 ### Added
 
@@ -61,7 +90,7 @@ Stable promotion of the v3 line: identical feature set and breaking changes as
 
 ## [0.5.0a1] - 2026-07-21
 
-AIREloom now targets the OpenAIRE Graph API **v3** (v1/v2 deprecated by OpenAIRE). This is a **breaking** release; see [Migration to v3](migration-to-v3.md).
+AIREloom now targets the OpenAIRE Graph API **v3** (v1/v2 deprecated by OpenAIRE). This is a **breaking** release; see [Migration to v3](docs/migration-to-v3.md).
 
 ### Added
 
